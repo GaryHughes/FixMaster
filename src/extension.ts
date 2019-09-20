@@ -9,17 +9,21 @@ export function activate(context: vscode.ExtensionContext) {
 		if (activeTextEditor) {
 	
 			const {document} = activeTextEditor;
-			//var edits : vscode.WorkspaceEdit[] = []
 	
+			const edit = new vscode.WorkspaceEdit();
+
 			for (var index = 0; index < document.lineCount; ++index) {
 	
 				const line = document.lineAt(index);
+				
+				// TODO - support multiple configurable prefixes 
 				const fixMessageIndex = line.text.indexOf(fixMessagePrefix); 
 	
 				if (fixMessageIndex < 0) {
 					continue;
 				}
 	
+				// TODO - support configurable field delimiters incase messages are not raw
 				const message = parseMessage(line.text.substr(fixMessageIndex));	
 	
 				if (!message) {
@@ -27,12 +31,11 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 	
 				const pretty = prettyPrintMessage(message);
-				const edit = new vscode.WorkspaceEdit();
+				
 				edit.replace(document.uri, line.range, pretty);
-				vscode.workspace.applyEdit(edit)
-				//edits.push(edit)
 			}
-			//return edits
+
+			vscode.workspace.applyEdit(edit)
 		}
     });
 }
