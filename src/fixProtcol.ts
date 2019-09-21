@@ -1,3 +1,4 @@
+import * as FIX from './fixRepository'
 
 export const fixMessagePrefix = "8=FIX."
 export const fieldDelimiter = '\x01'
@@ -6,12 +7,14 @@ export const checkSumTag = 10
 
 export class Field {
 
-    tag : number;
-    value : string;
+    tag : number
+    value : string
+    name : string
     
-    constructor(tag: number, value: string) {
-        this.tag = tag;
-        this.value = value;
+    constructor(tag : number, value : string) {
+        this.tag = tag
+        this.value = value
+        this.name = ""
     }
 }
 
@@ -22,7 +25,6 @@ export class Message {
     constructor(fields : Field[]) {
         this.fields = fields;
     }
-
 }
 
 export function parseMessage(text:string) {
@@ -74,13 +76,26 @@ export function parseMessage(text:string) {
     return message;
 }
 
-export function prettyPrintMessage(message:Message) {
+export function prettyPrintMessage(message:Message, repository:FIX.Repository) {
+    
     var buffer : string = ""
     var field : any
+    var widestFieldName : number = 0
+
     for (var index = 0; index < message.fields.length; ++index) {
         let field = message.fields[index]
-        buffer += `(${field.tag}) - ${field.value}\n` 
+        field.name = repository.nameOfFieldWithTag(field.tag)
+        if (field.name.length > widestFieldName) {
+            widestFieldName = field.name.length
+        }
     }
+
+    for (var index = 0; index < message.fields.length; ++index) {
+        let field = message.fields[index]
+        buffer += `${field.name}`.padStart(widestFieldName, ' ') + ` (${field.tag})`.padStart(6, ' ') + ` = ${field.value}\n` 
+    }
+    
     buffer += "\n"
+    
     return buffer;
 }

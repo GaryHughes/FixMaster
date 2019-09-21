@@ -1,7 +1,13 @@
-import * as vscode from 'vscode';
-import { fixMessagePrefix, parseMessage, prettyPrintMessage } from './fixProtcol';
+import * as vscode from 'vscode'
+import * as FIX from './fixRepository'
+import { fixMessagePrefix, parseMessage, prettyPrintMessage } from './fixProtcol'
 
 export function activate(context: vscode.ExtensionContext) {
+	
+	// TODO - make the path configurable
+	// TODO - support QuickFix data dictionary
+	let repository = new FIX.Repository("/Users/geh/Downloads/Repository"); 
+
 	vscode.commands.registerCommand('extension.format', () => {
 	
 		const {activeTextEditor} = vscode.window;
@@ -30,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 					continue;
 				}
 	
-				const pretty = prettyPrintMessage(message);
+				const pretty = prettyPrintMessage(message, repository);
 				
 				edit.replace(document.uri, line.range, pretty);
 			}
