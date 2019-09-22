@@ -4,6 +4,7 @@ export const fixMessagePrefix = "8=FIX."
 export const fieldDelimiter = '\x01'
 export const fieldValueSeparator = '='
 export const checkSumTag = 10
+export const msgTypeTag = 35
 
 export class Field {
 
@@ -33,7 +34,7 @@ export function parseMessage(text:string) {
     
     let length = text.length;
 
-    for (var index = 0; index < length; ++index) {
+    for (var index = 0; index < length;) {
 
         var tag : string = ""
         var value : string = ""
@@ -58,7 +59,7 @@ export function parseMessage(text:string) {
 
         let intTag = parseInt(tag);
 
-        if (intTag == NaN) {
+        if (isNaN(intTag)) {
             continue;
         }
 
@@ -81,21 +82,30 @@ export function prettyPrintMessage(message:Message, repository:FIX.Repository) {
     var buffer : string = ""
     var field : any
     var widestFieldName : number = 0
+    var msgType : null;
 
-    for (var index = 0; index < message.fields.length; ++index) {
-        let field = message.fields[index]
+    message.fields.forEach(field => {
         field.name = repository.nameOfFieldWithTag(field.tag)
         if (field.name.length > widestFieldName) {
             widestFieldName = field.name.length
         }
+        if (field.tag == msgTypeTag) {
+            msgType = field.value;
+        }
+    });
+
+    if (msgType != null) {
+        let message = repository.messageWithMsgType(msgType);
+        buffer += message.name + "\n";
     }
 
-    for (var index = 0; index < message.fields.length; ++index) {
-        let field = message.fields[index]
+    buffer += "{\n";
+
+    message.fields.forEach(field => {
         buffer += `${field.name}`.padStart(widestFieldName, ' ') + ` (${field.tag})`.padStart(6, ' ') + ` = ${field.value}\n` 
-    }
+    });
     
-    buffer += "\n"
+    buffer += "}\n"
     
     return buffer;
 }

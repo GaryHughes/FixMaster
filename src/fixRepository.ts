@@ -33,19 +33,64 @@ export class MessageField {
 }
 
 export class Message {
+    
+    constructor(componentID: string, msgType: string, name: string, categoryID: string, sectionID: string, notReqXML: string, description: string, added: string)
+    {
+        this.componentID = componentID;
+        this.msgType = msgType;
+        this.name = name;
+        this.categoryID = categoryID;
+        this.sectionID = sectionID;
+        this.notReqXML = notReqXML;
+        this.description = description;
+        this.added = added;
+    }
 
+    componentID: string;
+    msgType: string;
+    name: string;
+    categoryID: string;
+    sectionID: string;
+    notReqXML: string;
+    description: string;
+    added: string;
 }
 
 export class Version {
 
-    constructor(root: string) {
+    loadMessages(versionPath: string) {
 
-        // TODO - handle EPs
+        let messagesPath = path.join(versionPath, "Messages.xml");
+        let buffer = fs.readFileSync(messagesPath);
+        let parser = new xml2js.Parser();
+        var messages: Message[] = [];
+    
+        parser.parseString(buffer, function (err:any, result:any) {
+            result.Messages.Message.forEach((element:any) => {
+                    messages.push(
+                        new Message(
+                            element.ComponentID[0], 
+                            element.MsgType[0],
+                            element.Name[0], 
+                            element.CategoryID[0], 
+                            element.SectionID[0],
+                            element.NotReqXML[0],
+                            element.Description[0], 
+                            element.Added ? element.Added[0] : "" 
+                        )
+                    );
+                }
+            );
+        });
 
-        let fieldsPath = path.join(root, "Base", "Fields.xml");
+        return messages;
+    }
+
+    loadFields(versionPath: string) {
+
+        let fieldsPath = path.join(versionPath, "Fields.xml");
         let buffer = fs.readFileSync(fieldsPath);
         let parser = new xml2js.Parser();
-        
         var fields: Field[] = [];
     
         // Field tags are 1 based and there are gaps in the sequence, we want to be able to
@@ -75,11 +120,19 @@ export class Version {
                 }
             );
         });
-    
-        this.fields = fields;
+
+        return fields;
+    }
+
+    constructor(repositoryPath: string) {
+        // TODO - handle EPs
+       let versionPath = path.join(repositoryPath, "Base");
+       this.fields = this.loadFields(versionPath);
+       this.messages = this.loadMessages(versionPath);
     }
 
     fields: Field[];
+    messages: Message[];
 
 }
 
@@ -98,11 +151,17 @@ export class Repository {
 
     nameOfFieldWithTag(tag: number) {
         // TODO - version lookup
-        let version = this.versions[0];
+        let version = this.versions[1];
         if (isNaN(tag) || tag < 1 || tag > version.fields.length) {
             return "";
         }
         return version.fields[tag].name;
+    }
+
+    messageWithMsgType(msgType: string) {
+        // TODO - version lookup
+        let version = this.versions[1];
+        return version.messages.find(message => message.msgType == msgType);
     }
 }
 
