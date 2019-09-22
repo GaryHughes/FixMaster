@@ -79,10 +79,10 @@ export function parseMessage(text:string) {
 
 export function prettyPrintMessage(message:Message, repository:FIX.Repository) {
     
-    var buffer : string = ""
-    var field : any
-    var widestFieldName : number = 0
-    var msgType : null;
+    var buffer: string = ""
+    var field: any
+    var widestFieldName: number = 0
+    var msgType: string = "";
 
     message.fields.forEach(field => {
         field.name = repository.nameOfFieldWithTag(field.tag)
@@ -94,15 +94,22 @@ export function prettyPrintMessage(message:Message, repository:FIX.Repository) {
         }
     });
 
-    if (msgType != null) {
+    if (msgType.length != 0) {
         let message = repository.messageWithMsgType(msgType);
-        buffer += message.name + "\n";
+        if (message != undefined) {
+            buffer += message.name + "\n";
+        }
     }
 
     buffer += "{\n";
 
     message.fields.forEach(field => {
-        buffer += `${field.name}`.padStart(widestFieldName, ' ') + ` (${field.tag})`.padStart(6, ' ') + ` = ${field.value}\n` 
+        buffer += `${field.name}`.padStart(widestFieldName, ' ') + ` (${field.tag})`.padStart(6, ' ') + ` = ${field.value}` 
+        let valueDescription = repository.descriptionOfValue(field.tag, field.value);
+        if (valueDescription != undefined && valueDescription.length > 0) {
+            buffer +=  " - " + valueDescription; 
+        }
+        buffer += "\n";
     });
     
     buffer += "}\n"

@@ -3,6 +3,23 @@ import * as xml2js from 'xml2js';
 import * as path from 'path';
 import { resolveCliPathFromVSCodeExecutablePath } from 'vscode-test';
 
+export class Enum {
+    
+    constructor(tag: number, value: string, symbolicName: string, description: string, added: string) {
+        this.tag = tag;
+        this.value = value;
+        this.symbolicName = symbolicName;
+        this.description = description;
+        this.added = added;
+    }
+
+    tag: number;
+    value: string;
+    symbolicName: string;
+    description: string;
+    added: string;
+}
+
 //
 // This is the generic description of a field for a given FIX version.
 //
@@ -54,9 +71,33 @@ export class Message {
     notReqXML: string;
     description: string;
     added: string;
-}
-
+} 
 export class Version {
+
+    loadEnums(versionPath: string) {
+     
+        let enumsPath = path.join(versionPath, "Enums.xml");
+        let buffer = fs.readFileSync(enumsPath);
+        let parser = new xml2js.Parser();
+        var enums: Enum[] = [];
+    
+        parser.parseString(buffer, function (err:any, result:any) {
+            result.Enums.Enum.forEach((element:any) => {
+                    enums.push(
+                        new Enum(
+                            element.Tag[0], 
+                            element.Value[0],
+                            element.SymbolicName[0], 
+                            element.Description[0], 
+                            element.Added ? element.Added[0] : "" 
+                        )
+                    );
+                }
+            );
+        });
+
+        return enums;
+    }
 
     loadMessages(versionPath: string) {
 
@@ -126,13 +167,27 @@ export class Version {
 
     constructor(repositoryPath: string) {
         // TODO - handle EPs
-       let versionPath = path.join(repositoryPath, "Base");
-       this.fields = this.loadFields(versionPath);
-       this.messages = this.loadMessages(versionPath);
+        let versionPath = path.join(repositoryPath, "Base");
+    
+        this.enums = this.loadEnums(versionPath);
+        this.fields = this.loadFields(versionPath);
+        this.messages = this.loadMessages(versionPath);
+    
+        this.enums.forEach(entry => {
+            if (this.enumeratedTags[entry.tag] == undefined) {
+                this.enumeratedTags[entry.tag] = [entry];
+            }
+            else {
+                this.enumeratedTags[entry.tag].push(entry);
+            }
+        });
     }
 
+    enums: Enum[];
     fields: Field[];
     messages: Message[];
+
+    enumeratedTags: Record<number, Enum[]> = {}; 
 
 }
 
@@ -162,6 +217,19 @@ export class Repository {
         // TODO - version lookup
         let version = this.versions[1];
         return version.messages.find(message => message.msgType == msgType);
+    }
+
+    descriptionOfValue(tag: number, value:string) {
+        // TODO - version lookup
+        let version = this.versions[1];
+        let enums = version.enumeratedTags[tag];
+        if (enums != undefined) {
+            let definition = enums.find(entry => entry.value == value);
+            if (definition != undefined) {
+                return definition.description;
+            }
+        }
+        return undefined;
     }
 }
 
