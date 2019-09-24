@@ -1,8 +1,13 @@
 {
 	"name": "fixmaster",
-	"displayName": "FixMaster",
+	"displayName": "FIX Master",
 	"description": "FIX Protocol formatter",
 	"version": "0.0.1",
+	"publisher": "geh-fixmaster",
+	"repository": "https://github.com/GaryHughes/FixMaster.git",
+	"author": {
+		"name": "Gary Hughes"
+	},
 	"engines": {
 		"vscode": "^1.38.0"
 	},
@@ -19,7 +24,17 @@
 				"command": "extension.format",
 				"title": "FIX protocol format"
 			}
-		]
+		],
+		"configuration": {
+			"title": "FIX Master",
+			"properties": {
+			  "fixmaster.repositoryPath": {
+				"type": "string",
+				"default": "/Users/geh/Downloads/Repository",
+				"description": "Path to the fixtrading.org XML Repository"
+			}
+		  }
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

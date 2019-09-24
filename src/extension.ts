@@ -1,12 +1,16 @@
 import * as vscode from 'vscode'
+import * as path from 'path';
 import * as FIX from './fixRepository'
 import { fixMessagePrefix, parseMessage, prettyPrintMessage } from './fixProtcol'
 
 export function activate(context: vscode.ExtensionContext) {
-	
-	// TODO - make the path configurable
-	// TODO - support QuickFix data dictionary
-	let repository = new FIX.Repository("/Users/geh/Downloads/Repository"); 
+
+	const configuration = vscode.workspace.getConfiguration();
+	var repositoryPath = configuration.get('fixmaster.repositoryPath') as string;
+	if (!path.isAbsolute(repositoryPath)) {
+		repositoryPath = path.join(context.extensionPath, repositoryPath);
+	}
+	const repository = new FIX.Repository(repositoryPath); 
 
 	vscode.commands.registerCommand('extension.format', () => {
 	
