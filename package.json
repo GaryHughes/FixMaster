@@ -28,12 +28,22 @@
 		"configuration": {
 			"title": "FIX Master",
 			"properties": {
-			  "fixmaster.repositoryPath": {
-				"type": "string",
-				"default": "/Users/geh/Downloads/Repository",
-				"description": "Path to the fixtrading.org XML Repository"
+			  	"fixmaster.repositoryPath": {
+					"type": "string",
+					"default": null,
+					"description": "Path to a fixtrading.org XML Repository. FIX Master includes a copy of the repository that it will use by default."
+				},
+				"fixmaster.nameLookup": {
+					"type": "string",
+					"default": "Promiscuous",
+					"enum": ["Strict", "Promiscuous"],
+					"enumDescriptions": [
+					  	"Only use message, field, and enumerated value names from the FIX version matching the BeginString of the message.",
+					  	"Use any available FIX version to find names for messages, fields, and enumerated values."
+					],
+					"description": "Governs how names are found for messages, fields, and enumerated values."
+				  }
 			}
-		  }
 		}
 	},
 	"scripts": {

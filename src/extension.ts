@@ -1,21 +1,25 @@
-import * as vscode from 'vscode'
+import * as vscode from 'vscode';
 import * as path from 'path';
-import * as FIX from './fixRepository'
-import { fixMessagePrefix, parseMessage, prettyPrintMessage } from './fixProtcol'
+import * as FIX from './fixRepository';
+import { fixMessagePrefix, parseMessage, prettyPrintMessage } from './fixProtcol';
 
 export function activate(context: vscode.ExtensionContext) {
 
 	const configuration = vscode.workspace.getConfiguration();
 	var repositoryPath = configuration.get('fixmaster.repositoryPath') as string;
+	if (!repositoryPath) {
+		repositoryPath = "./repository";
+	}
 	if (!path.isAbsolute(repositoryPath)) {
 		repositoryPath = path.join(context.extensionPath, repositoryPath);
 	}
-	const repository = new FIX.Repository(repositoryPath); 
+	// TODO - check path and raise error
+	const repository = new FIX.Repository(repositoryPath);
 
 	vscode.commands.registerCommand('extension.format', () => {
 	
 		const {activeTextEditor} = vscode.window;
-	
+		
 		if (activeTextEditor) {
 	
 			const {document} = activeTextEditor;
@@ -40,12 +44,15 @@ export function activate(context: vscode.ExtensionContext) {
 					continue;
 				}
 	
+				const configuration = vscode.workspace.getConfiguration();
+				repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
+
 				const pretty = prettyPrintMessage(message, repository);
 				
 				edit.replace(document.uri, line.range, pretty);
 			}
 
-			vscode.workspace.applyEdit(edit)
+			vscode.workspace.applyEdit(edit);
 		}
     });
 }
