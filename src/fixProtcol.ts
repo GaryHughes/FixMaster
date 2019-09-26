@@ -1,4 +1,5 @@
 import * as FIX from './fixRepository';
+import * as xml from './fixRepositoryXml';
 
 export const fixMessagePrefix = "8=FIX.";
 export const fieldDelimiter = '\x01';
@@ -57,31 +58,27 @@ export class Message {
     describe(repository: FIX.Repository) {
         
         const beginString = this.fields.find(field => field.tag === beginStringTag);
-        const msgType = this.fields.find(field => field.tag === msgTypeTag);
+     
+        var version: xml.Version | undefined;
+
+        if (beginString) {
+            version = repository.versions.find(v => v.beginString === beginString.value);        
+        }
+     
+        var msgType: string = "";
     
-        // TODO - keep going if promiscuous?
-        if (!beginString || !msgType) {
-            const fieldDescriptions = this.fields.map(field => new FieldDescription(field.tag, field.value, "", ""));       
-            return new MessageDescription("", "", fieldDescriptions);
-        }
-
-        const version = repository.versions.find(v => v.beginString === beginString.value);        
-
-        if (!version) {
-            // TODO - keep going if promiscuous?
-            const fieldDescriptions = this.fields.map(field => new FieldDescription(field.tag, field.value, "", ""));      
-            return new MessageDescription(msgType.value, "", fieldDescriptions);
-        }
-
         const fieldDescriptions = this.fields.map(field => {
+            if (field.tag === msgTypeTag) {
+                msgType = field.value;
+            }
             const name = repository.nameOfFieldWithTag(field.tag, version);
             const valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
             return new FieldDescription(field.tag, field.value, name, valueDescription);
         });
 
-        const messageName = repository.nameOfMessageWithMsgType(msgType.value, version);
+        const messageName = repository.nameOfMessageWithMsgType(msgType, version);
 
-        return new MessageDescription(msgType.value, messageName, fieldDescriptions);
+        return new MessageDescription(msgType, messageName, fieldDescriptions);
     }
 }
 

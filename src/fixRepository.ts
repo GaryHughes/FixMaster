@@ -23,9 +23,9 @@ export class Repository {
     readonly latestVersion: xml.Version;
     nameLookup: NameLookup = NameLookup.Promiscuous;
 
-    nameOfFieldWithTag(tag: number, version: xml.Version) {
+    nameOfFieldWithTag(tag: number, version: xml.Version | undefined) {
         var name = "";
-        if (!isNaN(tag) && tag > 0 && tag < version.fields.length) {
+        if (version && !isNaN(tag) && tag > 0 && tag < version.fields.length) {
             name = version.fields[tag].name;
         }
         if ((!name || name.length === 0) && this.nameLookup === NameLookup.Promiscuous) {
@@ -35,8 +35,11 @@ export class Repository {
         return name;
     }
 
-    nameOfMessageWithMsgType(msgType: string, version: xml.Version) {
-        var message = version.messages.find(message => message.msgType === msgType);
+    nameOfMessageWithMsgType(msgType: string, version: xml.Version | undefined) {
+        var message: xml.Message | undefined;
+        if (version) { 
+            message = version.messages.find(message => message.msgType === msgType);
+        }
         if (!message) {
             if (this.nameLookup === NameLookup.Promiscuous) {
                 message = this.latestVersion.messages.find(message => message.msgType === msgType);    
@@ -48,12 +51,14 @@ export class Repository {
         return "";
     }
 
-    descriptionOfValue(tag: number, value:string, version: xml.Version) {
-        const enums = version.enumeratedTags[tag];
-        if (enums) {
-            let definition = enums.find(entry => entry.value === value);
-            if (definition) {
-                return definition.description;
+    descriptionOfValue(tag: number, value:string, version: xml.Version | undefined) {
+        if (version) {
+            const enums = version.enumeratedTags[tag];
+            if (enums) {
+                let definition = enums.find(entry => entry.value === value);
+                if (definition) {
+                    return definition.description;
+                }
             }
         }
         if (this.nameLookup === NameLookup.Promiscuous) {
@@ -65,6 +70,7 @@ export class Repository {
                 }
             }
         }
+        
         return "";
     }
 }
