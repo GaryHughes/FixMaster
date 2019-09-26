@@ -18,3 +18,7 @@ FIX Master is designed to parse FIX messages from log files and pretty print the
 
 This extension is designed to parse FIX application log files which are typically very large, possibly 100s of MB. Visual Studio Code places limits on the size of files it reads so it
 doesn't use excessive amounts of memory and negatively affect performance and possibly crash. If a file is over this size which at the time of writing is 50MB, extensions can't see the file. If you have very large files then cut them up into smaller pieces before attempting to format them with FIX Master.
+
+## Acknowledgements
+
+This extension includes parts of the fixtrading.org XML Repository Copyright (c) FIX Protocol Ltd. All Rights Reserved.
