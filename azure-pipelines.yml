@@ -17,5 +17,9 @@ steps:
 
 - script: |
     npm install
-    npm run build
+    npm run compile
   displayName: 'npm install and build'
+
+- script: |
+    npm run test
+  displayName: 'test'
