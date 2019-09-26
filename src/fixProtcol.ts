@@ -134,7 +134,7 @@ export function parseMessage(text: string, separator: string | undefined) {
     return message;
 }
 
-export function prettyPrintMessage(message:Message, repository:FIX.Repository) {
+export function prettyPrintMessage(context: string, message:Message, repository:FIX.Repository) {
     
     var buffer: string = "";
     var widestFieldName: number = 0;
@@ -146,6 +146,10 @@ export function prettyPrintMessage(message:Message, repository:FIX.Repository) {
             widestFieldName = field.name.length;
         }
     });
+
+    if (context && context.length > 0) {
+        buffer += context + " ";
+    }
 
     if (description.messageName && description.messageName.length > 0) {
         buffer += description.messageName + "\n";

@@ -48,6 +48,15 @@ export function activate(context: vscode.ExtensionContext) {
 				continue;
 			}
 
+			const prefixPattern = configuration.get("fixmaster.prefixPattern") as string;
+			const linePrefix = line.text.substr(0, fixMessageIndex);
+			const regex = new RegExp(prefixPattern);
+			let match = regex.exec(linePrefix);
+			var messageContext: string = "";
+			if (match) {
+				messageContext = match[0];	
+			}
+
 			const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
 
 			const message = parseMessage(line.text.substr(fixMessageIndex), fieldSeparator);	
@@ -58,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 			
 			repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
 
-			const pretty = prettyPrintMessage(message, repository);
+			const pretty = prettyPrintMessage(messageContext, message, repository);
 			
 			edit.replace(document.uri, line.range, pretty);
 		}

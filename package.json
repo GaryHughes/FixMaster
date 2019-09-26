@@ -48,6 +48,11 @@
 					"maxLength": 1,
 					"default": null,
 					"description": "The character used to separate fields within a messages. Default is the standard 0x01, some users replace these control characeters when logging."
+				},
+				"fixmaster.prefixPattern": {
+					"type": "string",
+					"default": "\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}\\.\\d+",
+					"description": "Match this pattern in the part of each line preceding the FIX message. This will be included when formatting the FIX message. The default pattern matches a timestamp with the format yyyy-MM-dd HH:mm:ss.ffffff"
 				}
 				  
 			}
