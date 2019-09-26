@@ -20,41 +20,43 @@ export function activate(context: vscode.ExtensionContext) {
 	
 		const {activeTextEditor} = vscode.window;
 		
-		if (activeTextEditor) {
-	
-			const {document} = activeTextEditor;
-	
-			const edit = new vscode.WorkspaceEdit();
+		if (!activeTextEditor) {
+			vscode.window.showErrorMessage('No document is open or the file is too large.');
+			return;
+		}
 
-			const configuration = vscode.workspace.getConfiguration();
+		const {document} = activeTextEditor;
 
-			for (var index = 0; index < document.lineCount; ++index) {
-	
-				const line = document.lineAt(index);
-				
-				// TODO - support multiple configurable prefixes 
-				const fixMessageIndex = line.text.indexOf(fixMessagePrefix); 
-	
-				if (fixMessageIndex < 0) {
-					continue;
-				}
-	
-				const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
+		const edit = new vscode.WorkspaceEdit();
 
-				const message = parseMessage(line.text.substr(fixMessageIndex), fieldSeparator);	
-	
-				if (!message) {
-					continue;
-				}
-				
-				repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
+		const configuration = vscode.workspace.getConfiguration();
 
-				const pretty = prettyPrintMessage(message, repository);
-				
-				edit.replace(document.uri, line.range, pretty);
+		for (var index = 0; index < document.lineCount; ++index) {
+
+			const line = document.lineAt(index);
+			
+			// TODO - support multiple configurable prefixes 
+			const fixMessageIndex = line.text.indexOf(fixMessagePrefix); 
+
+			if (fixMessageIndex < 0) {
+				continue;
 			}
 
-			vscode.workspace.applyEdit(edit);
+			const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
+
+			const message = parseMessage(line.text.substr(fixMessageIndex), fieldSeparator);	
+
+			if (!message) {
+				continue;
+			}
+			
+			repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
+
+			const pretty = prettyPrintMessage(message, repository);
+			
+			edit.replace(document.uri, line.range, pretty);
 		}
+
+		vscode.workspace.applyEdit(edit);
     });
 }
