@@ -26,6 +26,8 @@ export function activate(context: vscode.ExtensionContext) {
 	
 			const edit = new vscode.WorkspaceEdit();
 
+			const configuration = vscode.workspace.getConfiguration();
+
 			for (var index = 0; index < document.lineCount; ++index) {
 	
 				const line = document.lineAt(index);
@@ -37,14 +39,14 @@ export function activate(context: vscode.ExtensionContext) {
 					continue;
 				}
 	
-				// TODO - support configurable field delimiters incase messages are not raw
-				const message = parseMessage(line.text.substr(fixMessageIndex));	
+				const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
+
+				const message = parseMessage(line.text.substr(fixMessageIndex), fieldSeparator);	
 	
 				if (!message) {
 					continue;
 				}
-	
-				const configuration = vscode.workspace.getConfiguration();
+				
 				repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
 
 				const pretty = prettyPrintMessage(message, repository);

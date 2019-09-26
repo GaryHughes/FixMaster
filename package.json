@@ -42,7 +42,14 @@
 					  	"Use any available FIX version to find names for messages, fields, and enumerated values."
 					],
 					"description": "Governs how names are found for messages, fields, and enumerated values."
-				  }
+				},
+				"fixmaster.fieldSeparator": {
+					"type": "string",
+					"maxLength": 1,
+					"default": null,
+					"description": "The character used to separate fields within a messages. Default is the standard 0x01, some users replace these control characeters when logging."
+				}
+				  
 			}
 		}
 	},

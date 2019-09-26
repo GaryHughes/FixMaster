@@ -82,20 +82,23 @@ export class Message {
     }
 }
 
-export function parseMessage(text:string) {
+export function parseMessage(text: string, separator: string | undefined) {
 
-    var fields : Field[] = [];
-    
+    if (!separator) {
+        separator = fieldDelimiter;
+    }
+
+    var fields: Field[] = [];
     let length = text.length;
 
     for (var index = 0; index < length;) {
 
-        var tag : string = "";
-        var value : string = "";
+        var tag: string = "";
+        var value: string = "";
 
         for (; index < length; ++index) {
             let token = text[index];
-            if (token === fieldValueSeparator || token === fieldDelimiter) {
+            if (token === fieldValueSeparator || token === separator) {
                 ++index;
                 break;
             }
@@ -104,7 +107,7 @@ export function parseMessage(text:string) {
 
         for (; index < length; ++index) {
             let token = text[index];
-            if (token === fieldDelimiter) {
+            if (token === separator) {
                 ++index;
                 break;
             }
