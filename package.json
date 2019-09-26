@@ -28,7 +28,7 @@
 		"configuration": {
 			"title": "FIX Master",
 			"properties": {
-			  	"fixmaster.repositoryPath": {
+				"fixmaster.repositoryPath": {
 					"type": "string",
 					"default": null,
 					"description": "Path to a fixtrading.org XML Repository. FIX Master includes a copy of the repository that it will use by default."
@@ -36,10 +36,13 @@
 				"fixmaster.nameLookup": {
 					"type": "string",
 					"default": "Promiscuous",
-					"enum": ["Strict", "Promiscuous"],
+					"enum": [
+						"Strict",
+						"Promiscuous"
+					],
 					"enumDescriptions": [
-					  	"Only use message, field, and enumerated value names from the FIX version matching the BeginString of the message.",
-					  	"Use any available FIX version to find names for messages, fields, and enumerated values."
+						"Only use message, field, and enumerated value names from the FIX version matching the BeginString of the message.",
+						"Use any available FIX version to find names for messages, fields, and enumerated values."
 					],
 					"description": "Governs how names are found for messages, fields, and enumerated values."
 				},
@@ -54,7 +57,6 @@
 					"default": "\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}\\.\\d+",
 					"description": "Match this pattern in the part of each line preceding the FIX message. This will be included when formatting the FIX message. The default pattern matches a timestamp with the format yyyy-MM-dd HH:mm:ss.ffffff"
 				}
-				  
 			}
 		}
 	},

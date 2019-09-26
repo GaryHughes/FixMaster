@@ -20,6 +20,6 @@ steps:
     npm run compile
   displayName: 'npm install and build'
 
-- script: |
-    npm test
-  displayName: 'test'
+# - script: |
+#     npm test
+#   displayName: 'test'
