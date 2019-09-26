@@ -4,7 +4,11 @@
 	"description": "FIX Protocol formatter",
 	"version": "0.0.1",
 	"publisher": "geh-fixmaster",
+	"license": "SEE LICENSE IN LICENSE.txt",
 	"repository": "https://github.com/GaryHughes/FixMaster.git",
+	"bugs": {
+		"url": "https://github.com/GaryHughes/FixMaster/issues"
+	},
 	"author": {
 		"name": "Gary Hughes"
 	},
@@ -12,6 +16,7 @@
 		"vscode": "^1.38.0"
 	},
 	"categories": [
+		"Formatters",
 		"Other"
 	],
 	"activationEvents": [
