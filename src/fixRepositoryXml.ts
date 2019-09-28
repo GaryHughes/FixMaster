@@ -244,8 +244,6 @@ export class Version {
             result.Fields.Field.forEach((element:any) => {
                     let tag = element.Tag[0];
                     while (index < tag - 1) {
-                        // TODO - what is the canonical way of handling a null object?
-                        //        maybe one static object?
                         fields.push(new Field(0, "", "", "", "", ""));
                         ++index;
                     }
