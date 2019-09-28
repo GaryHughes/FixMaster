@@ -9,7 +9,7 @@ suite('FIX Repository Test Suite', () => {
     var repository = new Repository(path.join(__dirname, "../../../repository"));
 
     before(() => {
-		vscode.window.showInformationMessage('Start all tests.');
+        vscode.window.showInformationMessage('Start all tests.');
     });
 
 	test('Strict field name lookup', () => {

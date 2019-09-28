@@ -160,7 +160,7 @@ export class Version {
 
     populateFieldsForComponent(fields:MessageField[], componentID: string, outerIndent: number) {
 
-        const msgContents = this.msgContents[componentID];
+        const msgContents = this._msgContents[componentID];
         
         if (!msgContents) {
             return;
@@ -170,14 +170,14 @@ export class Version {
             // If TagText is an int the content is a field, otherwise it is a component.
             const tag = Number(content.tagText);
             if (isNaN(tag)) {
-                const component = this.components[content.tagText];
+                const component = this._components[content.tagText];
                 if (component) {
                     this.populateFieldsForComponent(fields, component.componentID, content.indent);
                 }
             }
             else {
-                if (tag < this.fields.length) {
-                    const field = this.fields[tag];
+                if (tag < this._fields.length) {
+                    const field = this._fields[tag];
                     fields.push(
                         new MessageField(
                             field,
@@ -323,47 +323,91 @@ export class Version {
 
     constructor(repositoryPath: string) {
 
+        this.repositoryPath = repositoryPath;
         this.beginString = path.basename(repositoryPath);
+        this.loaded = false;
+    }
+
+    private load() {
+        
+        if (this.loaded) {
+            return;
+        }
 
         // TODO - handle EPs
-        let versionPath = path.join(repositoryPath, "Base");
+        let versionPath = path.join(this.repositoryPath, "Base");
     
-        this.enums = this.loadEnums(versionPath);
-        this.fields = this.loadFields(versionPath);
+        this._enums = this.loadEnums(versionPath);
+        this._fields = this.loadFields(versionPath);
         
         this.loadComponents(versionPath).forEach(component => {
-            this.components[component.name] = component;
+            this._components[component.name] = component;
         });
     
-        this.enums.forEach(entry => {
-            if (this.enumeratedTags[entry.tag]) {
-                this.enumeratedTags[entry.tag].push(entry);
+        this._enums.forEach(entry => {
+            if (this._enumeratedTags[entry.tag]) {
+                this._enumeratedTags[entry.tag].push(entry);
             }
             else {
-                this.enumeratedTags[entry.tag] = [entry];
+                this._enumeratedTags[entry.tag] = [entry];
             }
         });
 
         this.loadMsgContents(versionPath).forEach(content => {
-            if (this.msgContents[content.componentID]) {
-                this.msgContents[content.componentID].push(content);
+            if (this._msgContents[content.componentID]) {
+                this._msgContents[content.componentID].push(content);
             }
             else {
-                this.msgContents[content.componentID] = [content];
+                this._msgContents[content.componentID] = [content];
             }
         });
 
         this.loadMessages(versionPath).forEach(message => {
-            this.messages[message.msgType] = message;
+            this._messages[message.msgType] = message;
         });
+
+        this.loaded = true;
     }
 
+    private readonly repositoryPath: string;
+    private loaded: boolean;
+
     readonly beginString: string;
-    readonly enums: Enum[];
-    readonly fields: Field[];
-    readonly messages: Record<string, Message> = {};
-    readonly enumeratedTags: Record<number, Enum[]> = {};
-    readonly components: Record<string, Component> = {};
-    readonly msgContents: Record<string, MsgContent[]> = {};
+    _enums: Enum[] = [];
+    _fields: Field[] = [];
+    _messages: Record<string, Message> = {};
+    _enumeratedTags: Record<number, Enum[]> = {};
+    _components: Record<string, Component> = {};
+    _msgContents: Record<string, MsgContent[]> = {};
+
+    get enums(): Enum[] {
+        this.load();
+        return this._enums;
+    }
+
+    get fields(): Field[] {
+        this.load();
+        return this._fields;
+    }
+
+    get messages(): Record<string, Message> {
+        this.load();
+        return this._messages;
+    }
+
+    get enumeratedTags(): Record<string, Enum[]> {
+        this.load();
+        return this._enumeratedTags;
+    }
+
+    get components(): Record<string, Component> {
+        this.load();
+        return this._components;
+    }
+
+    get msgContents(): Record<string, MsgContent[]> {
+        this.load();
+        return this._msgContents;
+    }
 
 }

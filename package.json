@@ -54,7 +54,7 @@
 				"fixmaster.fieldSeparator": {
 					"type": "string",
 					"maxLength": 1,
-					"default": null,
+					"default": "",
 					"description": "The character used to separate fields within a messages. Default is the standard 0x01, some users replace these control characeters when logging."
 				},
 				"fixmaster.prefixPattern": {
