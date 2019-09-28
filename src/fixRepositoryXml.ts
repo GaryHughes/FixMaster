@@ -324,26 +324,51 @@ export class Version {
     constructor(repositoryPath: string) {
 
         this.repositoryPath = repositoryPath;
+        // TODO - handle EPs
+        this.versionPath = path.join(this.repositoryPath, "Base");
         this.beginString = path.basename(repositoryPath);
         this.loaded = false;
+        this.loadedEnums = false;
     }
 
-    private load() {
+    private forceLoad() {
         
+        this.forceLoadEnums();
+
         if (this.loaded) {
             return;
         }
 
-        // TODO - handle EPs
-        let versionPath = path.join(this.repositoryPath, "Base");
-    
-        this._enums = this.loadEnums(versionPath);
-        this._fields = this.loadFields(versionPath);
+        this._fields = this.loadFields(this.versionPath);
         
-        this.loadComponents(versionPath).forEach(component => {
+        this.loadComponents(this.versionPath).forEach(component => {
             this._components[component.name] = component;
         });
     
+        this.loadMsgContents(this.versionPath).forEach(content => {
+            if (this._msgContents[content.componentID]) {
+                this._msgContents[content.componentID].push(content);
+            }
+            else {
+                this._msgContents[content.componentID] = [content];
+            }
+        });
+
+        this.loadMessages(this.versionPath).forEach(message => {
+            this._messages[message.msgType] = message;
+        });
+
+        this.loaded = true;
+    }
+
+    private forceLoadEnums() {
+        
+        if (this.loadedEnums) {
+            return;
+        }
+        
+        this._enums = this.loadEnums(this.versionPath);
+        
         this._enums.forEach(entry => {
             if (this._enumeratedTags[entry.tag]) {
                 this._enumeratedTags[entry.tag].push(entry);
@@ -353,24 +378,13 @@ export class Version {
             }
         });
 
-        this.loadMsgContents(versionPath).forEach(content => {
-            if (this._msgContents[content.componentID]) {
-                this._msgContents[content.componentID].push(content);
-            }
-            else {
-                this._msgContents[content.componentID] = [content];
-            }
-        });
-
-        this.loadMessages(versionPath).forEach(message => {
-            this._messages[message.msgType] = message;
-        });
-
-        this.loaded = true;
+        this.loadedEnums = true;
     }
 
     private readonly repositoryPath: string;
+    private readonly versionPath: string;
     private loaded: boolean;
+    private loadedEnums: boolean;
 
     readonly beginString: string;
     _enums: Enum[] = [];
@@ -381,32 +395,32 @@ export class Version {
     _msgContents: Record<string, MsgContent[]> = {};
 
     get enums(): Enum[] {
-        this.load();
+        this.forceLoadEnums();
         return this._enums;
     }
 
     get fields(): Field[] {
-        this.load();
+        this.forceLoad();
         return this._fields;
     }
 
     get messages(): Record<string, Message> {
-        this.load();
+        this.forceLoad();
         return this._messages;
     }
 
     get enumeratedTags(): Record<string, Enum[]> {
-        this.load();
+        this.forceLoadEnums();
         return this._enumeratedTags;
     }
 
     get components(): Record<string, Component> {
-        this.load();
+        this.forceLoad();
         return this._components;
     }
 
     get msgContents(): Record<string, MsgContent[]> {
-        this.load();
+        this.forceLoad();
         return this._msgContents;
     }
 
