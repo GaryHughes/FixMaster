@@ -10,7 +10,7 @@ FIX Master is designed to parse FIX messages from log files and pretty print the
 
 **fixmaster.nameLookup** `(Strict,Promiscuous)` Governs how names are found for messages, fields, and enumerated values.
 
-**fixmaster.fieldSeparator** The character used to separate fields within a messages. Default is the standard 0x01, some users replace these control characeters when logging.
+**fixmaster.fieldSeparator** The character used to separate fields within a messages. Default is the standard 0x01, some users replace these control characters when logging.
 
 **fixmaster.prefixPattern** Match this pattern in the part of each line preceding the FIX message. This will be included when formatting the FIX message. The default pattern matches a timestamp with the format yyyy-MM-dd HH:mm:ss.ffffff
 
