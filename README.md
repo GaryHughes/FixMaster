@@ -23,4 +23,4 @@ doesn't use excessive amounts of memory and negatively affect performance and po
 
 ## Acknowledgements
 
-This extension includes parts of the fixtrading.org XML Repository Copyright (c) FIX Protocol Ltd. All Rights Reserved.
+This extension includes parts of the www.fixtrading.org XML Repository Copyright (c) FIX Protocol Ltd. All Rights Reserved.
