@@ -2,10 +2,14 @@
 	"name": "fixmaster",
 	"displayName": "FIX Master",
 	"description": "FIX Protocol formatter",
+	"icon": "images/fixMaster.png",
 	"version": "0.0.1",
 	"publisher": "geh-fixmaster",
 	"license": "SEE LICENSE IN LICENSE.txt",
-	"repository": "https://github.com/GaryHughes/FixMaster.git",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/GaryHughes/FixMaster.git"
+	},
 	"bugs": {
 		"url": "https://github.com/GaryHughes/FixMaster/issues"
 	},
