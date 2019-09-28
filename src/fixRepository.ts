@@ -15,6 +15,7 @@ export class Repository {
                             .filter(entry => entry.isDirectory() && entry.name.startsWith("FIX."))
                             .map(entry => entry.name);
 
+        // TODO - make this lazy, we will generally only need one version, maybe two if in promiscuous mode.
         this.versions = directories.map(entry => new xml.Version(path.join(root, entry)));   
         this.latestVersion = this.versions[this.versions.length - 1];
     }   
@@ -23,35 +24,62 @@ export class Repository {
     readonly latestVersion: xml.Version;
     nameLookup: NameLookup = NameLookup.Promiscuous;
 
-    nameOfFieldWithTag(tag: number, version: xml.Version | undefined) {
-        var name = "";
-        if (version && !isNaN(tag) && tag > 0 && tag < version.fields.length) {
-            name = version.fields[tag].name;
-        }
-        if ((!name || name.length === 0) && this.nameLookup === NameLookup.Promiscuous) {
-            // Just look at the most recent version for now, we could do an exhaustive search if that fails.
-            name = this.latestVersion.fields[tag].name;
-        }
-        return name;
-    }
+    definitionOfField(tag: number, version: xml.Version | undefined, message: xml.Message | undefined) {
 
-    nameOfMessageWithMsgType(msgType: string, version: xml.Version | undefined) {
-        var message: xml.Message | undefined;
-        if (version) { 
-            message = version.messages.find(message => message.msgType === msgType);
-        }
-        if (!message) {
-            if (this.nameLookup === NameLookup.Promiscuous) {
-                message = this.latestVersion.messages.find(message => message.msgType === msgType);    
+        if (message) {
+            const field = message.fields.find(f => f.field.tag === tag);
+            if (field) {
+                // Best case scenario, we found the requested field on the specified message.
+                return field;
             }
         }
-        if (message) {
-            return message.name;
+
+        if (this.nameLookup === NameLookup.Promiscuous) {
+
+            if (version && tag < version.fields.length) {
+                // Next best case, this field is not defined for this specified message but it is a valid
+                // field for this version.
+                const field = version.fields[tag];
+                if (field) {
+                    return new xml.MessageField(field, false, "", 0);
+                }
+            }
+
+            // Last chance.
+            // TODO - improve this to check all versions if necessary.
+            if (tag < this.latestVersion.fields.length) {
+                const field = this.latestVersion.fields[tag];
+                if (field) {
+                    return new xml.MessageField(field, false, "", 0);
+                }
+            }
         }
-        return "";
+
+        // Always return a valid object to simplify calling code.
+        const field = new xml.Field(tag, "", "", "", "", "");
+        return new xml.MessageField(field, false, "", 0);
+    }
+   
+    definitionOfMessage(msgType: string, version: xml.Version | undefined) {
+        
+        if (version) {
+            const message = version.messages[msgType];
+            if (message) {
+                return message;
+            }
+        } 
+
+        if (this.nameLookup === NameLookup.Promiscuous) {
+            return this.latestVersion.messages[msgType]; 
+        }
+
+        // Always return a valid object to simplify calling code.
+        const fields: xml.MessageField[] = [];
+        return new xml.Message("", msgType, "", "", "", "", "", "", fields);
     }
 
     descriptionOfValue(tag: number, value:string, version: xml.Version | undefined) {
+        
         if (version) {
             const enums = version.enumeratedTags[tag];
             if (enums) {
@@ -61,6 +89,7 @@ export class Repository {
                 }
             }
         }
+
         if (this.nameLookup === NameLookup.Promiscuous) {
             const enums = this.latestVersion.enumeratedTags[tag];
             if (enums) {

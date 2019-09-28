@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage("The repository path '" + repositoryPath + "' cannot be found.");
 			return;
 		}
-	
+
 		const repository = new FIX.Repository(repositoryPath);
 
 		const {document} = activeTextEditor;
@@ -66,8 +66,9 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 			
 			repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
+			const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
 
-			const pretty = prettyPrintMessage(messageContext, message, repository);
+			const pretty = prettyPrintMessage(messageContext, message, repository, nestedFieldIndent);
 			
 			edit.replace(document.uri, line.range, pretty);
 		}

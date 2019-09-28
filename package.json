@@ -61,6 +61,12 @@
 					"type": "string",
 					"default": "\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}\\.\\d+",
 					"description": "Match this pattern in the part of each line preceding the FIX message. This will be included when formatting the FIX message. The default pattern matches a timestamp with the format yyyy-MM-dd HH:mm:ss.ffffff"
+				},
+				"fixmaster.nestedFieldIndent": {
+					"type": "number",
+					"default" : 0,
+					"minLength" : 0,
+					"description": "The number of spaces to indent fields belonging to nested groups"
 				}
 			}
 		}

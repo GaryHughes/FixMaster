@@ -1,5 +1,6 @@
 import * as FIX from './fixRepository';
 import * as xml from './fixRepositoryXml';
+import { deflate } from 'zlib';
 
 export const fixMessagePrefix = "8=FIX.";
 export const fieldDelimiter = '\x01';
@@ -14,12 +15,16 @@ export class FieldDescription {
     readonly value: string;
     readonly name: string;
     readonly valueDescription: string;
+    readonly required: boolean;
+    readonly indent: number;
     
-    constructor(tag: number, value: string, name: string, valueDescription: string) {
+    constructor(tag: number, value: string, name: string, valueDescription: string, required: boolean, indent: number) {
         this.tag = tag;
         this.value = value;
         this.name = name;
         this.valueDescription = valueDescription;
+        this.required = required;
+        this.indent = indent;
     }
 }
 
@@ -56,7 +61,7 @@ export class Message {
     }
 
     describe(repository: FIX.Repository) {
-        
+        // TODO - This is all a bit messier than I'd like - review.
         const beginString = this.fields.find(field => field.tag === beginStringTag);
      
         var version: xml.Version | undefined;
@@ -65,20 +70,41 @@ export class Message {
             version = repository.versions.find(v => v.beginString === beginString.value);        
         }
      
-        var msgType: string = "";
-    
+        const msgTypeField = this.fields.find(field => field.tag === msgTypeTag);
+        
+        if (msgTypeField && msgTypeField.value.length > 0) {
+            const msgType = msgTypeField.value;
+            const messageDefinition = repository.definitionOfMessage(msgType, version);
+            const fieldDescriptions = this.fields.map(field => {
+                const definition = repository.definitionOfField(field.tag, version, messageDefinition);
+                const valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
+                return new FieldDescription(field.tag, 
+                                            field.value, 
+                                            definition ? definition.field.name : "", 
+                                            valueDescription, 
+                                            definition.required,
+                                            definition.indent);          
+            });
+            return new MessageDescription(msgType, 
+                                          messageDefinition ? messageDefinition.name : "", 
+                                          fieldDescriptions);
+        }
+
+        // This is a fallback, we don't have a MsgType or can't find a definition for it in the repository. Just try
+        // and lookup the fields in isolation, this means we don't have required or indent properties but still better
+        // than nothing.
         const fieldDescriptions = this.fields.map(field => {
-            if (field.tag === msgTypeTag) {
-                msgType = field.value;
-            }
-            const name = repository.nameOfFieldWithTag(field.tag, version);
+            const definition = repository.definitionOfField(field.tag, version, undefined);
             const valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
-            return new FieldDescription(field.tag, field.value, name, valueDescription);
+            return new FieldDescription(field.tag, 
+                                        field.value, 
+                                        definition ? definition.field.name : "", 
+                                        valueDescription, 
+                                        definition.required,
+                                        definition.indent);
         });
 
-        const messageName = repository.nameOfMessageWithMsgType(msgType, version);
-
-        return new MessageDescription(msgType, messageName, fieldDescriptions);
+        return new MessageDescription("", "", fieldDescriptions);
     }
 }
 
@@ -134,13 +160,13 @@ export function parseMessage(text: string, separator: string | undefined) {
     return message;
 }
 
-export function prettyPrintMessage(context: string, message:Message, repository:FIX.Repository) {
+export function prettyPrintMessage(context: string, message:Message, repository:FIX.Repository, nestedFieldIndent: number) {
     
     var buffer: string = "";
     var widestFieldName: number = 0;
  
     const description = message.describe(repository);
-
+    
     description.fields.forEach(field => {
         if (field.name.length > widestFieldName) {
             widestFieldName = field.name.length;
@@ -158,7 +184,12 @@ export function prettyPrintMessage(context: string, message:Message, repository:
     buffer += "{\n";
 
     description.fields.forEach(field => {
-        buffer += `${field.name}`.padStart(widestFieldName, ' ') + ` (${field.tag})`.padStart(6, ' ') + ` = ${field.value}`; 
+        buffer += `${field.name}`.padStart(widestFieldName, ' ') + ` (${field.tag})`.padStart(6, ' ');
+        if (nestedFieldIndent) {
+            buffer += "".padStart(field.indent * nestedFieldIndent, " ");
+        }
+        buffer += " ";
+        buffer += `${field.value}`; 
         if (field.valueDescription && field.valueDescription.length > 0) {
             buffer +=  " - " + field.valueDescription; 
         }
