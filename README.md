@@ -14,7 +14,7 @@ FIX Master is designed to parse FIX messages from log files and pretty print the
 
 **fixmaster.prefixPattern** Match this pattern in the part of each line preceding the FIX message. This will be included when formatting the FIX message. The default pattern matches a timestamp with the format yyyy-MM-dd HH:mm:ss.ffffff
 
-**fixmaster.nestedFieldIndent** he number of spaces to indent fields belonging to nested groups
+**fixmaster.nestedFieldIndent** The number of spaces to indent fields belonging to nested groups
 
 ## Known Issues
 
