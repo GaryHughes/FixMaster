@@ -4,7 +4,7 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [Unreleased]
+## [1.0.0] 2019-09-29
 
 ### Added
 
