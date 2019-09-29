@@ -4,6 +4,8 @@
 
 FIX Master is designed to parse FIX messages from log files and pretty print them in a structured format displaying the names for fields, messages, and enumerated values.
 
+![fixmaster](images/fixMaster.gif)
+
 ## Extension Settings
 
 **fixmaster.repositoryPath** Path to a fixtrading.org XML Repository. FIX Master includes a copy of the repository that it will use by default.
