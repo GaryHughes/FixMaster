@@ -44,6 +44,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 		repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
 
+		var lastLineWasAMessage = false;
+
 		for (var index = 0; index < document.lineCount; ++index) {
 
 			const line = document.lineAt(index);
@@ -51,6 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
 			const fixMessageIndex = line.text.indexOf(fixMessagePrefix); 
 
 			if (fixMessageIndex < 0) {
+				lastLineWasAMessage = false;
 				continue;
 			}
 			
@@ -65,11 +68,17 @@ export function activate(context: vscode.ExtensionContext) {
 			const message = parseMessage(line.text.substr(fixMessageIndex), fieldSeparator);	
 
 			if (!message) {
+				lastLineWasAMessage = false;
 				continue;
 			}
+
+			var pretty = prettyPrintMessage(messageContext, message, repository, nestedFieldIndent);
+
+			if (!lastLineWasAMessage) {
+				pretty = "\n" + pretty;	
+				lastLineWasAMessage = true;
+			}
 	
-			const pretty = prettyPrintMessage(messageContext, message, repository, nestedFieldIndent);
-			
 			edit.replace(document.uri, line.range, pretty);
 		}
 
