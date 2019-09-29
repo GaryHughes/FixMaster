@@ -155,6 +155,13 @@ export function parseMessage(text: string, separator: string | undefined) {
         }
     }
 
+    if (fields.length === 1) {
+        // The most likely case for this is that we have the wrong field delimiter. We found a
+        // prefix 8=FIX and correctly parsed 8 as the tag but then just read the rest of the message
+        // as the value.
+        return null;
+    }
+
     var message = new Message(fields);
 
     return message;
