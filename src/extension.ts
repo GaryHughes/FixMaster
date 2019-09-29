@@ -38,6 +38,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const edit = new vscode.WorkspaceEdit();
 
+		const prefixPattern = configuration.get("fixmaster.prefixPattern") as string;
+		const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
+		const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
+
+		repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
+
 		for (var index = 0; index < document.lineCount; ++index) {
 
 			const line = document.lineAt(index);
@@ -47,8 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
 			if (fixMessageIndex < 0) {
 				continue;
 			}
-
-			const prefixPattern = configuration.get("fixmaster.prefixPattern") as string;
+			
 			const linePrefix = line.text.substr(0, fixMessageIndex);
 			const regex = new RegExp(prefixPattern);
 			let match = regex.exec(linePrefix);
@@ -57,17 +62,12 @@ export function activate(context: vscode.ExtensionContext) {
 				messageContext = match[0];	
 			}
 
-			const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
-
 			const message = parseMessage(line.text.substr(fixMessageIndex), fieldSeparator);	
 
 			if (!message) {
 				continue;
 			}
-			
-			repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
-			const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
-
+	
 			const pretty = prettyPrintMessage(messageContext, message, repository, nestedFieldIndent);
 			
 			edit.replace(document.uri, line.range, pretty);
