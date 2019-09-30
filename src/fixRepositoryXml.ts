@@ -7,19 +7,17 @@ import { runInThisContext } from 'vm';
 
 export class Enum {
     
-    constructor(tag: number, value: string, symbolicName: string, description: string, added: string) {
+    constructor(readonly tag: number, 
+                readonly value: string, 
+                readonly symbolicName: string, 
+                readonly description: string, 
+                readonly added: string) {
         this.tag = tag;
         this.value = value;
         this.symbolicName = symbolicName;
         this.description = description;
         this.added = added;
     }
-
-    readonly tag: number;
-    readonly value: string;
-    readonly symbolicName: string;
-    readonly description: string;
-    readonly added: string;
 }
 
 //
@@ -27,7 +25,12 @@ export class Enum {
 //
 export class Field {
     
-    constructor(tag: number, name: string, type: string, notReqXML: string, description: string, added: string) {
+    constructor(readonly tag: number, 
+                readonly name: string, 
+                readonly type: string, 
+                readonly notReqXML: string, 
+                readonly description: string, 
+                readonly added: string) {
         this.tag = tag;
         this.name = name;
         this.type = type;
@@ -35,13 +38,6 @@ export class Field {
         this.description = description;
         this.added = added;
     }
-
-    readonly tag: number;
-    readonly name: string;
-    readonly type: string;
-    readonly notReqXML: string;
-    readonly description: string;
-    readonly added: string;
 }
 
 // 
@@ -49,22 +45,29 @@ export class Field {
 //
 export class MessageField {
 
-    constructor(field: Field, required: boolean, added: string, indent: number) {
+    constructor(readonly field: Field, 
+                readonly required: boolean, 
+                readonly added: string, 
+                readonly indent: number) {
         this.field = field;
         this.required = required;
         this.added = added;
         this.indent = indent;
     }
 
-    readonly field: Field;
-    readonly required: boolean;
-    readonly added: string;
-    readonly indent: number;    
 }
 
 export class Message {
     
-    constructor(componentID: string, msgType: string, name: string, categoryID: string, sectionID: string, notReqXML: string, description: string, added: string, fields: MessageField[])
+    constructor(readonly componentID: string, 
+                readonly msgType: string, 
+                readonly name: string, 
+                readonly categoryID: string, 
+                readonly sectionID: string, 
+                readonly notReqXML: string, 
+                readonly description: string, 
+                readonly added: string, 
+                readonly fields: MessageField[])
     {
         this.componentID = componentID;
         this.msgType = msgType;
@@ -77,20 +80,17 @@ export class Message {
         this.fields = fields;
     }
 
-    readonly componentID: string;
-    readonly msgType: string;
-    readonly name: string;
-    readonly categoryID: string;
-    readonly sectionID: string;
-    readonly notReqXML: string;
-    readonly description: string;
-    readonly added: string;
-    readonly fields: MessageField[];
 }
 
 export class MsgContent {
-    
-    constructor(componentID: string, tagText: string, indent: number, position: string, reqd: boolean, description: string, added: string) {
+
+    constructor(readonly componentID: string, 
+                readonly tagText: string, 
+                readonly indent: number, 
+                readonly position: string, 
+                readonly reqd: boolean, 
+                readonly description: string, 
+                readonly added: string) {
         this.componentID = componentID;
         this.tagText = tagText;
         this.indent = indent;
@@ -100,19 +100,17 @@ export class MsgContent {
         this.added = added;
     }
 
-    componentID: string;
-    tagText: string;
-    indent: number;
-    position: string;
-    reqd: boolean;
-    description: string;
-    added: string;
-
 }
 
 export class Component {
 
-    constructor(componentID: string, componentType: string, categoryID: string, name: string, notReqXML: string, description: string, added: string) {
+    constructor(readonly componentID: string, 
+                readonly componentType: string, 
+                readonly categoryID: string, 
+                readonly name: string, 
+                readonly notReqXML: string, 
+                readonly description: string, 
+                readonly added: string) {
         this.componentID = componentID;
         this.componentType = componentType;
         this.categoryID = categoryID;
@@ -122,13 +120,6 @@ export class Component {
         this.added = added;
     }
 
-    componentID: string;
-    componentType: string;
-    categoryID: string;
-    name: string;
-    notReqXML: string;
-    description: string;
-    added: string;
 }
 
 export class Version {
@@ -319,7 +310,7 @@ export class Version {
         return components;
     }
 
-    constructor(repositoryPath: string) {
+    constructor(private readonly repositoryPath: string) {
 
         this.repositoryPath = repositoryPath;
         // TODO - handle EPs
@@ -379,7 +370,6 @@ export class Version {
         this.loadedEnums = true;
     }
 
-    private readonly repositoryPath: string;
     private readonly versionPath: string;
     private loaded: boolean;
     private loadedEnums: boolean;
