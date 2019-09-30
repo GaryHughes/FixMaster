@@ -191,7 +191,7 @@ export function prettyPrintMessage(context: string, message:Message, repository:
     buffer += "{\n";
 
     description.fields.forEach(field => {
-        buffer += `${field.name}`.padStart(widestFieldName, ' ') + ` (${field.tag})`.padStart(6, ' ');
+        buffer += `${field.name}`.padStart(widestFieldName, ' ') + ` (${field.tag})`.padStart(7, ' ');
         if (nestedFieldIndent) {
             buffer += "".padStart(field.indent * nestedFieldIndent, " ");
         }
