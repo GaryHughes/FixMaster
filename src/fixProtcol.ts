@@ -10,15 +10,13 @@ export const checkSumTag = 10;
 export const msgTypeTag = 35;
 
 export class FieldDescription {
-
-    readonly tag: number;
-    readonly value: string;
-    readonly name: string;
-    readonly valueDescription: string;
-    readonly required: boolean;
-    readonly indent: number;
     
-    constructor(tag: number, value: string, name: string, valueDescription: string, required: boolean, indent: number) {
+    constructor(readonly tag: number, 
+                readonly value: string, 
+                readonly name: string, 
+                readonly valueDescription: string, 
+                readonly required: boolean, 
+                readonly indent: number) {
         this.tag = tag;
         this.value = value;
         this.name = name;
@@ -26,30 +24,29 @@ export class FieldDescription {
         this.required = required;
         this.indent = indent;
     }
+
 }
 
 export class MessageDescription {
     
-    readonly msgType: string;
-    readonly messageName: string;
-    readonly fields: FieldDescription[];
-
-    constructor(msgType: string, messageName: string, fields : FieldDescription[]) {
+    constructor(readonly msgType: string, 
+                readonly messageName: string, 
+                readonly fields : FieldDescription[]) {
         this.msgType = msgType;
         this.messageName = messageName;
         this.fields = fields;
     }
+
 }
 
 export class Field {
 
-    readonly tag: number;
-    readonly value: string;
-    
-    constructor(tag: number, value: string) {
+    constructor(readonly tag: number, 
+                readonly value: string) {
         this.tag = tag;
         this.value = value;
     }
+    
 }
 
 export class Message {
