@@ -4,6 +4,12 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [1.0.1] 2019-09-30
+
+### Fixed
+
+- Fixed a bug in the message detection causing messages with a BeginString of FIXT.1.1 to be ignored.
+
 ## [1.0.0] 2019-09-29
 
 ### Added
