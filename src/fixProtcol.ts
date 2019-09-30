@@ -2,7 +2,7 @@ import * as FIX from './fixRepository';
 import * as xml from './fixRepositoryXml';
 import { deflate } from 'zlib';
 
-export const fixMessagePrefix = "8=FIX.";
+export const fixMessagePrefix = "8=FIX";
 export const fieldDelimiter = '\x01';
 export const fieldValueSeparator = '=';
 export const beginStringTag = 8;
