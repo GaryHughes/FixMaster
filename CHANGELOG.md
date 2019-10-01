@@ -13,7 +13,7 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
   - `DeleteAll` - Delete all administrative messages from the output
   - `IgnoreAll` - Leave all administrative messages in the output but do not pretty print
   - `DeleteHeartbeatsAndTestRequests` - Delete Heartbeats and TestRequests from the output
-  - `IgnoreHeartbeatsAndTestRequests` - Leave all Heartbeat and TestRequest message in the output but do not pretty print
+  - `IgnoreHeartbeatsAndTestRequests` - Leave all Heartbeat and TestRequest messages in the output but do not pretty print
 
 ## [1.0.1] 2019-09-30
 

@@ -87,7 +87,7 @@
 						"Delete all administrative messages from the output",
 						"Leave all administrative messages in the output but do not pretty print",
 						"Delete Heartbeats and TestRequests from the output",
-						"Leave all Heartbeat and TestRequest message in the output but do not pretty print"
+						"Leave all Heartbeat and TestRequest messages in the output but do not pretty print"
 					]
 				}
 			}
