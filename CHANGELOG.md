@@ -4,6 +4,17 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [UNRELEASED]
+
+### Added
+
+- `administrativeMessageBehaviour` setting to control the inclusion and pretty printing of administrative messages.
+  - `IncludeAll` - Pretty print all administrative messages
+  - `DeleteAll` - Delete all administrative messages from the output
+  - `IgnoreAll` - Leave all administrative messages in the output but do not pretty print
+  - `DeleteHeartbeatsAndTestRequests` - Delete Heartbeats and TestRequests from the output
+  - `IgnoreHeartbeatsAndTestRequests` - Leave all Heartbeat and TestRequest message in the output but do not pretty print
+
 ## [1.0.1] 2019-09-30
 
 ### Fixed
