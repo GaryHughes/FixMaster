@@ -9,6 +9,14 @@ export const beginStringTag = 8;
 export const checkSumTag = 10;
 export const msgTypeTag = 35;
 
+export const msgTypeHeartbeat = "0";
+export const msgTypeTestRequest = "1";
+export const msgTypeResendRequest = "2";
+export const msgTypeReject = "3";
+export const msgTypeSequenceReset = "4";
+export const msgTypeLogout = "5";
+export const msgTypeLogon = "A";
+
 export class FieldDescription {
     
     constructor(readonly tag: number, 
@@ -51,9 +59,8 @@ export class Field {
 
 export class Message {
 
-    fields: Field[];
-
-    constructor(fields : Field[]) {
+    constructor(readonly msgType: string |  null, readonly fields : Field[]) {
+        this.msgType = msgType;
         this.fields = fields;
     }
 
@@ -103,6 +110,24 @@ export class Message {
 
         return new MessageDescription("", "", fieldDescriptions);
     }
+
+
+    isAdministrative() {
+        switch (this.msgType) {
+            case msgTypeHeartbeat:
+            case msgTypeTestRequest:
+            case msgTypeResendRequest:
+            case msgTypeReject:
+            case msgTypeSequenceReset:
+            case msgTypeLogout:
+            case msgTypeLogon:
+                return true;
+
+        }
+        return false;
+    }
+
+    
 }
 
 export function parseMessage(text: string, separator: string | undefined) {
@@ -111,6 +136,7 @@ export function parseMessage(text: string, separator: string | undefined) {
         separator = fieldDelimiter;
     }
 
+    var msgType = null;
     var fields: Field[] = [];
     let length = text.length;
 
@@ -147,6 +173,10 @@ export function parseMessage(text: string, separator: string | undefined) {
 
         fields.push(field);
 
+        if (field.tag === msgTypeTag) {
+            msgType = field.value;
+        }
+
         if (field.tag === checkSumTag) {
             break;
         }
@@ -159,7 +189,7 @@ export function parseMessage(text: string, separator: string | undefined) {
         return null;
     }
 
-    var message = new Message(fields);
+    var message = new Message(msgType, fields);
 
     return message;
 }

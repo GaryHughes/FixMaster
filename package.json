@@ -71,6 +71,24 @@
 					"default" : 0,
 					"minLength" : 0,
 					"description": "The number of spaces to indent fields belonging to nested groups"
+				},
+				"fixmaster.administrativeMessageBehaviour": {
+					"type": "string",
+					"default": "DeleteHeartbeatsAndTestRequests",
+					"enum": [
+						"IncludeAll",
+						"DeleteAll",
+						"IgnoreAll",
+						"DeleteHeartbeatsAndTestRequests",
+						"IgnoreHeartbeatsAndTestRequests"
+					],
+					"enumDescriptions": [
+						"Pretty print all administrative messages",
+						"Delete all administrative messages from the output",
+						"Leave all administrative messages in the output but do not pretty print",
+						"Delete Heartbeats and TestRequests from the output",
+						"Leave all Heartbeat and TestRequest message in the output but do not pretty print"
+					]
 				}
 			}
 		}

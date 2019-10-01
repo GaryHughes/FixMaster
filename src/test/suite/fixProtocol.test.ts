@@ -55,4 +55,24 @@ suite('FIX Protocol Test Suite', () => {
         assert.equal(8, message.fields[0].tag);
         assert.equal("INITIATOR", message.fields[4].value);
     });
+
+    test('isAdministrative is true for Logon', () => {
+        let text = "8=FIX.4.4\u00019=72\u000135=A\u000149=ACCEPTOR\u000156=INITIATOR\u000134=1\u000152=20190816-10:34:27.742\u000198=0\u0001108=30\u000110=012\u0001";
+        let message = parseMessage(text, undefined);
+        if (message === null) {
+            assert.fail("message failed to parsse");
+            return;
+        }
+        assert.equal(true, message.isAdministrative());
+    });
+
+    test('isAdministrative is false for NewOrderSingle', () => {
+        let text = "8=FIX.4.49=14035=D49=INITIATOR56=ACCEPTOR34=228252=20190929-04:51:00.84911=5070=49100=AUTO55=WTF54=160=20190929-04:35:33.56238=1000040=159=110=129";
+        let message = parseMessage(text, undefined);
+        if (message === null) {
+            assert.fail("message failed to parsse");
+            return;
+        }
+        assert.equal(false, message.isAdministrative());
+    });
 });

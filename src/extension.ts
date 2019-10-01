@@ -2,7 +2,15 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as FIX from './fixRepository';
-import { fixMessagePrefix, parseMessage, prettyPrintMessage } from './fixProtcol';
+import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest } from './fixProtcol';
+
+enum AdministrativeMessageBehaviour {
+	IncludeAll,
+	DeleteAll,
+	IgnoreAll,
+	DeleteHeartbeatsAndTestRequests,
+	IgnoreHeartbeatsAndTestRequests
+}
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -41,6 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const prefixPattern = configuration.get("fixmaster.prefixPattern") as string;
 		const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
 		const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
+		const administrativeMessageBehaviour = AdministrativeMessageBehaviour[configuration.get("fixmaster.administrativeMessageBehaviour") as keyof typeof AdministrativeMessageBehaviour];
 
 		repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
 
@@ -72,14 +81,45 @@ export function activate(context: vscode.ExtensionContext) {
 				continue;
 			}
 
-			var pretty = prettyPrintMessage(messageContext, message, repository, nestedFieldIndent);
+			var prettyPrint = true;
+			var include = true;
 
-			if (!lastLineWasAMessage) {
-				pretty = "\n" + pretty;	
-				lastLineWasAMessage = true;
+			if (message.isAdministrative()) {
+				if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.DeleteAll) {
+					include = false;
+				}
+				else if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.DeleteHeartbeatsAndTestRequests &&
+						 (message.msgType === msgTypeHeartbeat || message.msgType === msgTypeTestRequest)) {
+					include = false;
+				}
+				else if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.IgnoreAll) {
+					prettyPrint = false;
+					continue;
+				}
+				else if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.IgnoreHeartbeatsAndTestRequests &&
+						 (message.msgType === msgTypeHeartbeat || message.msgType === msgTypeTestRequest)) {
+					prettyPrint = false;
+					continue;
+				}
 			}
-	
-			edit.replace(document.uri, line.range, pretty);
+
+			if (include) {
+				if (prettyPrint) {
+					var pretty = prettyPrintMessage(messageContext, message, repository, nestedFieldIndent);
+					if (!lastLineWasAMessage) {
+						pretty = "\n" + pretty;	
+						lastLineWasAMessage = true;
+					}
+					edit.replace(document.uri, line.range, pretty);
+				}
+				else {
+					// Leave the message in the output as is.
+					lastLineWasAMessage = false;
+				}
+			}
+			else {
+				edit.delete(document.uri, line.range.with(undefined, document.lineAt(index + 1).range.start));
+			}
 		}
 
 		vscode.workspace.applyEdit(edit);
