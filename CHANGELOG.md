@@ -15,6 +15,8 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
   - `DeleteHeartbeatsAndTestRequests` - Delete Heartbeats and TestRequests from the output
   - `IgnoreHeartbeatsAndTestRequests` - Leave all Heartbeat and TestRequest messages in the output but do not pretty print
 - A progress window is now displayed while the format command runs.
+- Extension Packs will now be read from the repository if present.
+  - The highest number EPnnn directory will be used for any FIX version instead of the Base.
 
 ## [1.0.1] 2019-09-30
 

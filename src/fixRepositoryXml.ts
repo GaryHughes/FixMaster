@@ -4,6 +4,7 @@ import * as path from 'path';
 import { version } from 'vscode';
 import { MessageDescription } from './fixProtcol';
 import { runInThisContext } from 'vm';
+import { O_DIRECTORY } from 'constants';
 
 export class Enum {
     
@@ -233,22 +234,28 @@ export class Version {
 
         parser.parseString(buffer, function (err:any, result:any) {
             result.Fields.Field.forEach((element:any) => {
-                    let tag = element.Tag[0];
-                    while (index < tag - 1) {
-                        fields.push(new Field(0, "", "", "", "", ""));
-                        ++index;
-                    }
-                    ++index;
-                    fields.push(
-                        new Field(
-                            Number(element.Tag[0]), 
-                            element.Name[0],
-                            element.Type[0], 
-                            element.NotReqXML[0], 
-                            element.Description[0], 
-                            element.Added ? element.Added[0] : "" 
-                        )
+                    let tag = Number(element.Tag[0]);
+                    let field = new Field(
+                        tag, 
+                        element.Name[0],
+                        element.Type[0], 
+                        element.NotReqXML[0], 
+                        element.Description[0], 
+                        element.Added ? element.Added[0] : "" 
                     );
+                    if (tag < index) {
+                        // field elements are not always sorted and we may have generated nulls for a gap
+                        // so go back and fill in.
+                        fields[tag] = field;    
+                    }
+                    else {
+                        while (index < tag - 1) {
+                            fields.push(new Field(0, "", "", "", "", ""));
+                            ++index;
+                        }
+                        ++index;
+                        fields.push(field);
+                    }
                 }
             );
         });
@@ -310,12 +317,22 @@ export class Version {
         return components;
     }
 
-    constructor(private readonly repositoryPath: string) {
+    constructor(private readonly versionPath: string) {
 
-        this.repositoryPath = repositoryPath;
-        // TODO - handle EPs
-        this.versionPath = path.join(this.repositoryPath, "Base");
-        this.beginString = path.basename(repositoryPath);
+        this.versionPath = versionPath;
+       
+        var baseOrEpDirectory = "Base";
+
+        let directories = fs.readdirSync(versionPath, { withFileTypes: true })
+                            .filter(entry => entry.isDirectory() && entry.name.startsWith("EP"))
+                            .sort(entry => Number(entry.name.substr(2)));
+
+        if (directories.length > 0) {
+            baseOrEpDirectory = directories[0].name;
+        }
+
+        this.versionPath = path.join(this.versionPath, baseOrEpDirectory);
+        this.beginString = path.basename(versionPath);
         this.loaded = false;
         this.loadedEnums = false;
     }
@@ -370,7 +387,6 @@ export class Version {
         this.loadedEnums = true;
     }
 
-    private readonly versionPath: string;
     private loaded: boolean;
     private loadedEnums: boolean;
 

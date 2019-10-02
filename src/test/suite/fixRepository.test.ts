@@ -69,4 +69,15 @@ suite('FIX Repository Test Suite', () => {
         assert.equal("Accepted for bidding", repository.descriptionOfValue(39, "D", FIX_4_2));
     });
 
+    test('Field name lookup from extension pack', () => {
+        const FIX_5_0SP2 = repository.versions.find(version => version.beginString === "FIX.5.0SP2");
+        if (!FIX_5_0SP2) {
+            assert.fail("can't find FIX version FIX.5.0SP2");
+            return;
+        }
+        repository.nameLookup = NameLookup.Promiscuous;
+        const message = repository.definitionOfMessage("R", FIX_5_0SP2);
+        assert.equal("SideTradeReportingIndicator", repository.definitionOfField(2671, FIX_5_0SP2, message).field.name);
+    });
+
 });
