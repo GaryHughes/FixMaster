@@ -8,7 +8,7 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
-- `administrativeMessageBehaviour` setting to control the inclusion and pretty printing of administrative messages.
+- A new setting `administrativeMessageBehaviour` to control the inclusion and pretty printing of administrative messages.
   - `IncludeAll` - Pretty print all administrative messages
   - `DeleteAll` - Delete all administrative messages from the output
   - `IgnoreAll` - Leave all administrative messages in the output but do not pretty print
@@ -17,11 +17,11 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 - A progress window is now displayed while the format command runs.
 - Extension Packs will now be read from the repository if present.
   - The highest number EPnnn directory will be used for any FIX version instead of the Base.
-- Added a command to format messages as CSV.
+- A new CSV formatting command.
   - The existing command will now appear in the command palette as `FIX Master - Pretty Print`
   - The new command will appear in the command palette as `FIX Master - CSV Format`
-  - The CSV format includes the data type for each field.
-- Added the following new commands, these are available in the command palette and the editor context menu when there is selected text.
+  - The CSV format includes the FIX data type for each field.
+- New selection formatting commands, these are available in the command palette and the editor context menu when there is selected text.
   - `FIX Master - Pretty Print Selection`
   - `FIX Master - CSV Format Selection`
 
