@@ -1,6 +1,6 @@
 import * as FIX from './fixRepository';
 import * as xml from './fixRepositoryXml';
-import { deflate } from 'zlib';
+import stringify = require('csv-stringify/lib/sync.js');
 
 export const fixMessagePrefix = "8=FIX";
 export const fieldDelimiter = '\x01';
@@ -24,13 +24,15 @@ export class FieldDescription {
                 readonly name: string, 
                 readonly valueDescription: string, 
                 readonly required: boolean, 
-                readonly indent: number) {
+                readonly indent: number,
+                readonly type: string) {
         this.tag = tag;
         this.value = value;
         this.name = name;
         this.valueDescription = valueDescription;
         this.required = required;
         this.indent = indent;
+        this.type = type;
     }
 
 }
@@ -87,7 +89,8 @@ export class Message {
                                             definition ? definition.field.name : "", 
                                             valueDescription, 
                                             definition.required,
-                                            definition.indent);          
+                                            definition.indent,
+                                            definition.field.type);          
             });
             return new MessageDescription(msgType, 
                                           messageDefinition ? messageDefinition.name : "", 
@@ -102,10 +105,11 @@ export class Message {
             const valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
             return new FieldDescription(field.tag, 
                                         field.value, 
-                                        definition ? definition.field.name : "", 
+                                        definition.field.name, 
                                         valueDescription, 
                                         definition.required,
-                                        definition.indent);
+                                        definition.indent,
+                                        definition.field.type);
         });
 
         return new MessageDescription("", "", fieldDescriptions);
@@ -232,5 +236,36 @@ export function prettyPrintMessage(context: string, message:Message, repository:
     
     buffer += "}\n";
     
+    return buffer;
+}
+
+export function csvPrintMessage(context: string, message:Message, repository:FIX.Repository, _: number) {
+
+    var buffer: string = "";
+    const description = message.describe(repository);
+    
+    if (context && context.length > 0) {
+        buffer += context + " ";
+    }
+
+    if (description.messageName && description.messageName.length > 0) {
+        buffer += description.messageName + "\n";
+    }  
+
+    buffer += "{\n";
+
+    description.fields.forEach(field => {
+        const record = {
+            tag: field.tag,
+            name: field.name,
+            value: field.value,
+            description: field.valueDescription,
+            type: field.type
+        };
+        buffer += "  " + stringify([record]);
+    });
+
+    buffer += "}\n";
+
     return buffer;
 }

@@ -24,14 +24,19 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.format"
+		"onCommand:extension.format-pretty",
+		"onCommand:extension.format-csv"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.format",
-				"title": "FIX protocol format"
+				"command": "extension.format-pretty",
+				"title": "FIX Master - Pretty Print"
+			},
+			{
+				"command": "extension.format-csv",
+				"title": "FIX Master - CSV format"
 			}
 		],
 		"configuration": {
@@ -68,8 +73,8 @@
 				},
 				"fixmaster.nestedFieldIndent": {
 					"type": "number",
-					"default" : 0,
-					"minLength" : 0,
+					"default": 0,
+					"minLength": 0,
 					"description": "The number of spaces to indent fields belonging to nested groups"
 				},
 				"fixmaster.administrativeMessageBehaviour": {
@@ -113,6 +118,7 @@
 	},
 	"dependencies": {
 		"@types/xml2js": "^0.4.5",
+		"csv-stringify": "^5.3.3",
 		"xml2js": "^0.4.22"
 	}
 }

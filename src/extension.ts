@@ -2,7 +2,7 @@ import { window, ProgressLocation, ExtensionContext, commands, workspace, Worksp
 import * as path from 'path';
 import * as fs from 'fs';
 import * as FIX from './fixRepository';
-import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest } from './fixProtcol';
+import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
 import { resolve } from 'dns';
 
 enum AdministrativeMessageBehaviour {
@@ -15,7 +15,7 @@ enum AdministrativeMessageBehaviour {
 
 export function activate(context: ExtensionContext) {
 
-	commands.registerCommand('extension.format', () => {
+	let format = (printer: (context: string, message:Message, repository:FIX.Repository, nestedFieldIndent: number) => string) => {
 
 		const {activeTextEditor} = window;
 			
@@ -117,7 +117,7 @@ export function activate(context: ExtensionContext) {
 
 					if (include) {
 						if (prettyPrint) {
-							var pretty = prettyPrintMessage(messageContext, message, repository, nestedFieldIndent);
+							var pretty = printer(messageContext, message, repository, nestedFieldIndent);
 							if (!lastLineWasAMessage) {
 								pretty = "\n" + pretty;	
 								lastLineWasAMessage = true;
@@ -139,5 +139,13 @@ export function activate(context: ExtensionContext) {
 				resolve();
 			});
 		});
+	};
+
+	commands.registerCommand('extension.format-pretty', () => {
+		format(prettyPrintMessage);
+	});
+
+	commands.registerCommand('extension.format-csv', () => {
+		format(csvPrintMessage);
 	});
 }

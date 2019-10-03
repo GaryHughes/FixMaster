@@ -17,6 +17,10 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 - A progress window is now displayed while the format command runs.
 - Extension Packs will now be read from the repository if present.
   - The highest number EPnnn directory will be used for any FIX version instead of the Base.
+- Added a command to format messages as CSV.
+  - The existing command will now appear in the command palette as `FIX Master - Pretty Print`
+  - The new command will appear in the command palette as `FIX Master - CSV Format`
+  - The CSV format includes the data type for each field.
 
 ## [1.0.1] 2019-09-30
 
