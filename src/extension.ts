@@ -112,7 +112,7 @@ export function activate(context: ExtensionContext) {
 				if (scope === CommandScope.Selection) {
 					if (activeTextEditor.selection) {
 						index = activeTextEditor.selection.start.line;
-						maxIndex = activeTextEditor.selection.end.line;
+						maxIndex = activeTextEditor.selection.end.line + 1;
 					}
 				}
 
