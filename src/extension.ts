@@ -3,8 +3,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as FIX from './fixRepository';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
-import { resolve } from 'dns';
-import { downloadAndUnzipVSCode } from 'vscode-test';
 
 enum AdministrativeMessageBehaviour {
 	IncludeAll,
@@ -21,6 +19,25 @@ enum CommandScope {
 
 export function activate(context: ExtensionContext) {
 
+	const configuration = workspace.getConfiguration();
+
+	var repositoryPath = configuration.get('fixmaster.repositoryPath') as string;
+	
+	if (!repositoryPath) {
+		repositoryPath = "./repository";
+	}
+	
+	if (!path.isAbsolute(repositoryPath)) {
+		repositoryPath = path.join(context.extensionPath, repositoryPath);
+	}
+	
+	if (!fs.existsSync(repositoryPath)) {
+		window.showErrorMessage("The repository path '" + repositoryPath + "' cannot be found.");
+		return;
+	}
+
+	const repository = new FIX.Repository(repositoryPath);
+
 	let format = (printer: (context: string, message:Message, repository:FIX.Repository, nestedFieldIndent: number) => string, scope: CommandScope) => {
 
 		const {activeTextEditor} = window;
@@ -30,29 +47,11 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
-		const configuration = workspace.getConfiguration();
-
-		var repositoryPath = configuration.get('fixmaster.repositoryPath') as string;
-		
-		if (!repositoryPath) {
-			repositoryPath = "./repository";
-		}
-		
-		if (!path.isAbsolute(repositoryPath)) {
-			repositoryPath = path.join(context.extensionPath, repositoryPath);
-		}
-		
-		if (!fs.existsSync(repositoryPath)) {
-			window.showErrorMessage("The repository path '" + repositoryPath + "' cannot be found.");
-			return;
-		}
-
-		const repository = new FIX.Repository(repositoryPath);
-
 		const {document} = activeTextEditor;
 
 		const edit = new WorkspaceEdit();
 
+		const configuration = workspace.getConfiguration();
 		const prefixPattern = configuration.get("fixmaster.prefixPattern") as string;
 		const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
 		const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
