@@ -1,9 +1,10 @@
-import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit } from 'vscode';
+import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, Command } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as FIX from './fixRepository';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
 import { resolve } from 'dns';
+import { downloadAndUnzipVSCode } from 'vscode-test';
 
 enum AdministrativeMessageBehaviour {
 	IncludeAll,
@@ -13,9 +14,14 @@ enum AdministrativeMessageBehaviour {
 	IgnoreHeartbeatsAndTestRequests
 }
 
+enum CommandScope {
+	Document,
+	Selection
+}
+
 export function activate(context: ExtensionContext) {
 
-	let format = (printer: (context: string, message:Message, repository:FIX.Repository, nestedFieldIndent: number) => string) => {
+	let format = (printer: (context: string, message:Message, repository:FIX.Repository, nestedFieldIndent: number) => string, scope: CommandScope) => {
 
 		const {activeTextEditor} = window;
 			
@@ -67,7 +73,17 @@ export function activate(context: ExtensionContext) {
 
 				var lastLineWasAMessage = false;
 
-				for (var index = 0; index < document.lineCount; ++index) {
+				var index = 0;
+				var maxIndex = document.lineCount;
+				
+				if (scope === CommandScope.Selection) {
+					if (activeTextEditor.selection) {
+						index = activeTextEditor.selection.start.line;
+						maxIndex = activeTextEditor.selection.end.line;
+					}
+				}
+
+				for (; index < maxIndex; ++index) {
 
 					const line = document.lineAt(index);
 					
@@ -142,10 +158,18 @@ export function activate(context: ExtensionContext) {
 	};
 
 	commands.registerCommand('extension.format-pretty', () => {
-		format(prettyPrintMessage);
+		format(prettyPrintMessage, CommandScope.Document);
 	});
 
 	commands.registerCommand('extension.format-csv', () => {
-		format(csvPrintMessage);
+		format(csvPrintMessage, CommandScope.Document);
+	});
+
+	commands.registerCommand('extension.format-pretty-selection', () => {
+		format(prettyPrintMessage, CommandScope.Selection);
+	});
+
+	commands.registerCommand('extension.format-csv-selection', () => {
+		format(csvPrintMessage, CommandScope.Selection);
 	});
 }

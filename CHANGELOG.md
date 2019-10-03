@@ -21,6 +21,9 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
   - The existing command will now appear in the command palette as `FIX Master - Pretty Print`
   - The new command will appear in the command palette as `FIX Master - CSV Format`
   - The CSV format includes the data type for each field.
+- Added the following new commands, these are available in the command palette and the editor context menu when there is selected text.
+  - `FIX Master - Pretty Print Selection`
+  - `FIX Master - CSV Format Selection`
 
 ## [1.0.1] 2019-09-30
 

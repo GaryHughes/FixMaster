@@ -36,9 +36,48 @@
 			},
 			{
 				"command": "extension.format-csv",
-				"title": "FIX Master - CSV format"
+				"title": "FIX Master - CSV Format"
+			},
+			{
+				"command": "extension.format-pretty-selection",
+				"title": "FIX Master - Pretty Print Selection"
+			},
+			{
+				"command": "extension.format-csv-selection",
+				"title": "FIX Master - CSV Format Selection"
 			}
 		],
+		"menus": {
+			"commandPalette": [
+				{
+				  "command": "extension.format-pretty"
+				},
+				{
+				  "command": "extension.format-csv"
+				},
+				{
+				  "when": "editorHasSelection",
+				  "command": "extension.format-pretty-selection"
+
+				},
+				{
+				  "when": "editorHasSelection",
+				  "command": "extension.format-csv-selection"
+				}
+  			],
+			"editor/context": [
+			  {
+				"when": "editorHasSelection",
+				"command": "extension.format-pretty-selection",
+				"group": "1_modification"
+			  },
+			  {
+				"when": "editorHasSelection",
+				"command": "extension.format-csv-selection",
+				"group": "1_modification"
+			  }
+			]
+		},
 		"configuration": {
 			"title": "FIX Master",
 			"properties": {
