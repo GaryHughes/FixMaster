@@ -9,15 +9,20 @@ export enum NameLookup {
 
 export class Repository {
 
-    constructor(root: string) {
+    constructor(root: string, preload: boolean = false) {
 
         let directories = fs.readdirSync(root, { withFileTypes: true })
                             .filter(entry => entry.isDirectory() && entry.name.startsWith("FIX."))
                             .map(entry => entry.name);
 
-        // TODO - make this lazy, we will generally only need one version, maybe two if in promiscuous mode.
         this.versions = directories.map(entry => new xml.Version(path.join(root, entry)));   
         this.latestVersion = this.versions[this.versions.length - 1];
+
+        if (preload) {
+            for (let version of this.versions) {
+                const _ = version.fields;
+            }
+        }
     }   
 
     readonly versions: xml.Version[];

@@ -6,13 +6,9 @@ import { Repository, NameLookup } from '../../fixRepository';
 
 suite('FIX Repository Test Suite', () => {
 
-    var repository = new Repository(path.join(__dirname, "../../../repository"));
-
-    before(() => {
-        vscode.window.showInformationMessage('Start all tests.');
-    });
-
-	test('Strict field name lookup', () => {
+    var repository = new Repository(path.join(__dirname, "../../../repository"), true);
+   
+  	test('Strict field name lookup', () => {
         const FIX_4_0 = repository.versions[0];
         const FIX_4_1 = repository.versions[1];
         const quoteRequest = repository.definitionOfMessage("R", FIX_4_0);

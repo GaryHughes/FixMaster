@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as FIX from './fixRepository';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
+import { downloadAndUnzipVSCode } from 'vscode-test';
 
 enum AdministrativeMessageBehaviour {
 	IncludeAll,
@@ -19,26 +20,52 @@ enum CommandScope {
 
 export function activate(context: ExtensionContext) {
 
-	const configuration = workspace.getConfiguration();
+	var repository: FIX.Repository | null = null;
 
-	var repositoryPath = configuration.get('fixmaster.repositoryPath') as string;
-	
-	if (!repositoryPath) {
-		repositoryPath = "./repository";
-	}
-	
-	if (!path.isAbsolute(repositoryPath)) {
-		repositoryPath = path.join(context.extensionPath, repositoryPath);
-	}
-	
-	if (!fs.existsSync(repositoryPath)) {
-		window.showErrorMessage("The repository path '" + repositoryPath + "' cannot be found.");
-		return;
-	}
+	const loadRepository = () => {
+		window.withProgress({
+			location: ProgressLocation.Notification,
+			title: "Loading the FIX repository...",
+			cancellable: false
+		}, (progress, token) => {
+			return new Promise(resolve => {
+				const configuration = workspace.getConfiguration();
+				var repositoryPath = configuration.get('fixmaster.repositoryPath') as string;
+				
+				if (!repositoryPath) {
+					repositoryPath = "./repository";
+				}
+				
+				if (!path.isAbsolute(repositoryPath)) {
+					repositoryPath = path.join(context.extensionPath, repositoryPath);
+				}
+				
+				if (!fs.existsSync(repositoryPath)) {
+					window.showErrorMessage("The repository path '" + repositoryPath + "' cannot be found.");
+				}
+				else {
+					repository = new FIX.Repository(repositoryPath, true);
+				}
 
-	const repository = new FIX.Repository(repositoryPath);
+				resolve();
+			});
+		});
+	};
+
+	loadRepository();
+
+	workspace.onDidChangeConfiguration(evt => {
+		if (evt.affectsConfiguration('fixmaster.repositoryPath')) {
+			loadRepository();
+		}
+	});
 
 	let format = (printer: (context: string, message:Message, repository:FIX.Repository, nestedFieldIndent: number) => string, scope: CommandScope) => {
+
+		if (!repository) {
+			window.showErrorMessage('The repository has not been loaded - check the repositoryPath setting.');
+			return;
+		}
 
 		const {activeTextEditor} = window;
 			
@@ -69,6 +96,13 @@ export function activate(context: ExtensionContext) {
 		}, (progress, token) => {
 
 			return new Promise(resolve => {
+
+				if (!repository) {
+					// We should never get here but but the compiler complains repository migth be undefined
+					// in the call to printer below.
+					resolve();
+					return;
+				}
 
 				var lastLineWasAMessage = false;
 
