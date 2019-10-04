@@ -118,6 +118,7 @@
 				},
 				"fixmaster.administrativeMessageBehaviour": {
 					"type": "string",
+					"description": "Control the inclusion and pretty printing of administrative messages",
 					"default": "DeleteHeartbeatsAndTestRequests",
 					"enum": [
 						"IncludeAll",
