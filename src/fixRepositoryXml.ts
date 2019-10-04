@@ -1,10 +1,6 @@
 import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 import * as path from 'path';
-import { version } from 'vscode';
-import { MessageDescription } from './fixProtcol';
-import { runInThisContext } from 'vm';
-import { O_DIRECTORY } from 'constants';
 
 export class Enum {
     

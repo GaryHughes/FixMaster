@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as FIX from './fixRepository';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
-import { downloadAndUnzipVSCode } from 'vscode-test';
 
 enum AdministrativeMessageBehaviour {
 	IncludeAll,

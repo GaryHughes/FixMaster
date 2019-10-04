@@ -1,7 +1,5 @@
 import * as assert from 'assert';
-import { before } from 'mocha';
 import * as path from 'path';
-import * as vscode from 'vscode';
 import { Repository, NameLookup } from '../../fixRepository';
 
 suite('FIX Repository Test Suite', () => {
