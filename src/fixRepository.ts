@@ -1,11 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as xml from './fixRepositoryXml';
-
-export enum NameLookup {
-    Strict,
-    Promiscuous
-}
+import { NameLookup } from './options';
 
 export class Repository {
 

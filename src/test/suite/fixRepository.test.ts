@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import * as path from 'path';
-import { Repository, NameLookup } from '../../fixRepository';
+import { Repository } from '../../fixRepository';
+import { NameLookup } from '../../options';
 
 suite('FIX Repository Test Suite', () => {
 

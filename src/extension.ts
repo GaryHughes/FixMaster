@@ -3,19 +3,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as FIX from './fixRepository';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
+import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
 
-enum AdministrativeMessageBehaviour {
-	IncludeAll,
-	DeleteAll,
-	IgnoreAll,
-	DeleteHeartbeatsAndTestRequests,
-	IgnoreHeartbeatsAndTestRequests
-}
-
-enum CommandScope {
-	Document,
-	Selection
-}
 
 export function activate(context: ExtensionContext) {
 
@@ -83,7 +72,7 @@ export function activate(context: ExtensionContext) {
 		const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
 		const administrativeMessageBehaviour = AdministrativeMessageBehaviour[configuration.get("fixmaster.administrativeMessageBehaviour") as keyof typeof AdministrativeMessageBehaviour];
 
-		repository.nameLookup = FIX.NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof FIX.NameLookup];
+		repository.nameLookup = NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof NameLookup];
 
 		window.withProgress({
 			location: ProgressLocation.Notification,

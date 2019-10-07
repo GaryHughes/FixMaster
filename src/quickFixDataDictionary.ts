@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as xml2js from 'xml2js';
+import { NameLookup } from './options';
 
 /*
 
@@ -85,8 +86,40 @@ export class DataDictionary {
         this.major = major;
         this.minor = minor;
         this.servicePack = servicePack;
+        this.beginString = `${this.type}.${this.major}.${this.minor}SP${this.servicePack}`;
         this.messages = messages;
         this.fields = fields;
+    }
+
+    readonly beginString: string;
+    nameLookup: NameLookup = NameLookup.Promiscuous;
+
+    definitionOfField(tag: number, beginString: string, message: Message | undefined) {
+        
+    }
+
+    definitionOfMessage(msgType: string, beginString: string) {
+    
+    }
+
+    descriptionOfValue(tag: number, value: string, beginString: string) {
+        
+        if (beginString !== this.beginString && this.nameLookup !== NameLookup.Promiscuous) {
+            return "";
+        }
+
+        if (tag >= this.fields.length) {
+            return "";
+        }
+
+        const field = this.fields[tag];
+        const definition = field.values.find(v => v.value === value);
+
+        if (definition) {
+            return definition.description;
+        }
+
+        return "";
     }
 
     static async parse(filename: string) {
@@ -100,6 +133,10 @@ export class DataDictionary {
         let fields: Field[] = [];
         let messages: Message[] = [];
        
+        // Field tags are 1 based and there are gaps in the sequence, we want to be able to
+        // do constant time lookup using the tag value so insert dummies where required.
+        var index: number = -1;
+
         json.fix.fields[0].field.forEach((element: any) => {
             const values: FieldValue[] = [];
             if (element.value) {
@@ -110,14 +147,25 @@ export class DataDictionary {
                     ));
                 });
             }
-            fields.push(
-                new Field(
-                    Number(element.number),
-                    element.name,
-                    element.type,
-                    values
-                )
+            const field = new Field(
+                Number(element.$.number),
+                element.$.name,
+                element.$.type,
+                values
             );
+            if (field.number < index) {
+                // field elements are not always sorted and we may have generated nulls for a gap
+                // so go back and fill in.
+                fields[field.number] = field;    
+            }
+            else {
+                while (index < field.number - 1) {
+                    fields.push(new Field(0, "", "", []));
+                    ++index;
+                }
+                ++index;
+                fields.push(field);
+            }
         });
     
         json.fix.messages[0].message.forEach((element:any) => {
