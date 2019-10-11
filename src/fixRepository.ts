@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as xml from './fixRepositoryXml';
+import { Field, MessageField, Message } from './definitions';
 import { NameLookup } from './options';
 
 export class Repository {
@@ -25,7 +26,7 @@ export class Repository {
     readonly latestVersion: xml.Version;
     nameLookup: NameLookup = NameLookup.Promiscuous;
 
-    definitionOfField(tag: number, version: xml.Version | undefined, message: xml.Message | undefined) {
+    definitionOfField(tag: number, version: xml.Version | undefined, message: Message | undefined) {
 
         if (message) {
             const field = message.fields.find(f => f.field.tag === tag);
@@ -42,7 +43,7 @@ export class Repository {
                 // field for this version.
                 const field = version.fields[tag];
                 if (field) {
-                    return new xml.MessageField(field, false, "", 0);
+                    return new MessageField(field, false, "", 0);
                 }
             }
 
@@ -51,14 +52,14 @@ export class Repository {
             if (tag < this.latestVersion.fields.length) {
                 const field = this.latestVersion.fields[tag];
                 if (field) {
-                    return new xml.MessageField(field, false, "", 0);
+                    return new MessageField(field, false, "", 0);
                 }
             }
         }
 
         // Always return a valid object to simplify calling code.
-        const field = new xml.Field(tag, "", "", "", "", "");
-        return new xml.MessageField(field, false, "", 0);
+        const field = new Field(tag, "", "", "", "", "");
+        return new MessageField(field, false, "", 0);
     }
    
     definitionOfMessage(msgType: string, version: xml.Version | undefined) {
@@ -75,8 +76,8 @@ export class Repository {
         }
 
         // Always return a valid object to simplify calling code.
-        const fields: xml.MessageField[] = [];
-        return new xml.Message("", msgType, "", "", "", "", "", "", fields);
+        const fields: MessageField[] = [];
+        return new Message("", msgType, "", "", "", "", "", "", fields);
     }
 
     descriptionOfValue(tag: number, value:string, version: xml.Version | undefined) {

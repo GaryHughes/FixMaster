@@ -2,6 +2,7 @@ import { window, ProgressLocation, ExtensionContext, commands, workspace, Worksp
 import * as path from 'path';
 import * as fs from 'fs';
 import * as FIX from './fixRepository';
+import * as QuickFix from './quickFixDataDictionary';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
 import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
 
@@ -9,6 +10,7 @@ import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './opti
 export function activate(context: ExtensionContext) {
 
 	var repository: FIX.Repository | null = null;
+	var dataDictionary: QuickFix.DataDictionary | null = null;
 
 	const loadRepository = () => {
 		window.withProgress({
@@ -40,12 +42,44 @@ export function activate(context: ExtensionContext) {
 		});
 	};
 
+	const loadDataDictionary = () => {
+		window.withProgress({
+			location: ProgressLocation.Notification,
+			title: "Loading the QuickFix data dictionary...",
+			cancellable: false
+		}, (progress, token) => {
+			return new Promise(async resolve => {
+				dataDictionary = null;
+				const configuration = workspace.getConfiguration();
+				var path = configuration.get('fixmaster.quickFixDataDictionaryPath') as string;
+				
+				if (!path) {
+					return;
+				}
+				
+				if (!fs.existsSync(path)) {
+					window.showErrorMessage("The QuickFix data dictionary path '" + path + "' cannot be found.");
+				}
+				else {
+					dataDictionary = await QuickFix.DataDictionary.parse(path);
+				}
+
+				resolve();
+			});
+		});	
+	};
+
 	loadRepository();
+	loadDataDictionary();
 
 	workspace.onDidChangeConfiguration(evt => {
 		if (evt.affectsConfiguration('fixmaster.repositoryPath')) {
 			loadRepository();
 		}
+		else if (evt.affectsConfiguration('fixmaster.quickFixDataDictionaryPath')) {
+			loadDataDictionary();
+		}
+	
 	});
 
 	let format = (printer: (context: string, message:Message, repository:FIX.Repository, nestedFieldIndent: number) => string, scope: CommandScope) => {
@@ -192,5 +226,15 @@ export function activate(context: ExtensionContext) {
 
 	commands.registerCommand('extension.format-csv-selection', () => {
 		format(csvPrintMessage, CommandScope.Selection);
+	});
+
+	commands.registerCommand('extension.show-message', async () => {
+
+		const input = await window.showInputBox({ prompt: "Enter a MsgType or Name. e.g. D or NewOrderSingle" });
+
+		if (input) {
+						
+		}
+
 	});
 }

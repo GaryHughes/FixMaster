@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as xml2js from 'xml2js';
-import { NameLookup } from './options';
+import { Enum, Field, MessageField, Message } from './definitions';
 
 /*
 
@@ -43,80 +43,64 @@ import { NameLookup } from './options';
 
 */
 
-export class FieldValue {
-
-    constructor(readonly value: string, readonly description: string) {
-        this.value = value;
-        this.description = description;
-    }
-
-}
-
-export class Field {
-
-    constructor(readonly number: number, 
-                readonly name: string, 
-                readonly type: string, 
-                readonly values: FieldValue[]) {
-        this.number = number;
-        this.name = name;
-        this.type = type;
-        this.values = values;
-    }
-
-}
-
-export class MessageField {
-
-}
-
-export class Message {
-
-}
-
 export class DataDictionary {
 
     constructor(readonly type: string,
                 readonly major: number,
                 readonly minor: number,
                 readonly servicePack: number,
-                readonly messages: Message[],
-                readonly fields: Field[]) {
+                readonly fields: Field[],
+                readonly fieldsByName: Record<string, Field>,
+                enums: Enum[],
+                messages: Message[]) {
         this.type = type;
         this.major = major;
         this.minor = minor;
         this.servicePack = servicePack;
         this.beginString = `${this.type}.${this.major}.${this.minor}SP${this.servicePack}`;
-        this.messages = messages;
         this.fields = fields;
+        this.fieldsByName = fieldsByName;
+        
+        enums.forEach(entry => {
+            if (this.enums[entry.tag]) {
+                this.enums[entry.tag].push(entry);
+            }
+            else {
+                this.enums[entry.tag] = [entry];
+            }
+        });
+
+        messages.forEach(message => this.messages[message.msgType] = message);
     }
 
     readonly beginString: string;
-    nameLookup: NameLookup = NameLookup.Promiscuous;
-
+    readonly enums: Record<number, Enum[]> = {};
+    readonly messages: Record<string, Message> = {};
+   
     definitionOfField(tag: number, beginString: string, message: Message | undefined) {
         
     }
 
-    definitionOfMessage(msgType: string, beginString: string) {
-    
+    definitionOfMessage(msgType: string) {
+        
+        const message = this.messages[msgType];
+        if (message) {
+            return message;
+        }
+
+        // Always return a valid object to simplify calling code.
+        return new Message("", msgType, "", "", "", "", "", "", []);
     }
 
-    descriptionOfValue(tag: number, value: string, beginString: string) {
+    descriptionOfValue(tag: number, value: string) {
         
-        if (beginString !== this.beginString && this.nameLookup !== NameLookup.Promiscuous) {
-            return "";
-        }
+        const enums = this.enums[tag];
 
-        if (tag >= this.fields.length) {
-            return "";
-        }
-
-        const field = this.fields[tag];
-        const definition = field.values.find(v => v.value === value);
-
-        if (definition) {
-            return definition.description;
+        if (enums) {
+            const definition = enums.find(e => e.value === value);
+            if (definition) {
+                return definition.symbolicName;
+            }
         }
 
         return "";
@@ -131,6 +115,8 @@ export class DataDictionary {
         const minor = Number(json.fix.$.minor);
         const servicePack = Number(json.fix.$.servicepack);
         let fields: Field[] = [];
+        let fieldsByName: Record<string, Field> = {};
+        let enums: Enum[] = [];
         let messages: Message[] = [];
        
         // Field tags are 1 based and there are gaps in the sequence, we want to be able to
@@ -138,47 +124,104 @@ export class DataDictionary {
         var index: number = -1;
 
         json.fix.fields[0].field.forEach((element: any) => {
-            const values: FieldValue[] = [];
+            const tag = Number(element.$.number);
             if (element.value) {
                 element.value.forEach((value: any) => {
-                    values.push(new FieldValue(
+                    enums.push(new Enum(
+                        tag,
                         value.$.enum,
-                        value.$.description
+                        value.$.description,
                     ));
                 });
             }
             const field = new Field(
-                Number(element.$.number),
+                tag,
                 element.$.name,
-                element.$.type,
-                values
+                element.$.type
             );
-            if (field.number < index) {
+            if (field.tag < index) {
                 // field elements are not always sorted and we may have generated nulls for a gap
                 // so go back and fill in.
-                fields[field.number] = field;    
+                fields[field.tag] = field;    
             }
             else {
-                while (index < field.number - 1) {
-                    fields.push(new Field(0, "", "", []));
+                while (index < field.tag - 1) {
+                    fields.push(new Field(0, "", ""));
                     ++index;
                 }
                 ++index;
                 fields.push(field);
             }
         });
-    
-        json.fix.messages[0].message.forEach((element:any) => {
-    
+
+        fields.forEach(field => {
+            fieldsByName[field.name] = field;
+        });
+
+        var componentsByName: Record<string, any> = {};
+
+        json.fix.components[0].component.forEach((element:any) => {
+            componentsByName[element.$.name] = element;
         });
     
+        json.fix.messages[0].message.forEach((element:any) => {
+        
+            var fields: MessageField[] = [];
+           
+            let processChildren = (children: any[], indent: number, fieldsByName: Record<string, Field>) => {
+                children.forEach((child: any) => {
+                    switch (child["#name"]) {
+                        case "field": {
+                            const name = child.$.name;    
+                            const required = child.$.required === 'Y';
+                            const field = fieldsByName[name];
+                            if (field) {
+                                fields.push(new MessageField(field, required, "", indent));
+                            }                            
+                            break;
+                        }
+                        case "component": {
+                            const name = child.$.name;
+                            const component = componentsByName[name];
+                            if (component) {
+                                processChildren(component.$$, indent, fieldsByName);
+                            }
+                            break;
+                        }
+                        case "group": {
+                            processChildren(child.$$, indent + 1, fieldsByName);
+                            break;
+                        }
+                    }
+                });
+            };
+
+            processChildren(element.$$, 0, fieldsByName);
+
+            const message = new Message(
+                "",
+                element.$.msgtype,
+                element.$.name,
+                element.$.msgcat,
+                "",
+                "",
+                "",
+                "",
+                fields);
+        
+                messages.push(message);
+        
+        });
+
         return new DataDictionary(
             type,
             major,
             minor,
             servicePack,
-            messages,
-            fields
+            fields,
+            fieldsByName,
+            enums,
+            messages
         );
     
     }
@@ -188,7 +231,10 @@ export class DataDictionary {
 async function xml2json(filename: string) {
     return new Promise<any>((resolve, reject) => {
         let xml = fs.readFileSync(filename);
-        let parser = new xml2js.Parser();
+        let parser = new xml2js.Parser({
+            explicitChildren: true, 
+            preserveChildrenOrder: true 
+        });
         parser.parseString(xml, function (err: any, json: any) {
             if (err) {
                 reject(err);

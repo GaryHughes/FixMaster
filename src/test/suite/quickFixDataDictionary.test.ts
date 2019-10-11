@@ -19,23 +19,21 @@ suite('QuickFix XML Data Dictionary Test Suite', () => {
       assert.equal(2, dictionary.servicePack);
     });
 
-  	test('Fields Parse', () => {
+  	test('Fields parse', () => {
       assert.equal(1618, dictionary.fields.length);
     });
   
-    test('Strict value description lookup', () => {
-      dictionary.nameLookup = NameLookup.Strict;
-      assert.equal("FILLED", dictionary.descriptionOfValue(39, "2", "FIX.5.0SP2"));
-      assert.equal("", dictionary.descriptionOfValue(39, "D", "FIX.4.0"));
-      assert.equal("ACCEPTED_FOR_BIDDING", dictionary.descriptionOfValue(39, "D", "FIX.5.0SP2"));
-    });
-
-    test('Promiscuous value description lookup', () => {
-      dictionary.nameLookup = NameLookup.Promiscuous;
-      assert.equal("FILLED", dictionary.descriptionOfValue(39, "2", "FIX.5.0SP2"));
-      assert.equal("ACCEPTED_FOR_BIDDING", dictionary.descriptionOfValue(39, "D", "FIX.4.0SP2"));
-      assert.equal("ACCEPTED_FOR_BIDDING", dictionary.descriptionOfValue(39, "D", "FIX.4.2SP2"));
+    test('Value description lookup', () => {
+      assert.equal("FILLED", dictionary.descriptionOfValue(39, "2"));
+      assert.equal("ACCEPTED_FOR_BIDDING", dictionary.descriptionOfValue(39, "D"));
+      assert.equal("ACCEPTED_FOR_BIDDING", dictionary.descriptionOfValue(39, "D"));
     });
     
+    test('Message lookup', () => {
+      const message = dictionary.definitionOfMessage("D");
+      assert.equal("NewOrderSingle", message.name);
+      assert.equal("app", message.categoryID);
+    });
+
 
 });

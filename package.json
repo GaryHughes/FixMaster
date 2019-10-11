@@ -45,6 +45,10 @@
 			{
 				"command": "extension.format-csv-selection",
 				"title": "FIX Master - CSV Format Selection"
+			},
+			{
+				"command": "extension.show-message",
+				"title": "FIX Master - Show the definition of a message"
 			}
 		],
 		"menus": {
@@ -63,6 +67,9 @@
 				{
 				  "when": "editorHasSelection",
 				  "command": "extension.format-csv-selection"
+				},
+				{
+				  "command": "extension.show-message"
 				}
   			],
 			"editor/context": [
@@ -85,6 +92,11 @@
 					"type": "string",
 					"default": null,
 					"description": "Path to a fixtrading.org XML Repository. FIX Master includes a copy of the repository that it will use by default."
+				},
+				"fixmaster.quickFixDataDictionaryPath": {
+					"type": "string",
+					"default": null,
+					"description": "Path to a QuickFix Xml Data Dictionary."
 				},
 				"fixmaster.nameLookup": {
 					"type": "string",
