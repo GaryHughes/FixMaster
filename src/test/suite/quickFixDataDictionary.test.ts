@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { before } from 'mocha';
 import * as path from 'path';
-import { DataDictionary } from '../../quickFixDataDictionary';
+import { DataDictionary } from '../../quickFixDataDictionary'; 
 import { NameLookup } from '../../options';
 
 suite('QuickFix XML Data Dictionary Test Suite', () => {

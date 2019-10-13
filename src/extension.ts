@@ -1,15 +1,16 @@
-import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, Command } from 'vscode';
+import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, WebviewPanel, ViewColumn } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as FIX from './fixRepository';
+import { Repository } from './fixRepository';
+import * as Definitions from './definitions';
 import * as QuickFix from './quickFixDataDictionary';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
 import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
-
+import { definitionHtmlForMessage } from './html';
 
 export function activate(context: ExtensionContext) {
 
-	var repository: FIX.Repository | null = null;
+	var repository: Repository | null = null;
 	var dataDictionary: QuickFix.DataDictionary | null = null;
 
 	const loadRepository = () => {
@@ -34,7 +35,7 @@ export function activate(context: ExtensionContext) {
 					window.showErrorMessage("The repository path '" + repositoryPath + "' cannot be found.");
 				}
 				else {
-					repository = new FIX.Repository(repositoryPath, true);
+					repository = new Repository(repositoryPath, true);
 				}
 
 				resolve();
@@ -82,7 +83,7 @@ export function activate(context: ExtensionContext) {
 	
 	});
 
-	let format = (printer: (context: string, message:Message, repository:FIX.Repository, nestedFieldIndent: number) => string, scope: CommandScope) => {
+	let format = (printer: (context: string, message:Message, repository:Repository, nestedFieldIndent: number) => string, scope: CommandScope) => {
 
 		if (!repository) {
 			window.showErrorMessage('The repository has not been loaded - check the repositoryPath setting.');
@@ -230,11 +231,30 @@ export function activate(context: ExtensionContext) {
 
 	commands.registerCommand('extension.show-message', async () => {
 
-		const input = await window.showInputBox({ prompt: "Enter a MsgType or Name. e.g. D or NewOrderSingle" });
-
-		if (input) {
-						
+		if (!repository) {
+			return;
 		}
+
+		const msgTypeOrName = await window.showInputBox({ prompt: "Enter a MsgType or Name. e.g. D or NewOrderSingle" });
+
+		if (!msgTypeOrName) {
+			return;
+		}
+
+		const definition = definitionHtmlForMessage(msgTypeOrName, 'FIX.4.4', repository);
+
+		if (!definition) {
+			return;
+		}
+
+		const panel = window.createWebviewPanel(
+			'FIX Master - Definition',
+			definition.name,
+			ViewColumn.Two, 
+			{ enableScripts: true }
+		);
+
+		panel.webview.html = definition.html; 
 
 	});
 }
