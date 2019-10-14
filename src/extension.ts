@@ -14,31 +14,30 @@ export function activate(context: ExtensionContext) {
 	var dataDictionary: QuickFix.DataDictionary | null = null;
 
 	const loadRepository = () => {
+
 		window.withProgress({
 			location: ProgressLocation.Notification,
 			title: "Loading the FIX repository...",
 			cancellable: false
 		}, (progress, token) => {
 			return new Promise(resolve => {
-				const configuration = workspace.getConfiguration();
-				var repositoryPath = configuration.get('fixmaster.repositoryPath') as string;
-				
-				if (!repositoryPath) {
-					repositoryPath = "./repository";
-				}
-				
-				if (!path.isAbsolute(repositoryPath)) {
-					repositoryPath = path.join(context.extensionPath, repositoryPath);
-				}
-				
-				if (!fs.existsSync(repositoryPath)) {
-					window.showErrorMessage("The repository path '" + repositoryPath + "' cannot be found.");
-				}
-				else {
-					repository = new Repository(repositoryPath, true);
-				}
-
-				resolve();
+				setTimeout(() => {
+					const configuration = workspace.getConfiguration();
+					var repositoryPath = configuration.get('fixmaster.repositoryPath') as string;
+					if (!repositoryPath) {
+						repositoryPath = "./repository";
+					}
+					if (!path.isAbsolute(repositoryPath)) {
+						repositoryPath = path.join(context.extensionPath, repositoryPath);
+					}
+					if (!fs.existsSync(repositoryPath)) {
+						window.showErrorMessage("The repository path '" + repositoryPath + "' cannot be found.");
+					}
+					else {
+						repository = new Repository(repositoryPath, true);
+					}
+					resolve();
+				}, 0);
 			});
 		});
 	};
@@ -49,26 +48,26 @@ export function activate(context: ExtensionContext) {
 			title: "Loading the QuickFix data dictionary...",
 			cancellable: false
 		}, (progress, token) => {
-			return new Promise(async resolve => {
-				dataDictionary = null;
-				const configuration = workspace.getConfiguration();
-				var path = configuration.get('fixmaster.quickFixDataDictionaryPath') as string;
-				
-				if (!path) {
-					return;
-				}
-				
-				if (!fs.existsSync(path)) {
-					window.showErrorMessage("The QuickFix data dictionary path '" + path + "' cannot be found.");
-				}
-				else {
-					dataDictionary = await QuickFix.DataDictionary.parse(path);
-				}
-
-				resolve();
+			return new Promise(resolve => {
+				setTimeout(async () => {
+					dataDictionary = null;
+					const configuration = workspace.getConfiguration();
+					var path = configuration.get('fixmaster.quickFixDataDictionaryPath') as string;
+					if (!path) {
+						return;
+					}
+					if (!fs.existsSync(path)) {
+						window.showErrorMessage("The QuickFix data dictionary path '" + path + "' cannot be found.");
+					}
+					else {
+						dataDictionary = await QuickFix.DataDictionary.parse(path);
+					}
+					resolve();
+				}, 0);
 			});
 		});	
 	};
+
 
 	loadRepository();
 	loadDataDictionary();
@@ -80,7 +79,6 @@ export function activate(context: ExtensionContext) {
 		else if (evt.affectsConfiguration('fixmaster.quickFixDataDictionaryPath')) {
 			loadDataDictionary();
 		}
-	
 	});
 
 	let format = (printer: (context: string, message:Message, repository:Repository, nestedFieldIndent: number) => string, scope: CommandScope) => {
@@ -120,95 +118,98 @@ export function activate(context: ExtensionContext) {
 
 			return new Promise(resolve => {
 
-				if (!repository) {
-					// We should never get here but but the compiler complains repository migth be undefined
-					// in the call to printer below.
-					resolve();
-					return;
-				}
+				setTimeout(() => {
 
-				var lastLineWasAMessage = false;
-
-				var index = 0;
-				var maxIndex = document.lineCount;
-				
-				if (scope === CommandScope.Selection) {
-					if (activeTextEditor.selection) {
-						index = activeTextEditor.selection.start.line;
-						maxIndex = activeTextEditor.selection.end.line + 1;
+					if (!repository) {
+						// We should never get here but but the compiler complains repository migth be undefined
+						// in the call to printer below.
+						resolve();
+						return;
 					}
-				}
 
-				for (; index < maxIndex; ++index) {
+					var lastLineWasAMessage = false;
 
-					const line = document.lineAt(index);
+					var index = 0;
+					var maxIndex = document.lineCount;
 					
-					const fixMessageIndex = line.text.indexOf(fixMessagePrefix); 
-
-					if (fixMessageIndex < 0) {
-						lastLineWasAMessage = false;
-						continue;
-					}
-					
-					const linePrefix = line.text.substr(0, fixMessageIndex);
-					const regex = new RegExp(prefixPattern);
-					let match = regex.exec(linePrefix);
-					var messageContext: string = "";
-					if (match) {
-						messageContext = match[0];	
-					}
-
-					const message = parseMessage(line.text.substr(fixMessageIndex), fieldSeparator);	
-
-					if (!message) {
-						lastLineWasAMessage = false;
-						continue;
-					}
-
-					var prettyPrint = true;
-					var include = true;
-
-					if (message.isAdministrative()) {
-						if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.DeleteAll) {
-							include = false;
+					if (scope === CommandScope.Selection) {
+						if (activeTextEditor.selection) {
+							index = activeTextEditor.selection.start.line;
+							maxIndex = activeTextEditor.selection.end.line + 1;
 						}
-						else if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.DeleteHeartbeatsAndTestRequests &&
-								(message.msgType === msgTypeHeartbeat || message.msgType === msgTypeTestRequest)) {
-							include = false;
-						}
-						else if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.IgnoreAll) {
-							prettyPrint = false;
+					}
+
+					for (; index < maxIndex; ++index) {
+
+						const line = document.lineAt(index);
+						
+						const fixMessageIndex = line.text.indexOf(fixMessagePrefix); 
+
+						if (fixMessageIndex < 0) {
+							lastLineWasAMessage = false;
 							continue;
 						}
-						else if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.IgnoreHeartbeatsAndTestRequests &&
-								(message.msgType === msgTypeHeartbeat || message.msgType === msgTypeTestRequest)) {
-							prettyPrint = false;
+						
+						const linePrefix = line.text.substr(0, fixMessageIndex);
+						const regex = new RegExp(prefixPattern);
+						let match = regex.exec(linePrefix);
+						var messageContext: string = "";
+						if (match) {
+							messageContext = match[0];	
+						}
+
+						const message = parseMessage(line.text.substr(fixMessageIndex), fieldSeparator);	
+
+						if (!message) {
+							lastLineWasAMessage = false;
 							continue;
 						}
-					}
 
-					if (include) {
-						if (prettyPrint) {
-							var pretty = printer(messageContext, message, repository, nestedFieldIndent);
-							if (!lastLineWasAMessage) {
-								pretty = "\n" + pretty;	
-								lastLineWasAMessage = true;
+						var prettyPrint = true;
+						var include = true;
+
+						if (message.isAdministrative()) {
+							if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.DeleteAll) {
+								include = false;
 							}
-							edit.replace(document.uri, line.range, pretty);
+							else if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.DeleteHeartbeatsAndTestRequests &&
+									(message.msgType === msgTypeHeartbeat || message.msgType === msgTypeTestRequest)) {
+								include = false;
+							}
+							else if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.IgnoreAll) {
+								prettyPrint = false;
+								continue;
+							}
+							else if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.IgnoreHeartbeatsAndTestRequests &&
+									(message.msgType === msgTypeHeartbeat || message.msgType === msgTypeTestRequest)) {
+								prettyPrint = false;
+								continue;
+							}
+						}
+
+						if (include) {
+							if (prettyPrint) {
+								var pretty = printer(messageContext, message, repository, nestedFieldIndent);
+								if (!lastLineWasAMessage) {
+									pretty = "\n" + pretty;	
+									lastLineWasAMessage = true;
+								}
+								edit.replace(document.uri, line.range, pretty);
+							}
+							else {
+								// Leave the message in the output as is.
+								lastLineWasAMessage = false;
+							}
 						}
 						else {
-							// Leave the message in the output as is.
-							lastLineWasAMessage = false;
+							edit.delete(document.uri, line.range.with(undefined, document.lineAt(index + 1).range.start));
 						}
 					}
-					else {
-						edit.delete(document.uri, line.range.with(undefined, document.lineAt(index + 1).range.start));
-					}
-				}
 
-				workspace.applyEdit(edit);
-				
-				resolve();
+					workspace.applyEdit(edit);
+					
+					resolve();
+				}, 0);
 			});
 		});
 	};
@@ -255,6 +256,7 @@ export function activate(context: ExtensionContext) {
 		);
 
 		panel.webview.html = definition.html; 
-
 	});
+
+
 }
