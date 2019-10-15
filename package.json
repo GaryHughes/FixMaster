@@ -25,7 +25,10 @@
 	],
 	"activationEvents": [
 		"onCommand:extension.format-pretty",
-		"onCommand:extension.format-csv"
+		"onCommand:extension.format-csv",
+		"onCommand:extension.format-pretty-selection",
+		"onCommand:extension.format-csv-selection",
+		"onCommand:extension.show-message"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
