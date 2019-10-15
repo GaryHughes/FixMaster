@@ -6,7 +6,11 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [UNRELEASED]
 
+### Added
 
+### Fixed
+
+- Fixed an issue preventing progress notifications from displaying correctly.
 
 ## [1.1.0] 2019-10-03
 

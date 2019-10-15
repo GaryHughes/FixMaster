@@ -43,6 +43,12 @@ export function activate(context: ExtensionContext) {
 	};
 
 	const loadDataDictionary = () => {
+		dataDictionary = null;
+		const configuration = workspace.getConfiguration();
+		var path = configuration.get('fixmaster.quickFixDataDictionaryPath') as string;
+		if (!path) {
+			return;
+		}
 		window.withProgress({
 			location: ProgressLocation.Notification,
 			title: "Loading the QuickFix data dictionary...",
@@ -50,12 +56,6 @@ export function activate(context: ExtensionContext) {
 		}, (progress, token) => {
 			return new Promise(resolve => {
 				setTimeout(async () => {
-					dataDictionary = null;
-					const configuration = workspace.getConfiguration();
-					var path = configuration.get('fixmaster.quickFixDataDictionaryPath') as string;
-					if (!path) {
-						return;
-					}
 					if (!fs.existsSync(path)) {
 						window.showErrorMessage("The QuickFix data dictionary path '" + path + "' cannot be found.");
 					}
@@ -229,7 +229,7 @@ export function activate(context: ExtensionContext) {
 	commands.registerCommand('extension.format-csv-selection', () => {
 		format(csvPrintMessage, CommandScope.Selection);
 	});
-
+							 
 	commands.registerCommand('extension.show-message', async () => {
 
 		if (!repository) {
@@ -242,7 +242,24 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
-		const definition = definitionHtmlForMessage(msgTypeOrName, 'FIX.4.4', repository);
+		type Definition = { name: string, html: string };
+
+		const definition = await window.withProgress({
+			location: ProgressLocation.Notification,
+			title: "Constructing the message definitions...",
+			cancellable: false
+		}, (progress, token) => {
+			return new Promise<Definition | null>(resolve => {
+				setTimeout(async () => {
+					if (!repository) {
+						resolve(null);
+						return;
+					}
+					const definition = definitionHtmlForMessage(msgTypeOrName, 'FIX.4.4', repository);
+					resolve(definition);
+				}, 0);
+			});
+		});	
 
 		if (!definition) {
 			return;
