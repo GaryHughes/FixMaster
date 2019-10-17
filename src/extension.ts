@@ -1,4 +1,4 @@
-import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, WebviewPanel, ViewColumn } from 'vscode';
+import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, WebviewPanel, ViewColumn, Uri } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Repository } from './fixRepository';
@@ -242,37 +242,49 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
-		type Definition = { name: string, html: string };
+		const name = repository.definitionOfMessage(msgTypeOrName, undefined).name;
 
-		const definition = await window.withProgress({
+		const panel = window.createWebviewPanel(
+			'FIX Master - Definition',
+			name,
+			ViewColumn.Two, 
+			{ 
+				enableScripts: true,
+				localResourceRoots: [
+					Uri.file(path.join(context.extensionPath, 'css')),
+					Uri.file(path.join(context.extensionPath, 'js'))
+				] 
+			}
+		);
+
+		const localScriptPath = Uri.file(path.join(context.extensionPath, 'js', 'repository.js'));
+		const scriptPath = panel.webview.asWebviewUri(localScriptPath);
+
+		const localStylesheetPath = Uri.file(path.join(context.extensionPath, 'css', 'repository.css'));
+		const stylesheetPath = panel.webview.asWebviewUri(localStylesheetPath);
+	
+		const html = await window.withProgress({
 			location: ProgressLocation.Notification,
 			title: "Constructing the message definitions...",
 			cancellable: false
 		}, (progress, token) => {
-			return new Promise<Definition | null>(resolve => {
+			return new Promise<string | null>(resolve => {
 				setTimeout(async () => {
 					if (!repository) {
 						resolve(null);
 						return;
 					}
-					const definition = definitionHtmlForMessage(msgTypeOrName, 'FIX.4.4', repository);
-					resolve(definition);
+					const html = definitionHtmlForMessage(msgTypeOrName, repository, stylesheetPath, scriptPath);
+					resolve(html);
 				}, 0);
 			});
 		});	
 
-		if (!definition) {
+		if (!html) {
 			return;
 		}
 
-		const panel = window.createWebviewPanel(
-			'FIX Master - Definition',
-			definition.name,
-			ViewColumn.Two, 
-			{ enableScripts: true }
-		);
-
-		panel.webview.html = definition.html; 
+		panel.webview.html = html; 
 	});
 
 

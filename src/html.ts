@@ -1,8 +1,9 @@
 import { Message } from './definitions';
 import { Repository } from './fixRepository';
 import { Version } from './fixRepositoryXml';
+import { Uri } from 'vscode';
 
-export function definitionHtmlForMessage(msgTypeOrName: string, preferredVersion:string, repository: Repository) {
+export function definitionHtmlForMessage(msgTypeOrName: string, repository: Repository, stylesheetPath: Uri, scriptPath: Uri) {
 
     var messages: [Version, Message][] = [];
 
@@ -11,48 +12,12 @@ export function definitionHtmlForMessage(msgTypeOrName: string, preferredVersion
     html += '<!DOCTYPE html>';
     html += '<html lang="en">';
     html += '<head>';
-    html += '<style>';
-    html += '.tab {';
-    html += '   overflow: hidden;';
-    html += '}';
-    html += '.tab button {';
-    html += '   background-color: #1D62C4;';
-    html += '   border: none;';
-    html += '   color: white;';
-    html += '   padding: 5px 5px;';
-    html += '   margin: 0px 5px;';
-    html += '   text-align: center;';
-    html += '   text-decoration: none;';
-    html += '   display: inline-block;';
-    html += '}';
-    html += '.tab button.active {';
-    html += '   background-color: #ccc;';
-    html += '   color: black;';
-    html += '}';
-    html += '</style>';
-    html += '<script>';
-    html += 'function selectVersion(evt, beginString) {';
-    html += '   var i, tabcontent, tablinks;';
-    html += '   tabcontent = document.getElementsByClassName("tabcontent");';
-    html += '   for (i = 0; i < tabcontent.length; i++) {';
-    html += '       tabcontent[i].style.display = "none";';
-    html += '   }';
-    html += '   tablinks = document.getElementsByClassName("tablinks");';
-    html += '   for (i = 0; i < tablinks.length; i++) {';
-    html += '       tablinks[i].className = tablinks[i].className.replace(" active", "");';
-    html += '   }';
-    html += '   document.getElementById(beginString).style.display = "block";';
-    html += '   evt.currentTarget.className += " active";';
-    html += '}';
-    html += 'function selectDefaultVersion() {';
-    html += '    console.log("ONLOAD");';
-    html += '    document.getElementById("defaultVersion").click();';
-    html += '}';
-    html += 'window.onload = selectDefaultVersion;';
-    html += '</script>';
+    html += '<link rel="stylesheet" type="text/css" href="' + stylesheetPath + '">';
+    html += '<script src="' + scriptPath + '"></script>';
     html += '</head>';
     html += '<body">';
 
+    html += '<br>';
     html += '<div class="tab">';
     for (const version of repository.versions) {
         // TODO - add name lookup
@@ -61,9 +26,6 @@ export function definitionHtmlForMessage(msgTypeOrName: string, preferredVersion
             messages.push([version, message]);
         }
         html += `<button class="tablinks" onclick="selectVersion(event, '${version.beginString}')"'`;
-        if (version.beginString === preferredVersion) {
-            html += 'id="defaultVersion"';
-        }
         html += `>${version.beginString}</button>`;
     }
 
@@ -77,7 +39,11 @@ export function definitionHtmlForMessage(msgTypeOrName: string, preferredVersion
 
     for (const [version, message] of messages) {
         html += `<div id="${version.beginString}" class="tabcontent">`;
-        html += '<table>';
+        html += '<br>';
+        html += '<table border="1">';
+        html += '<thead>';
+        html += '<trow><th>Tag</th><th>Name</th><th>Type</th><th>Description</th><th>Added</th></trow>';
+        html += '</thead>';
         html += '<tbody>';
         for (const field of message.fields) {
             html += '<tr>';
@@ -96,5 +62,5 @@ export function definitionHtmlForMessage(msgTypeOrName: string, preferredVersion
     html += '</body>';
     html += '</html>';
 
-    return { name: name, html: html };
+    return html;
 }
