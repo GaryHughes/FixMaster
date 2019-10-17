@@ -16,6 +16,7 @@ suite('FIX Repository Test Suite', () => {
         assert.equal("PrevClosePx", repository.definitionOfField(140, FIX_4_0, quoteRequest).field.name);
         assert.equal("", repository.definitionOfField(200, FIX_4_0, quoteRequest).field.name);
         assert.equal("MaturityMonthYear", repository.definitionOfField(200, FIX_4_1, quote).field.name);
+        assert.equal("FIX.4.1", repository.definitionOfField(200, FIX_4_1, quote).field.added);
     });
 
     test('Promiscuous field name lookup', () => {

@@ -161,7 +161,7 @@ export class Version {
                         element.Type[0], 
                         element.NotReqXML[0], 
                         element.Description[0], 
-                        element.Added ? element.Added[0] : "" 
+                        element.$.added ? element.$.added : "" 
                     );
                     if (tag < index) {
                         // field elements are not always sorted and we may have generated nulls for a gap
