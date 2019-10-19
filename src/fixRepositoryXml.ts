@@ -60,7 +60,7 @@ export class Version {
                             element.Value[0],
                             element.SymbolicName[0], 
                             element.Description[0], 
-                            element.Added ? element.Added[0] : "" 
+                            element.$ ? (element.$.added ? element.$.added : "") : "" 
                         )
                     );
                 }
@@ -200,7 +200,7 @@ export class Version {
                             element.Position[0], 
                             element.Reqd[0] === "1" ? true : false,
                             element.Description ? element.Description[0] : "", 
-                            element.Added ? element.Added[0] : "" 
+                            element.$.added ? element.$.added : "" 
                         )
                     );
                 }
@@ -227,7 +227,7 @@ export class Version {
                             element.Name[0], 
                             element.NotReqXML[0],
                             element.Description ? element.Description[0] : "",
-                            element.Added ? element.Added[0] : "" 
+                            element.$.added ? element.$.added : "" 
                         )
                     );
                 }

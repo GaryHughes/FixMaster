@@ -28,7 +28,7 @@
 		"onCommand:extension.format-csv",
 		"onCommand:extension.format-pretty-selection",
 		"onCommand:extension.format-csv-selection",
-		"onCommand:extension.show-message"
+		"onCommand:extension.show-field"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -50,8 +50,8 @@
 				"title": "FIX Master - CSV Format Selection"
 			},
 			{
-				"command": "extension.show-message",
-				"title": "FIX Master - Show the definition of a message"
+				"command": "extension.show-field",
+				"title": "FIX Master - Show the definition of a field"
 			}
 		],
 		"menus": {
@@ -72,7 +72,7 @@
 				  "command": "extension.format-csv-selection"
 				},
 				{
-				  "command": "extension.show-message"
+				  "command": "extension.show-field"
 				}
   			],
 			"editor/context": [

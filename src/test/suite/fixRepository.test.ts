@@ -76,4 +76,8 @@ suite('FIX Repository Test Suite', () => {
         assert.equal("SideTradeReportingIndicator", repository.definitionOfField(2671, FIX_5_0SP2, message).field.name);
     });
 
+    test('Field lookup by name', () => {
+        assert.equal(59, repository.definitionOfField('TimeInForce').field.tag);    
+    });
+
 });

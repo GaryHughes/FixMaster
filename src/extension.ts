@@ -6,7 +6,7 @@ import * as Definitions from './definitions';
 import * as QuickFix from './quickFixDataDictionary';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
 import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
-import { definitionHtmlForMessage } from './html';
+import { definitionHtmlForField, definitionHtmlForMessage } from './html';
 
 export function activate(context: ExtensionContext) {
 
@@ -229,7 +229,57 @@ export function activate(context: ExtensionContext) {
 	commands.registerCommand('extension.format-csv-selection', () => {
 		format(csvPrintMessage, CommandScope.Selection);
 	});
-							 
+					
+	commands.registerCommand('extension.show-field', async () => {
+
+		if (!repository) {
+			return;
+		}
+
+		const fieldTagOrName = await window.showInputBox({ prompt: "Enter a Tag or Name. e.g. 40 or OrdType" });
+
+		if (!fieldTagOrName) {
+			return;
+		}
+
+
+
+		const definition = repository.definitionOfField(fieldTagOrName);
+
+		const panel = window.createWebviewPanel(
+			'FIX Master - Field Definition',
+			definition.field.tag + ' - ' + definition.field.name,
+			ViewColumn.One, 
+			{ 
+				enableScripts: true,
+				localResourceRoots: [
+					Uri.file(path.join(context.extensionPath, 'css')),
+					Uri.file(path.join(context.extensionPath, 'js'))
+				] 
+			}
+		);
+
+		var scriptPaths: Uri[] = [];
+		for (const source of ['repository.js', 'jquery.slim.min.js', 'bootstrap.bundle.min.js']) {
+			scriptPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'js', source))));
+		}
+
+		var stylesheetPaths: Uri[] = [];
+		for (const source of ['repository.css', 'bootstrap.min.css']) {
+			stylesheetPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'css', source))));
+		} 
+
+		const html = definitionHtmlForField(definition, repository, stylesheetPaths, scriptPaths);
+
+		if (!html) {
+			return;
+		}
+
+		panel.webview.html = html;
+
+	});
+
+	/*
 	commands.registerCommand('extension.show-message', async () => {
 
 		if (!repository) {
@@ -242,12 +292,12 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
-		const name = repository.definitionOfMessage(msgTypeOrName, undefined).name;
+		const definition = repository.definitionOfMessage(msgTypeOrName, undefined);
 
 		const panel = window.createWebviewPanel(
-			'FIX Master - Definition',
-			name,
-			ViewColumn.Two, 
+			'FIX Master - Message Definition',
+			definition.name,
+			ViewColumn.One, 
 			{ 
 				enableScripts: true,
 				localResourceRoots: [
@@ -257,12 +307,16 @@ export function activate(context: ExtensionContext) {
 			}
 		);
 
-		const localScriptPath = Uri.file(path.join(context.extensionPath, 'js', 'repository.js'));
-		const scriptPath = panel.webview.asWebviewUri(localScriptPath);
+		var scriptPaths: Uri[] = [];
+		for (const source of ['repository.js', 'jquery.slim.min.js', 'bootstrap.bundle.min.js']) {
+			scriptPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'js', source))));
+		}
 
-		const localStylesheetPath = Uri.file(path.join(context.extensionPath, 'css', 'repository.css'));
-		const stylesheetPath = panel.webview.asWebviewUri(localStylesheetPath);
-	
+		var stylesheetPaths: Uri[] = [];
+		for (const source of ['repository.css', 'bootstrap.min.css']) {
+			stylesheetPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'css', source))));
+		} 
+
 		const html = await window.withProgress({
 			location: ProgressLocation.Notification,
 			title: "Constructing the message definitions...",
@@ -274,7 +328,7 @@ export function activate(context: ExtensionContext) {
 						resolve(null);
 						return;
 					}
-					const html = definitionHtmlForMessage(msgTypeOrName, repository, stylesheetPath, scriptPath);
+					const html = definitionHtmlForMessage(definition, repository, stylesheetPaths, scriptPaths);
 					resolve(html);
 				}, 0);
 			});
@@ -284,8 +338,13 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
-		panel.webview.html = html; 
+		panel.webview.html = html;
+
+		//panel.webview.postMessage({ command: 'selectVersion', beginString: 'FIX.4.4' });
+		// setTimeout(async () => {
+		// 	panel.webview.postMessage({ command: 'selectVersion', beginString: 'FIX.4.4' });
+		// }, 100);
+	
 	});
-
-
+	*/
 }

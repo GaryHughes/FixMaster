@@ -1,30 +1,109 @@
-import { Message } from './definitions';
+import { Message, MessageField } from './definitions';
 import { Repository } from './fixRepository';
 import { Version } from './fixRepositoryXml';
 import { Uri } from 'vscode';
 
-export function definitionHtmlForMessage(msgTypeOrName: string, repository: Repository, stylesheetPath: Uri, scriptPath: Uri) {
-
-    var messages: [Version, Message][] = [];
-
+function htmlHead(stylesheetPaths: Uri[], scriptPaths: Uri[]) {
     var html = '';
-
     html += '<!DOCTYPE html>';
     html += '<html lang="en">';
     html += '<head>';
-    html += '<link rel="stylesheet" type="text/css" href="' + stylesheetPath + '">';
-    html += '<script src="' + scriptPath + '"></script>';
+    for (const path of stylesheetPaths) {
+        html += '<link rel="stylesheet" type="text/css" href="' + path + '">';
+    }
+    for (const path of scriptPaths) {
+        html += '<script src="' + path + '"></script>';
+    }
     html += '</head>';
-    html += '<body">';
+    return html;
+}
+
+function normaliseId(value: string) {
+    // id attributes are suppose to allow periods but they don't work in here.
+    return value.split(".").join("");
+}
+
+export function definitionHtmlForField(definition: MessageField, repository: Repository, stylesheetPaths: Uri[], scriptPaths: Uri[], prefferedVersion: string | undefined = undefined) {
+
+    if (!prefferedVersion) {
+        prefferedVersion = repository.latestVersion.beginString;
+    }
+
+    var html = htmlHead(stylesheetPaths, scriptPaths);
+    html += '<body>';
+    html += '<div>';
+    html += '<br>';
+    html += '<ul class="nav nav-pills">';
+    for (const version of repository.versions) {
+        var style = 'nav-link';
+        if (version.beginString === prefferedVersion) {
+            style += ' active';
+        }
+        html += '<li class="nav-item">';
+        html += `   <a class="${style}" href="#${normaliseId(version.beginString)}" data-toggle="pill">${version.beginString}</a>`;
+        html += '</li>';
+    }
+    html += '</ul>';
+    html += '<br>';
+    html += '</div>';
+    html += '<div class="tab-content">';
+
+    for (const version of repository.versions) {
+        const values = version.enumeratedTags[definition.field.tag];
+        // if not values disable tab
+        style = 'tab-pane';
+        if (version.beginString === prefferedVersion) {
+            style += ' active';
+        }
+        html += `   <div class="${style}" id="${normaliseId(version.beginString)}">`;
+        html += '       <table class="table table-dark table-sm">';
+        html += '           <thead>';
+        html += '               <trow><th class="text-center">Value</th><th>Name</th><th>Description</th><th>Added</th></trow>';
+        html += '           </thead>';
+        html += '           <tbody>';
+        if (values) {
+            for (const enumValue of values) {
+                html += '   <tr>';
+                html += '   <td class="text-center">' + enumValue.value + '</td>';
+                html += '   <td>' + enumValue.symbolicName + '</td>';
+                html += '   <td>' + enumValue.description + '</td>';
+                html += '   <td>' + enumValue.added + '</td>';
+                html += '   </tr>';
+            }
+        }
+        html += '           </tbody>';
+        html += '       </table>';
+        html += '   </div>';
+    }
+
+    html += '</div>';
+    html += '</body>';
+    html += '</html>';
+
+    return html;
+}
+
+/*
+export function definitionHtmlForMessage(definition: Message, repository: Repository, stylesheetPaths: Uri[], scriptPaths: Uri[]) {
+
+    var html = htmlHead(stylesheetPaths, scriptPaths);
 
     html += '<br>';
     html += '<div class="tab">';
+  
+    var messages: [Version, Message][] = [];
+    //html += '<ul class="nav nav-pills">';
+  
     for (const version of repository.versions) {
         // TODO - add name lookup
-        const message = version.messages[msgTypeOrName];
+        const message = version.messages[definition.msgType];
         if (message) {
             messages.push([version, message]);
         }
+        // html += '<li class="nav-item">';
+        // html += '<a class="nav-link" href="' + version.beginString + '">' + version.beginString + '</a>';
+        // html += '</li>';
+
         html += `<button class="tablinks" onclick="selectVersion(event, '${version.beginString}')"'`;
         html += `>${version.beginString}</button>`;
     }
@@ -34,13 +113,14 @@ export function definitionHtmlForMessage(msgTypeOrName: string, repository: Repo
     }
 
     html += '</div>';
-    
-    const name = messages[0][1].name;
+    //html += '</ul>';
+
+    //const name = messages[0][1].name;
 
     for (const [version, message] of messages) {
         html += `<div id="${version.beginString}" class="tabcontent">`;
         html += '<br>';
-        html += '<table border="1">';
+        html += '<table class="table table-dark table-sm">';
         html += '<thead>';
         html += '<trow><th>Tag</th><th>Name</th><th>Type</th><th>Description</th><th>Added</th></trow>';
         html += '</thead>';
@@ -64,3 +144,4 @@ export function definitionHtmlForMessage(msgTypeOrName: string, repository: Repo
 
     return html;
 }
+*/

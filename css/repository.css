@@ -1,4 +1,5 @@
-.tab {
+
+/* .tab {
     overflow: hidden;
 }
 
@@ -16,20 +17,9 @@
 .tab button.active {
     background-color: #ccc;
     color: black;
+} */
+
+body, table, thead, ul {
+    background-color: var(--vscode-editor-background) !important;
 }
 
-table {
-    border-collapse: collapse;
-}
-
-table, th, td {
-    border: 1px solid grey;
-}
-
-th {
-    text-align: left;
-}
-
-th, td {
-    padding: 2px;
-}

@@ -26,33 +26,51 @@ export class Repository {
     readonly latestVersion: xml.Version;
     nameLookup: NameLookup = NameLookup.Promiscuous;
 
-    definitionOfField(tag: number, version: xml.Version | undefined, message: Message | undefined) {
+    definitionOfField(tagOrName: number | string, version: xml.Version | undefined = undefined, message: Message | undefined = undefined) : MessageField {
 
-        if (message) {
-            const field = message.fields.find(f => f.field.tag === tag);
-            if (field) {
-                // Best case scenario, we found the requested field on the specified message.
-                return field;
+        var tag = Number(tagOrName);
+        
+        if (isNaN(tag)) {
+            var v = version;
+            if (!version) {
+                v = this.latestVersion;
+            }
+            if (v) {
+                const field = v.fields.find(f => f.name === tagOrName);
+                if (field) {
+                    tag = field.tag;
+                }
             }
         }
 
-        if (this.nameLookup === NameLookup.Promiscuous) {
-
-            if (version && tag < version.fields.length) {
-                // Next best case, this field is not defined for this specified message but it is a valid
-                // field for this version.
-                const field = version.fields[tag];
+        if (!isNaN(tag)) {
+            
+            if (message) {
+                const field = message.fields.find(f => f.field.tag === tag);
                 if (field) {
-                    return new MessageField(field, false, "", 0);
+                    // Best case scenario, we found the requested field on the specified message.
+                    return field;
                 }
             }
 
-            // Last chance.
-            // TODO - improve this to check all versions if necessary.
-            if (tag < this.latestVersion.fields.length) {
-                const field = this.latestVersion.fields[tag];
-                if (field) {
-                    return new MessageField(field, false, "", 0);
+            if (this.nameLookup === NameLookup.Promiscuous) {
+
+                if (version && tag < version.fields.length) {
+                    // Next best case, this field is not defined for this specified message but it is a valid
+                    // field for this version.
+                    const field = version.fields[tag];
+                    if (field) {
+                        return new MessageField(field, false, "", 0);
+                    }
+                }
+
+                // Last chance.
+                // TODO - improve this to check all versions if necessary.
+                if (tag < this.latestVersion.fields.length) {
+                    const field = this.latestVersion.fields[tag];
+                    if (field) {
+                        return new MessageField(field, false, "", 0);
+                    }
                 }
             }
         }
@@ -61,9 +79,11 @@ export class Repository {
         const field = new Field(tag, "", "", "", "", "");
         return new MessageField(field, false, "", 0);
     }
-   
-    definitionOfMessage(msgType: string, version: xml.Version | undefined) {
+
+    definitionOfMessage(msgType: string, version: xml.Version | undefined = undefined) {
         
+        // TODO - name lookups
+
         if (version) {
             const message = version.messages[msgType];
             if (message) {

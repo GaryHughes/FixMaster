@@ -16,3 +16,16 @@ function selectVersion(evt, beginString) {
     document.getElementById(beginString).style.display = "block";
     evt.currentTarget.className += " active";
 }
+
+// window.addEventListener('load', event => {
+//     selectVersion('FIX.4.0');
+// });
+
+// window.addEventListener('message', event => {
+//     const message = event.data;
+//     switch (message.command) {
+//         case 'selectVersion':
+//             selectVersion(message.beginString);
+//             break;
+//     }
+// });
