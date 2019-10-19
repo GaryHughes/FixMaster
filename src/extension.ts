@@ -6,7 +6,7 @@ import * as Definitions from './definitions';
 import * as QuickFix from './quickFixDataDictionary';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
 import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
-import { definitionHtmlForField, definitionHtmlForMessage } from './html';
+import { definitionHtmlForField } from './html';
 
 export function activate(context: ExtensionContext) {
 
@@ -252,6 +252,7 @@ export function activate(context: ExtensionContext) {
 			ViewColumn.One, 
 			{ 
 				enableScripts: true,
+				retainContextWhenHidden: true,
 				localResourceRoots: [
 					Uri.file(path.join(context.extensionPath, 'css')),
 					Uri.file(path.join(context.extensionPath, 'js'))
