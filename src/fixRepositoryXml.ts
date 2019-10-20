@@ -175,7 +175,7 @@ export class Version {
                     }
                     else {
                         while (index < tag - 1) {
-                            fields.push(new Field(0, "", "", "", "", ""));
+                            fields.push(new Field(NaN, "", "", "", "", ""));
                             ++index;
                         }
                         ++index;

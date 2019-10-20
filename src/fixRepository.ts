@@ -9,11 +9,12 @@ export class Repository {
     constructor(root: string, preload: boolean = false) {
 
         let directories = fs.readdirSync(root, { withFileTypes: true })
-                            .filter(entry => entry.isDirectory() && entry.name.startsWith("FIX."))
+                            .filter(entry => entry.isDirectory() && entry.name.startsWith("FIX"))
                             .map(entry => entry.name);
 
         this.versions = directories.map(entry => new xml.Version(path.join(root, entry)));   
-        this.latestVersion = this.versions[this.versions.length - 1];
+        // FIXT would end up being last but we don't want that because it is a subset.
+        this.latestVersion = this.versions[this.versions.length - 2];
 
         if (preload) {
             for (let version of this.versions) {

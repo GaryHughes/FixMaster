@@ -36,14 +36,13 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
     html += '<br>';
     html += '<ul class="nav nav-pills">';
     for (const version of repository.versions) {
-        const values = version.enumeratedTags[definition.field.tag];
         var style = 'nav-link';
         if (version.beginString === prefferedVersion) {
             style += ' active';
         }
         
         const versionDefinition = version.fields[definition.field.tag];
-        if (!versionDefinition) {
+        if (!versionDefinition || isNaN(versionDefinition.tag)) {
             style += ' disabled';
         }
 
