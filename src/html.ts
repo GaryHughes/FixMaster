@@ -70,7 +70,9 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
         }
 
         if (values && values.length > 0) {
-            html += '       <table class="table table-sm">';
+            /* we shouldn't add table-dark here but I don't know how to do this dynamically based on the theme and it looks ok
+               in both themes anyway because we explicitly override the background and text colors in the css. */
+            html += '       <table class="table table-dark table-sm">';
             html += '           <thead>';
             html += '               <trow><th class="text-center">Value</th><th>Name</th><th>Description</th><th>Added</th><th>Updated</th><th>Deprecated</th></trow>';
             html += '           </thead>';
