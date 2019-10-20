@@ -2,6 +2,7 @@ import { Message, MessageField } from './definitions';
 import { Repository } from './fixRepository';
 import { Version } from './fixRepositoryXml';
 import { Uri } from 'vscode';
+import { fieldValueSeparator } from './fixProtcol';
 
 function htmlHead(stylesheetPaths: Uri[], scriptPaths: Uri[]) {
     var html = '';
@@ -40,9 +41,12 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
         if (version.beginString === prefferedVersion) {
             style += ' active';
         }
-        if (!values || values.length === 0) {
+        
+        const versionDefinition = version.fields[definition.field.tag]
+        if (!versionDefinition) {
             style += ' disabled';
         }
+
         html += '<li class="nav-item">';
         html += `   <a class="${style}" href="#${normaliseId(version.beginString)}" data-toggle="pill">${version.beginString}</a>`;
         html += '</li>';
@@ -54,46 +58,48 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
 
     for (const version of repository.versions) {
         const values = version.enumeratedTags[definition.field.tag];
-        // if not values disable tab
         style = 'tab-pane';
         if (version.beginString === prefferedVersion) {
             style += ' active';
         }
         html += `   <div class="${style}" id="${normaliseId(version.beginString)}">`;
-        html += '       <table class="table table-dark table-sm">';
-        html += '           <thead>';
-        html += '               <trow><th class="text-center">Value</th><th>Name</th><th>Description</th><th>Added</th><th>Updated</th><th>Deprecated</th></trow>';
-        html += '           </thead>';
-        html += '           <tbody>';
-        if (values) {
-            for (const enumValue of values) {
-                html += '   <tr>';
-                html += '   <td class="text-center">' + enumValue.value + '</td>';
-                html += '   <td>' + enumValue.symbolicName + '</td>';
-                html += '   <td>' + enumValue.description + '</td>';
-                if (enumValue.addedEP && enumValue.addedEP.length > 0) {
-                    html += '   <td>' + enumValue.added + " EP" + enumValue.addedEP + '</td>';
+        html += '       <p>' + definition.field.description + '</p>';
+        if (values && values.length > 0) {
+            html += '       <table class="table table-dark table-sm">';
+            html += '           <thead>';
+            html += '               <trow><th class="text-center">Value</th><th>Name</th><th>Description</th><th>Added</th><th>Updated</th><th>Deprecated</th></trow>';
+            html += '           </thead>';
+            html += '           <tbody>';
+            if (values) {
+                for (const enumValue of values) {
+                    html += '   <tr>';
+                    html += '   <td class="text-center">' + enumValue.value + '</td>';
+                    html += '   <td>' + enumValue.symbolicName + '</td>';
+                    html += '   <td>' + enumValue.description + '</td>';
+                    if (enumValue.addedEP && enumValue.addedEP.length > 0) {
+                        html += '   <td>' + enumValue.added + " EP" + enumValue.addedEP + '</td>';
+                    }
+                    else {
+                        html += '   <td>' + enumValue.added + '</td>';
+                    }
+                    if (enumValue.updatedEP && enumValue.updatedEP.length > 0) {
+                        html += '   <td>' + enumValue.updated + " EP" + enumValue.updatedEP + '</td>';
+                    }
+                    else {
+                        html += '   <td>' + enumValue.updated + '</td>';
+                    }
+                    if (enumValue.deprecatedEP && enumValue.deprecatedEP.length > 0) {
+                        html += '   <td>' + enumValue.deprecated + " EP" + enumValue.deprecatedEP + '</td>';
+                    }
+                    else {
+                        html += '   <td>' + enumValue.deprecated + '</td>';
+                    }
+                    html += '   </tr>';
                 }
-                else {
-                    html += '   <td>' + enumValue.added + '</td>';
-                }
-                if (enumValue.updatedEP && enumValue.updatedEP.length > 0) {
-                    html += '   <td>' + enumValue.updated + " EP" + enumValue.updatedEP + '</td>';
-                }
-                else {
-                    html += '   <td>' + enumValue.updated + '</td>';
-                }
-                if (enumValue.deprecatedEP && enumValue.deprecatedEP.length > 0) {
-                    html += '   <td>' + enumValue.deprecated + " EP" + enumValue.deprecatedEP + '</td>';
-                }
-                else {
-                    html += '   <td>' + enumValue.deprecated + '</td>';
-                }
-                html += '   </tr>';
             }
+            html += '           </tbody>';
+            html += '       </table>';
         }
-        html += '           </tbody>';
-        html += '       </table>';
         html += '   </div>';
     }
 
