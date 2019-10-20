@@ -77,19 +77,19 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
                     html += '   <td>' + enumValue.symbolicName + '</td>';
                     html += '   <td>' + enumValue.description + '</td>';
                     if (enumValue.addedEP && enumValue.addedEP.length > 0) {
-                        html += '   <td>' + enumValue.added + " EP" + enumValue.addedEP + '</td>';
+                        html += '   <td>' + enumValue.added + "/EP" + enumValue.addedEP + '</td>';
                     }
                     else {
                         html += '   <td>' + enumValue.added + '</td>';
                     }
                     if (enumValue.updatedEP && enumValue.updatedEP.length > 0) {
-                        html += '   <td>' + enumValue.updated + " EP" + enumValue.updatedEP + '</td>';
+                        html += '   <td>' + enumValue.updated + "/EP" + enumValue.updatedEP + '</td>';
                     }
                     else {
                         html += '   <td>' + enumValue.updated + '</td>';
                     }
                     if (enumValue.deprecatedEP && enumValue.deprecatedEP.length > 0) {
-                        html += '   <td>' + enumValue.deprecated + " EP" + enumValue.deprecatedEP + '</td>';
+                        html += '   <td>' + enumValue.deprecated + "/EP" + enumValue.deprecatedEP + '</td>';
                     }
                     else {
                         html += '   <td>' + enumValue.deprecated + '</td>';
