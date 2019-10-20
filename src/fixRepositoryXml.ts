@@ -58,9 +58,14 @@ export class Version {
                         new Enum(
                             element.Tag[0], 
                             element.Value[0],
-                            element.SymbolicName[0], 
+                            element.SymbolicName[0],
                             element.Description[0], 
-                            element.$ ? (element.$.added ? element.$.added : "") : "" 
+                            element.$ ? (element.$.added ? element.$.added : "") : "", 
+                            element.$ ? (element.$.addedEP ? element.$.addedEP : "") : "",
+                            element.$ ? (element.$.updated ? element.$.updated : "") : "", 
+                            element.$ ? (element.$.updatedEP ? element.$.updatedEP : "") : "",
+                            element.$ ? (element.$.deprecated ? element.$.deprecated : "") : "",  
+                            element.$ ? (element.$.deprecatedEP ? element.$.deprecatedEP : "") : ""  
                         )
                     );
                 }

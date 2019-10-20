@@ -3,16 +3,26 @@
 // 
 export class Enum {
     
-    constructor(readonly tag: number, 
-                readonly value: string, 
-                readonly symbolicName: string, 
+    constructor(readonly tag: number,
+                readonly value: string,
+                readonly symbolicName: string,
                 readonly description: string = "", 
-                readonly added: string = "") {
+                readonly added: string = "",
+                readonly addedEP: string = "",
+                readonly updated: string = "",
+                readonly updatedEP: string = "",
+                readonly deprecated: string = "",
+                readonly deprecatedEP: string = "") {
         this.tag = tag;
         this.value = value;
         this.symbolicName = symbolicName;
         this.description = description;
         this.added = added;
+        this.addedEP = addedEP;
+        this.updated = updated;
+        this.updatedEP = updatedEP;
+        this.deprecated = deprecated;
+        this.deprecatedEP = deprecatedEP;
     }
 }
 

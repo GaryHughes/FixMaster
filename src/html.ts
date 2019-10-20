@@ -35,9 +35,13 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
     html += '<br>';
     html += '<ul class="nav nav-pills">';
     for (const version of repository.versions) {
+        const values = version.enumeratedTags[definition.field.tag];
         var style = 'nav-link';
         if (version.beginString === prefferedVersion) {
             style += ' active';
+        }
+        if (!values || values.length === 0) {
+            style += ' disabled';
         }
         html += '<li class="nav-item">';
         html += `   <a class="${style}" href="#${normaliseId(version.beginString)}" data-toggle="pill">${version.beginString}</a>`;
@@ -58,7 +62,7 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
         html += `   <div class="${style}" id="${normaliseId(version.beginString)}">`;
         html += '       <table class="table table-dark table-sm">';
         html += '           <thead>';
-        html += '               <trow><th class="text-center">Value</th><th>Name</th><th>Description</th><th>Added</th></trow>';
+        html += '               <trow><th class="text-center">Value</th><th>Name</th><th>Description</th><th>Added</th><th>Updated</th><th>Deprecated</th></trow>';
         html += '           </thead>';
         html += '           <tbody>';
         if (values) {
@@ -67,7 +71,24 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
                 html += '   <td class="text-center">' + enumValue.value + '</td>';
                 html += '   <td>' + enumValue.symbolicName + '</td>';
                 html += '   <td>' + enumValue.description + '</td>';
-                html += '   <td>' + enumValue.added + '</td>';
+                if (enumValue.addedEP && enumValue.addedEP.length > 0) {
+                    html += '   <td>' + enumValue.added + " EP" + enumValue.addedEP + '</td>';
+                }
+                else {
+                    html += '   <td>' + enumValue.added + '</td>';
+                }
+                if (enumValue.updatedEP && enumValue.updatedEP.length > 0) {
+                    html += '   <td>' + enumValue.updated + " EP" + enumValue.updatedEP + '</td>';
+                }
+                else {
+                    html += '   <td>' + enumValue.updated + '</td>';
+                }
+                if (enumValue.deprecatedEP && enumValue.deprecatedEP.length > 0) {
+                    html += '   <td>' + enumValue.deprecated + " EP" + enumValue.deprecatedEP + '</td>';
+                }
+                else {
+                    html += '   <td>' + enumValue.deprecated + '</td>';
+                }
                 html += '   </tr>';
             }
         }

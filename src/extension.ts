@@ -242,9 +242,12 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
-
-
 		const definition = repository.definitionOfField(fieldTagOrName);
+
+		if (!definition || isNaN(definition.field.tag)) {
+			window.showErrorMessage(`Can't find a field with Tag or Name '${fieldTagOrName}'`);
+			return;
+		}
 
 		const panel = window.createWebviewPanel(
 			'FIX Master - Field Definition',
