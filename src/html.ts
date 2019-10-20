@@ -63,7 +63,12 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
             style += ' active';
         }
         html += `   <div class="${style}" id="${normaliseId(version.beginString)}">`;
-        html += '       <p>' + definition.field.description.split('\n').join('<br>') + '</p>';
+
+        const versionDefinition = version.fields[definition.field.tag];
+        if (versionDefinition) {
+            html += '       <p>' + versionDefinition.description.split('\n').join('<br>') + '</p>';
+        }
+
         if (values && values.length > 0) {
             html += '       <table class="table table-dark table-sm">';
             html += '           <thead>';
