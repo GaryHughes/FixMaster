@@ -36,7 +36,7 @@ export class Repository {
                 v = this.latestVersion;
             }
             if (v) {
-                const field = v.fields.find(f => f.name === tagOrName);
+                const field = v.fields.find(f => f.name.toUpperCase() === tagOrName.toString().toUpperCase());
                 if (field) {
                     tag = field.tag;
                 }

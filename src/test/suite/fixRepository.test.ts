@@ -80,4 +80,8 @@ suite('FIX Repository Test Suite', () => {
         assert.equal(59, repository.definitionOfField('TimeInForce').field.tag);    
     });
 
+    test('Field lookup by name is not case sensitive', () => {
+        assert.equal(59, repository.definitionOfField('timeinforce').field.tag);    
+    });
+
 });

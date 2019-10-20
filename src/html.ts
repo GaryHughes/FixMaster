@@ -42,7 +42,7 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
             style += ' active';
         }
         
-        const versionDefinition = version.fields[definition.field.tag]
+        const versionDefinition = version.fields[definition.field.tag];
         if (!versionDefinition) {
             style += ' disabled';
         }
