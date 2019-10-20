@@ -2,7 +2,6 @@ body, table, thead, ul {
     background-color: var(--vscode-editor-background) !important;
 }
 
-p {
-    color: var(--vscode-editor-foreground) ! important;
+p, td, th {
+    color: var(--vscode-editor-foreground) !important;
 }
-

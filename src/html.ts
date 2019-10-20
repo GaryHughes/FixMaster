@@ -70,7 +70,7 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
         }
 
         if (values && values.length > 0) {
-            html += '       <table class="table table-dark table-sm">';
+            html += '       <table class="table table-sm">';
             html += '           <thead>';
             html += '               <trow><th class="text-center">Value</th><th>Name</th><th>Description</th><th>Added</th><th>Updated</th><th>Deprecated</th></trow>';
             html += '           </thead>';
