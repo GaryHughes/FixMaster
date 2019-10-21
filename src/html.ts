@@ -47,7 +47,11 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
         }
 
         html += '<li class="nav-item">';
-        html += `   <a class="${style}" href="#${normaliseId(version.beginString)}" data-toggle="pill">${version.beginString}</a>`;
+        html += `   <a class="${style}" href="#${normaliseId(version.beginString)}" data-toggle="pill">${version.beginString}`;
+        if (version.extensionPack) {
+            html += "/EP" + version.extensionPack;
+        }
+        html += '</a>';
         html += '</li>';
     }
     html += '</ul>';

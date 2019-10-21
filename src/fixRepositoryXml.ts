@@ -254,6 +254,7 @@ export class Version {
 
         if (directories.length > 0) {
             baseOrEpDirectory = directories[0].name;
+            this.extensionPack = baseOrEpDirectory.substring(2);
         }
 
         this.versionPath = path.join(this.versionPath, baseOrEpDirectory);
@@ -316,6 +317,7 @@ export class Version {
     private loadedEnums: boolean;
 
     readonly beginString: string;
+    readonly extensionPack: string | null = null;
     _enums: Enum[] = [];
     _fields: Field[] = [];
     _messages: Record<string, Message> = {};
