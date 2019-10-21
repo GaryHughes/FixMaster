@@ -1,5 +1,6 @@
 import * as FIX from './fixRepository';
 import * as xml from './fixRepositoryXml';
+import { DataDictionary } from './quickFixDataDictionary';
 import stringify = require('csv-stringify/lib/sync.js');
 
 export const fixMessagePrefix = "8=FIX";
@@ -66,7 +67,7 @@ export class Message {
         this.fields = fields;
     }
 
-    describe(repository: FIX.Repository) {
+    describe(repository: FIX.Repository, quickFix: DataDictionary | null) {
         // TODO - This is all a bit messier than I'd like - review.
         const beginString = this.fields.find(field => field.tag === beginStringTag);
      
@@ -103,6 +104,10 @@ export class Message {
         const fieldDescriptions = this.fields.map(field => {
             const definition = repository.definitionOfField(field.tag, version, undefined);
             const valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
+
+
+
+
             return new FieldDescription(field.tag, 
                                         field.value, 
                                         definition.field.name, 
@@ -198,12 +203,12 @@ export function parseMessage(text: string, separator: string | undefined) {
     return message;
 }
 
-export function prettyPrintMessage(context: string, message:Message, repository:FIX.Repository, nestedFieldIndent: number) {
+export function prettyPrintMessage(context: string, message:Message, repository:FIX.Repository, quickFix: DataDictionary | null, nestedFieldIndent: number) {
     
     var buffer: string = "";
     var widestFieldName: number = 0;
  
-    const description = message.describe(repository);
+    const description = message.describe(repository, quickFix);
     
     description.fields.forEach(field => {
         if (field.name.length > widestFieldName) {
@@ -239,10 +244,10 @@ export function prettyPrintMessage(context: string, message:Message, repository:
     return buffer;
 }
 
-export function csvPrintMessage(context: string, message:Message, repository:FIX.Repository, _: number) {
+export function csvPrintMessage(context: string, message:Message, repository:FIX.Repository, quickFix: DataDictionary | null, _: number) {
 
     var buffer: string = "";
-    const description = message.describe(repository);
+    const description = message.describe(repository, quickFix);
     
     if (context && context.length > 0) {
         buffer += context + " ";

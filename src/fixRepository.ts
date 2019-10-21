@@ -65,12 +65,13 @@ export class Repository {
                     }
                 }
 
-                // Last chance.
-                // TODO - improve this to check all versions if necessary.
-                if (tag < this.latestVersion.fields.length) {
-                    const field = this.latestVersion.fields[tag];
-                    if (field) {
-                        return new MessageField(field, false, "", 0);
+                // Last chance, check all versions.
+                for (const version of this.versions) {
+                    if (tag < version.fields.length) {
+                        const field = version.fields[tag];
+                        if (field && !isNaN(field.tag)) {
+                            return new MessageField(field, false, "", 0);
+                        }
                     }
                 }
             }

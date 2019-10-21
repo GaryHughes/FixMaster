@@ -2,8 +2,7 @@ import { window, ProgressLocation, ExtensionContext, commands, workspace, Worksp
 import * as path from 'path';
 import * as fs from 'fs';
 import { Repository } from './fixRepository';
-import * as Definitions from './definitions';
-import * as QuickFix from './quickFixDataDictionary';
+import { DataDictionary } from './quickFixDataDictionary';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
 import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
 import { definitionHtmlForField } from './html';
@@ -11,7 +10,7 @@ import { definitionHtmlForField } from './html';
 export function activate(context: ExtensionContext) {
 
 	var repository: Repository | null = null;
-	var dataDictionary: QuickFix.DataDictionary | null = null;
+	var dataDictionary: DataDictionary | null = null;
 
 	const loadRepository = () => {
 
@@ -60,7 +59,7 @@ export function activate(context: ExtensionContext) {
 						window.showErrorMessage("The QuickFix data dictionary path '" + path + "' cannot be found.");
 					}
 					else {
-						dataDictionary = await QuickFix.DataDictionary.parse(path);
+						dataDictionary = await DataDictionary.parse(path);
 					}
 					resolve();
 				}, 0);
@@ -81,7 +80,7 @@ export function activate(context: ExtensionContext) {
 		}
 	});
 
-	let format = (printer: (context: string, message:Message, repository:Repository, nestedFieldIndent: number) => string, scope: CommandScope) => {
+	let format = (printer: (context: string, message:Message, repository:Repository, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, scope: CommandScope) => {
 
 		if (!repository) {
 			window.showErrorMessage('The repository has not been loaded - check the repositoryPath setting.');
@@ -189,7 +188,7 @@ export function activate(context: ExtensionContext) {
 
 						if (include) {
 							if (prettyPrint) {
-								var pretty = printer(messageContext, message, repository, nestedFieldIndent);
+								var pretty = printer(messageContext, message, repository, dataDictionary, nestedFieldIndent);
 								if (!lastLineWasAMessage) {
 									pretty = "\n" + pretty;	
 									lastLineWasAMessage = true;
@@ -280,75 +279,5 @@ export function activate(context: ExtensionContext) {
 		}
 
 		panel.webview.html = html;
-
 	});
-
-	/*
-	commands.registerCommand('extension.show-message', async () => {
-
-		if (!repository) {
-			return;
-		}
-
-		const msgTypeOrName = await window.showInputBox({ prompt: "Enter a MsgType or Name. e.g. D or NewOrderSingle" });
-
-		if (!msgTypeOrName) {
-			return;
-		}
-
-		const definition = repository.definitionOfMessage(msgTypeOrName, undefined);
-
-		const panel = window.createWebviewPanel(
-			'FIX Master - Message Definition',
-			definition.name,
-			ViewColumn.One, 
-			{ 
-				enableScripts: true,
-				localResourceRoots: [
-					Uri.file(path.join(context.extensionPath, 'css')),
-					Uri.file(path.join(context.extensionPath, 'js'))
-				] 
-			}
-		);
-
-		var scriptPaths: Uri[] = [];
-		for (const source of ['repository.js', 'jquery.slim.min.js', 'bootstrap.bundle.min.js']) {
-			scriptPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'js', source))));
-		}
-
-		var stylesheetPaths: Uri[] = [];
-		for (const source of ['repository.css', 'bootstrap.min.css']) {
-			stylesheetPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'css', source))));
-		} 
-
-		const html = await window.withProgress({
-			location: ProgressLocation.Notification,
-			title: "Constructing the message definitions...",
-			cancellable: false
-		}, (progress, token) => {
-			return new Promise<string | null>(resolve => {
-				setTimeout(async () => {
-					if (!repository) {
-						resolve(null);
-						return;
-					}
-					const html = definitionHtmlForMessage(definition, repository, stylesheetPaths, scriptPaths);
-					resolve(html);
-				}, 0);
-			});
-		});	
-
-		if (!html) {
-			return;
-		}
-
-		panel.webview.html = html;
-
-		//panel.webview.postMessage({ command: 'selectVersion', beginString: 'FIX.4.4' });
-		// setTimeout(async () => {
-		// 	panel.webview.postMessage({ command: 'selectVersion', beginString: 'FIX.4.4' });
-		// }, 100);
-	
-	});
-	*/
 }

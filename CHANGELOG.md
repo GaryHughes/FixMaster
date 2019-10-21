@@ -8,6 +8,9 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+- Command 'Show the definition of a field' which will show the field description and enumerated values for all availble FIX versions.
+- Support for loading a QuickFix data dictionary that can be used to supplement the repository when pretty printing logs.
+
 ### Fixed
 
 - Fixed an issue preventing progress notifications from displaying correctly.

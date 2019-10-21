@@ -84,4 +84,8 @@ suite('FIX Repository Test Suite', () => {
         assert.equal(59, repository.definitionOfField('timeinforce').field.tag);    
     });
 
+    test('Lookup removed field', () => {
+        assert.equal('ExecTransType', repository.definitionOfField(20).field.name);
+    });
+
 });
