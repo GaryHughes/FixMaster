@@ -83,7 +83,11 @@ export class Message {
             const msgType = msgTypeField.value;
             const messageDefinition = repository.definitionOfMessage(msgType, version);
             const fieldDescriptions = this.fields.map(field => {
-                const definition = repository.definitionOfField(field.tag, version, messageDefinition);
+                var definition = repository.definitionOfField(field.tag, version, messageDefinition);
+                // TODO - change this to return tag === NaN 
+                if (definition.field.description.length === 0 && quickFix) {
+                    definition = quickFix.definitionOfField(field.tag, undefined, undefined);
+                }
                 const valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
                 return new FieldDescription(field.tag, 
                                             field.value, 
@@ -102,12 +106,12 @@ export class Message {
         // and lookup the fields in isolation, this means we don't have required or indent properties but still better
         // than nothing.
         const fieldDescriptions = this.fields.map(field => {
-            const definition = repository.definitionOfField(field.tag, version, undefined);
+            var definition = repository.definitionOfField(field.tag, version, undefined);
+            // TODO - change this to return tag === NaN
+            if (definition.field.description.length === 0 && quickFix) {
+                definition = quickFix.definitionOfField(field.tag, undefined, undefined);
+            }
             const valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
-
-
-
-
             return new FieldDescription(field.tag, 
                                         field.value, 
                                         definition.field.name, 

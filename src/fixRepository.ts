@@ -78,6 +78,7 @@ export class Repository {
         }
 
         // Always return a valid object to simplify calling code.
+        // TODO - change this to return tag === NaN
         const field = new Field(tag, "", "", "", "", "");
         return new MessageField(field, false, "", 0);
     }

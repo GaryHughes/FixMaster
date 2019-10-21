@@ -77,8 +77,12 @@ export class DataDictionary {
     readonly enums: Record<number, Enum[]> = {};
     readonly messages: Record<string, Message> = {};
    
-    definitionOfField(tag: number, beginString: string, message: Message | undefined) {
-        
+    definitionOfField(tag: number, beginString: string | undefined, message: Message | undefined) {
+        if (tag > 0 && tag < this.fields.length) {
+            const field = this.fields[tag];
+            return new MessageField(field, false, "", 0);
+        }
+        return new MessageField(new Field(NaN, "", "", undefined, undefined, undefined), false, "", 0);
     }
 
     definitionOfMessage(msgType: string) {
