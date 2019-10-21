@@ -1,8 +1,6 @@
-import { Message, MessageField } from './definitions';
+import { MessageField } from './definitions';
 import { Repository } from './fixRepository';
-import { Version } from './fixRepositoryXml';
 import { Uri } from 'vscode';
-import { fieldValueSeparator } from './fixProtcol';
 
 function htmlHead(stylesheetPaths: Uri[], scriptPaths: Uri[]) {
     var html = '';
@@ -24,10 +22,26 @@ function normaliseId(value: string) {
     return value.split(".").join("");
 }
 
-export function definitionHtmlForField(definition: MessageField, repository: Repository, stylesheetPaths: Uri[], scriptPaths: Uri[], prefferedVersion: string | undefined = undefined) {
+export function definitionHtmlForField(definition: MessageField, repository: Repository, stylesheetPaths: Uri[], scriptPaths: Uri[], preferedBeginString: string | undefined = undefined) {
 
-    if (!prefferedVersion) {
-        prefferedVersion = repository.latestVersion.beginString;
+    if (!preferedBeginString) {
+        preferedBeginString = repository.latestVersion.beginString;
+    }
+
+    // The requested field might not be available in the preferred version and we don't
+    // want that tab to be selected so find a version it is available in.
+    const preferredVersion = repository.versions.find(version => version.beginString === preferedBeginString);
+    if (preferredVersion) {
+        var preferredDefinition = preferredVersion.fields[definition.field.tag];
+        if (isNaN(preferredDefinition.tag)) {
+            for (const version of repository.versions.slice().reverse()) {
+                preferredDefinition = version.fields[definition.field.tag];    
+                if (!isNaN(preferredDefinition.tag)) {
+                    preferedBeginString = version.beginString;
+                    break;
+                }   
+            }
+        }
     }
 
     var html = htmlHead(stylesheetPaths, scriptPaths);
@@ -37,13 +51,13 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
     html += '<ul class="nav nav-pills">';
     for (const version of repository.versions) {
         var style = 'nav-link';
-        if (version.beginString === prefferedVersion) {
-            style += ' active';
-        }
-        
+      
         const versionDefinition = version.fields[definition.field.tag];
         if (!versionDefinition || isNaN(versionDefinition.tag)) {
             style += ' disabled';
+        }
+        else if (version.beginString === preferedBeginString) {
+            style += ' active';
         }
 
         html += '<li class="nav-item">';
@@ -62,7 +76,7 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
     for (const version of repository.versions) {
         const values = version.enumeratedTags[definition.field.tag];
         style = 'tab-pane';
-        if (version.beginString === prefferedVersion) {
+        if (version.beginString === preferedBeginString) {
             style += ' active';
         }
         html += `   <div class="${style}" id="${normaliseId(version.beginString)}">`;
