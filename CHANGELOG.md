@@ -4,11 +4,11 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [UNRELEASED]
+## [1.2.0] 2019-10-22
 
 ### Added
 
-- Command 'Show the definition of a field' which will show the field description and enumerated values for all availble FIX versions.
+- Command 'Show the definition of a field' which will show the field description and enumerated values for all available FIX versions.
 - Support for loading a QuickFix data dictionary that can be used to supplement the repository when pretty printing logs.
 
 ### Fixed

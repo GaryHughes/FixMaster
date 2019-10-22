@@ -3,7 +3,7 @@
 	"displayName": "FIX Master",
 	"description": "FIX Protocol formatter",
 	"icon": "images/fixMaster.png",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"publisher": "geh-fixmaster",
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"repository": {

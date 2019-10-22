@@ -10,6 +10,8 @@ FIX Master is designed to parse FIX messages from log files and pretty print the
 
 **fixmaster.repositoryPath** Path to a fixtrading.org XML Repository. FIX Master includes a copy of the repository that it will use by default.
 
+**fixmaster.quickFixDataDictionaryPath** Path to a QuickFix XML data dictionary. This can be used to supplement the fixtrading.org repository with custom field definitions.
+
 **fixmaster.nameLookup** `(Strict,Promiscuous)` Governs how names are found for messages, fields, and enumerated values.
 
 **fixmaster.fieldSeparator** The character used to separate fields within a messages. Default is the standard 0x01, some users replace these control characters when logging.
