@@ -88,7 +88,10 @@ export class Message {
                 if (definition.field.description.length === 0 && quickFix) {
                     definition = quickFix.definitionOfField(field.tag, undefined, undefined);
                 }
-                const valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
+                var valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
+                if (valueDescription.length === 0 && quickFix) {
+                    valueDescription = quickFix.descriptionOfValue(field.tag, field.value);
+                }
                 return new FieldDescription(field.tag, 
                                             field.value, 
                                             definition ? definition.field.name : "", 
