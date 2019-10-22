@@ -1,7 +1,7 @@
 {
 	"name": "fixmaster",
 	"displayName": "FIX Master",
-	"description": "FIX Protocol formatter",
+	"description": "FIX Protocol Formatter and Data Dictionary",
 	"icon": "images/fixMaster.png",
 	"version": "1.2.0",
 	"publisher": "geh-fixmaster",
