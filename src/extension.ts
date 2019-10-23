@@ -263,7 +263,7 @@ export function activate(context: ExtensionContext) {
 		);
 
 		var scriptPaths: Uri[] = [];
-		for (const source of ['repository.js', 'jquery.slim.min.js', 'bootstrap.bundle.min.js']) {
+		for (const source of ['jquery.slim.min.js', 'bootstrap.bundle.min.js']) {
 			scriptPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'js', source))));
 		}
 
