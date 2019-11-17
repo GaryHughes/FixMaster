@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Repository } from './fixRepository';
 import { DataDictionary } from './quickFixDataDictionary';
-import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtcol';
+import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtocol';
 import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
 import { definitionHtmlForField } from './html';
 

@@ -6,7 +6,7 @@ import { before } from 'mocha';
 import * as vscode from 'vscode';
 // import * as myExtension from '../extension';
 
-import { fixMessagePrefix, parseMessage, prettyPrintMessage } from '../../fixProtcol';
+import { fixMessagePrefix, parseMessage, prettyPrintMessage } from '../../fixProtocol';
 
 suite('FIX Protocol Test Suite', () => {
 
@@ -16,7 +16,7 @@ suite('FIX Protocol Test Suite', () => {
 
 	test('Parse Message', () => {
         let text = "8=FIX.4.4\u00019=72\u000135=A\u000149=ACCEPTOR\u000156=INITIATOR\u000134=1\u000152=20190816-10:34:27.742\u000198=0\u0001108=30\u000110=012\u0001";
-        let message = parseMessage(text, undefined);
+        let message = parseMessage(text);
         if (!message) {
             assert.fail("message failed to parse");
             return;
@@ -40,13 +40,13 @@ suite('FIX Protocol Test Suite', () => {
 
     test('Parse Message Wtih Wrong Field Delimiter', () => {
         let text = "8=FIX.4.4|9=72|35=A|49=ACCEPTOR|56=INITIATOR|34=1|52=20190816-10:34:27.742|98=0|108=30|10=012|";
-        let message = parseMessage(text, undefined);
+        let message = parseMessage(text);
         assert.equal(undefined, message);
     });
   
     test('Parse FIXT.1.1 Message', () => {
         let text = "8=FIXT.1.1\u00019=72\u000135=A\u000149=ACCEPTOR\u000156=INITIATOR\u000134=1\u000152=20190816-10:34:27.742\u000198=0\u0001108=30\u000110=012\u0001";
-        let message = parseMessage(text, undefined);
+        let message = parseMessage(text);
         if (!message) {
             assert.fail("message failed to parse");
             return;
@@ -58,7 +58,7 @@ suite('FIX Protocol Test Suite', () => {
 
     test('isAdministrative is true for Logon', () => {
         let text = "8=FIX.4.4\u00019=72\u000135=A\u000149=ACCEPTOR\u000156=INITIATOR\u000134=1\u000152=20190816-10:34:27.742\u000198=0\u0001108=30\u000110=012\u0001";
-        let message = parseMessage(text, undefined);
+        let message = parseMessage(text);
         if (!message) {
             assert.fail("message failed to parse");
             return;
@@ -68,7 +68,7 @@ suite('FIX Protocol Test Suite', () => {
 
     test('isAdministrative is false for NewOrderSingle', () => {
         let text = "8=FIX.4.49=14035=D49=INITIATOR56=ACCEPTOR34=228252=20190929-04:51:00.84911=5070=49100=AUTO55=WTF54=160=20190929-04:35:33.56238=1000040=159=110=129";
-        let message = parseMessage(text, undefined);
+        let message = parseMessage(text);
         if (!message) {
             assert.fail("message failed to parse");
             return;

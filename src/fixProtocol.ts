@@ -16,7 +16,12 @@ export const msgTypeResendRequest = "2";
 export const msgTypeReject = "3";
 export const msgTypeSequenceReset = "4";
 export const msgTypeLogout = "5";
+export const msgTypeExecutionReport = "8";
+export const msgTypeOrderCancelReject = "9";
 export const msgTypeLogon = "A";
+export const msgTypeNewOrderSingle = "D";
+export const msgTypeOrderCancelRequest = "F";
+export const msgTypeOrderCancelReplaceRequest = "G";
 
 export class FieldDescription {
     
@@ -146,7 +151,7 @@ export class Message {
     
 }
 
-export function parseMessage(text: string, separator: string | undefined) {
+export function parseMessage(text: string, separator: string | undefined = undefined) {
 
     if (!separator) {
         separator = fieldDelimiter;

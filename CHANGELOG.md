@@ -6,12 +6,15 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [UNRELEASED]
 
+### Added
+
+- Command `FIX Master - Pretty Print with Order Book` which will track order messages and print an order book showing their state after each relevant message is printed.
 
 ## [1.2.0] 2019-10-22
 
 ### Added
 
-- Command 'Show the definition of a field' which will show the field description and enumerated values for all available FIX versions.
+- Command `FIX Master - Show the definition of a field` which will show the field description and enumerated values for all available FIX versions.
 - Support for loading a QuickFix data dictionary that can be used to supplement the repository when pretty printing logs.
 
 ### Fixed
