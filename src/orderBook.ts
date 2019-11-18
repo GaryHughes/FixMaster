@@ -4,11 +4,11 @@ import { Order } from './order';
 export class OrderBook {
 
     constructor() {
-        this._messageProcessors[FIX.msgTypeNewOrderSingle] = this.processNewOrderSingle;
-        this._messageProcessors[FIX.msgTypeExecutionReport] = this.processExecutionReport;
-        this._messageProcessors[FIX.msgTypeOrderCancelReplaceRequest] = this.processOrderCancelReplaceRequest;
-        this._messageProcessors[FIX.msgTypeOrderCancelRequest] = this.processOrderCancelRequest;
-        this._messageProcessors[FIX.msgTypeOrderCancelReject] = this.processOrderCancelReject;
+        this._messageProcessors[FIX.msgTypeNewOrderSingle] = (order) => this.processNewOrderSingle(order);
+        this._messageProcessors[FIX.msgTypeExecutionReport] = (order) => this.processExecutionReport(order);
+        this._messageProcessors[FIX.msgTypeOrderCancelReplaceRequest] = (order) => this.processOrderCancelReplaceRequest(order);
+        this._messageProcessors[FIX.msgTypeOrderCancelRequest] = (order) => this.processOrderCancelRequest(order);
+        this._messageProcessors[FIX.msgTypeOrderCancelReject] = (order) => this.processOrderCancelReject(order);
     }
 
     process(message: FIX.Message) {
@@ -23,32 +23,99 @@ export class OrderBook {
         return processor(message);
     }
 
-    public orders() {
-        return Object.keys(this._orders).map(key => this._orders[key]);
+    public get orders() : Iterator<Order> {
+        return this._orders.values();
+    }
+
+    public get size() : number {
+        return this._orders.size;
     }
 
     private processNewOrderSingle(message: FIX.Message) {
-        return false;
+        const id = this.idForMessage(message, FIX.Direction.Outgoing);
+        if (!id) {
+            return false;
+        }
+        const existing = this._orders.get(id);
+        if (existing) {
+            return false;
+        }
+        const order = new Order(message);
+        this._orders.set(id, order);
+        return true;
     }
 
     private processExecutionReport(message: FIX.Message) {
-        return false;
+        const id = this.idForMessage(message, FIX.Direction.Incoming);
+        if (!id) {
+            return false;
+        }
+        var order = this._orders.get(id);
+        if (!order) {
+            return false;
+        }
+        order.update(message);
+        return true;
     }
 
     private processOrderCancelReplaceRequest(message: FIX.Message) {
+        const id = this.idForMessage(message, FIX.Direction.Outgoing);
+        if (!id) {
+            return false;
+        }
         return false;
     }
 
     private processOrderCancelRequest(message: FIX.Message) {
+        const id = this.idForMessage(message, FIX.Direction.Outgoing);
+        if (!id) {
+            return false;
+        }
         return false;
     }   
 
     private processOrderCancelReject(message: FIX.Message) {
+        var id = this.idForMessage(message, FIX.Direction.Incoming);
+        if (!id) {
+            return false;
+        }
         return false;
     }
 
-    _messageProcessors: Record<string, (message:FIX.Message) => boolean> = {};
+    idForMessage(message: FIX.Message, direction: FIX.Direction) {
+      
+        const beginString = message.fields.find(field => field.tag === FIX.beginStringTag);
+        if (!beginString) {
+            return null;
+        }
+        
+        const senderCompId = message.fields.find(field => field.tag === FIX.senderCompIdTag);
+        if (!senderCompId) {
+            return null;
+        }
+
+        const targetCompId = message.fields.find(field => field.tag === FIX.targetCompIdTag);
+        if (!targetCompId) {
+            return null;
+        }
+
+        var clOrdId = message.fields.find(field => field.tag === FIX.OrigClOrdIdTag);
+        if (!clOrdId) {
+            clOrdId = message.fields.find(field => field.tag === FIX.clOrdIdTag);
+            if (!clOrdId) {
+                return null;
+            }
+        }
+
+        if (direction === FIX.Direction.Incoming) {
+            return `${targetCompId.value}-${senderCompId.value}-${clOrdId.value}`;
+        }
+
+        return `${senderCompId.value}-${targetCompId.value}-${clOrdId.value}`;
+    }
+       
+    private _messageProcessors: Record<string, (message:FIX.Message) => boolean> = {};
     
-    _orders: Record<string, Order> = {};
+    private _orders: Map<string, Order> = new Map<string, Order>();
    
 }

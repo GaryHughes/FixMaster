@@ -7,7 +7,7 @@ suite('OrderBook Test Suite', () => {
 
     test('test default book', () => {
       let book = new OrderBook();
-      assert.equal(0, book.orders.length);
+      assert.equal(0, book.size);
     });
 
     test('test unknown execution report', () => {
@@ -56,5 +56,22 @@ suite('OrderBook Test Suite', () => {
       if (book.process(message)) {
         assert.fail('unexpectedly processed order cancel reject');
       }
+    });
+
+    test('test new order single acknowledged', () => {
+      const messages: string[] = [
+        "8=FIX.4.4\u00019=140\u000135=D\u000149=INITIATOR\u000156=ACCEPTOR\u000134=2283\u000152=20190929-04:51:06.973\u000111=51\u000170=50\u0001100=AUTO\u000155=WTF\u000154=1\u000160=20190929-04:35:33.562\u000138=10000\u000140=1\u000159=1\u000110=127\u0001",
+        "8=FIX.4.4\u00019=164\u000135=8\u000149=ACCEPTOR\u000156=INITIATOR\u000134=232\u000152=20190929-04:51:06.981\u000139=0\u000111=51\u000137=INITIATOR-ACCEPTOR-51\u000117=2\u0001150=0\u0001151=10000\u000155=WTF\u000154=1\u000138=10000\u000132=0\u000131=0\u000114=0\u00016=0\u000140=1\u000110=115\u0001"
+      ];
+      let book = new OrderBook();
+      for (const text of messages) {
+        const message = parseMessage(text);
+        if (!message) {
+          assert.fail("message failed to parse");
+          return;
+        }
+        assert.equal(book.process(message), true);
+      }
+      assert.equal(book.size, 1);
     });
 });

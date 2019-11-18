@@ -9,6 +9,10 @@ export const fieldValueSeparator = '=';
 export const beginStringTag = 8;
 export const checkSumTag = 10;
 export const msgTypeTag = 35;
+export const senderCompIdTag = 49;
+export const targetCompIdTag = 56;
+export const clOrdIdTag = 11;
+export const OrigClOrdIdTag = 41;
 
 export const msgTypeHeartbeat = "0";
 export const msgTypeTestRequest = "1";
@@ -22,6 +26,11 @@ export const msgTypeLogon = "A";
 export const msgTypeNewOrderSingle = "D";
 export const msgTypeOrderCancelRequest = "F";
 export const msgTypeOrderCancelReplaceRequest = "G";
+
+export enum Direction {
+    Incoming,
+    Outgoing
+}
 
 export class FieldDescription {
     
