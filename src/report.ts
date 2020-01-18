@@ -37,6 +37,11 @@ export class Report {
         this.footer = values;
     }
 
+    public clear() {
+        this.rows = [];
+        this.footer = [];
+    }
+
     public toString = () : string => {
         var buffer = '';
         // Calculate the column widths
@@ -54,12 +59,12 @@ export class Report {
             // get the widest cell value for this column
             this.rows.forEach(row => {
                 if (index < row.length) {
-                    size = Math.max(size, row[index].length);
+                    size = Math.max(size, (row[index] || "").length);
                 }
             });
             // get the widest footer cell value
             if (index < this.footer.length) {
-                size = Math.max(size, this.footer[index].length);
+                size = Math.max(size, (this.footer[index] || "").length);
             }
             columnWidths[index] = size;
         }
@@ -98,10 +103,10 @@ export class Report {
             for (index = 0; index < this.columns.length; ++index) {
                 const column = this.columns[index];
                 if (column.justification === ColumnJustification.Left) {
-                    buffer += row[index].padEnd(columnWidths[index]);
+                    buffer += (row[index] || "").padEnd(columnWidths[index]);
                 }
                 else {
-                    buffer += row[index].padStart(columnWidths[index]);
+                    buffer += (row[index] || "").padStart(columnWidths[index]);
                 }
                 if (index < this.columns.length - 1) {
                     buffer += "  ";
@@ -120,10 +125,10 @@ export class Report {
                     value = this.footer[index];
                 }
                 if (column.justification === ColumnJustification.Left) {
-                    buffer += value.padStart(columnWidths[index]);
+                    buffer += (value || "").padStart(columnWidths[index]);
                 }
                 else {
-                    buffer += value.padEnd(columnWidths[index]);
+                    buffer += (value || "").padEnd(columnWidths[index]);
                 }
                 if (index < this.columns.length - 1) {
                     buffer += "  ";
