@@ -1,7 +1,7 @@
 import { Repository } from './fixRepository';
 import { OrderBook } from './orderBook';
 import { Order } from './order';
-import { Report } from './report';
+import { Report, ColumnJustification } from './report';
 import { reporters } from 'mocha';
 
 export class OrderReport
@@ -17,7 +17,11 @@ export class OrderReport
             if (!definition) {
                 throw new Error(`Unknown field tag ${tag}`);
             }
-            this._report.addColumn(definition.field.name);
+            let justification = ColumnJustification.Left;
+            if (definition.field.isNumeric) {
+                justification = ColumnJustification.Right;
+            }
+            this._report.addColumn(definition.field.name, justification);
             this._fieldIndexes.set(tag, index++);
         }
     }

@@ -26,14 +26,28 @@ export class Enum {
     }
 }
 
+const numericTypes = [ 
+    "int", 
+    "length",
+    "tagnum",
+    "seqnum",
+    "numingroup",
+    "float",
+    "qty",
+    "price",
+    "priceoffset",
+    "amt",
+    "percentage"
+];
+
 //
 // This is the generic description of a field for a given FIX version.
 //
 export class Field {
     
     constructor(readonly tag: number, 
-                readonly name: string, 
-                readonly type: string, 
+                readonly name: string,
+                readonly type: string,
                 readonly notReqXML: string = "", 
                 readonly description: string = "", 
                 readonly added: string = "") {
@@ -43,6 +57,12 @@ export class Field {
         this.notReqXML = notReqXML;
         this.description = description;
         this.added = added;
+    }
+
+    public get isNumeric() : boolean {
+        // TODO - make this smarter by using baseType
+        let dataType = this.type.toLowerCase();
+        return numericTypes.indexOf(dataType) >= 0;
     }
 }
 
