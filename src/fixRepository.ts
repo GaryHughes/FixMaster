@@ -103,6 +103,7 @@ export class Repository {
         return new Message("", msgType, "", "", "", "", "", "", fields);
     }
 
+    // TODO - refactor these two methods
     descriptionOfValue(tag: number, value:string, version: xml.Version | undefined) {
         
         if (version) {
@@ -126,6 +127,31 @@ export class Repository {
         }
         
         return "";
+    }
+
+    symbolicNameOfValue(tag: number, value:string, version: xml.Version | undefined) {
+        
+        if (version) {
+            const enums = version.enumeratedTags[tag];
+            if (enums) {
+                let definition = enums.find(entry => entry.value === value);
+                if (definition) {
+                    return definition.symbolicName;
+                }
+            }
+        }
+
+        if (this.nameLookup === NameLookup.Promiscuous) {
+            const enums = this.latestVersion.enumeratedTags[tag];
+            if (enums) {
+                let definition = enums.find(entry => entry.value === value);
+                if (definition) {
+                    return definition.symbolicName;
+                }
+            }
+        }
+        
+        return undefined;
     }
 
 }

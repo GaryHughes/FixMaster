@@ -6,7 +6,7 @@ import { reporters } from 'mocha';
 
 export class OrderReport
 {
-    public constructor(repository: Repository, readonly orderBook: OrderBook, readonly tags: number[]) {
+    public constructor(readonly repository: Repository, readonly orderBook: OrderBook, readonly tags: number[]) {
         this._report.addColumn("BeginString");
         this._report.addColumn("SenderCompID");
         this._report.addColumn("TargetCompID");
@@ -25,7 +25,7 @@ export class OrderReport
             this._fieldIndexes.set(tag, index++);
         }
     }
-    
+
     public toString = () : string => {
 
         this._report.clear();
@@ -42,7 +42,8 @@ export class OrderReport
             this._fieldIndexes.forEach((index, tag) => {
                 let field = order.fields.get(tag);
                 if (field) {
-                    values[index] = field.value;
+                    var name = this.repository.symbolicNameOfValue(field.tag, field.value, undefined);
+                    values[index] = name || field.value;
                 }    
             });
 
