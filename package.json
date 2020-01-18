@@ -159,7 +159,7 @@
 				},
 				"fixmaster.orderBookFields": {
 					"type": "string",
-					"default": "Symbol,OrdStatus,Side,OrderQty,Price,CumQty,AvgPx",
+					"default": "Symbol,TimeInForce,Side,OrderQty,Price,CumQty,AvgPx,OrdStatus",
 					"description": "A comma separated list of fields to display in the order book when pretty printing. These can be field names or tag numbers."
 				}
 			}
