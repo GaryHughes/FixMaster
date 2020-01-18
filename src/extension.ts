@@ -6,11 +6,15 @@ import { DataDictionary } from './quickFixDataDictionary';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtocol';
 import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
 import { definitionHtmlForField } from './html';
+import { OrderBook } from './orderBook';
+import { OrderReport } from './orderReport';
 
 export function activate(context: ExtensionContext) {
 
 	var repository: Repository | null = null;
 	var dataDictionary: DataDictionary | null = null;
+	var orderBook = new OrderBook();
+	var orderBookTags: number[] = [];
 
 	const loadRepository = () => {
 
@@ -34,6 +38,7 @@ export function activate(context: ExtensionContext) {
 					}
 					else {
 						repository = new Repository(repositoryPath, true);
+						loadOrderBookTags();
 					}
 					resolve();
 				}, 0);
@@ -67,6 +72,30 @@ export function activate(context: ExtensionContext) {
 		});	
 	};
 
+	const loadOrderBookTags = () => {
+		if (!repository) {
+			return;
+		}
+		const configuration = workspace.getConfiguration();
+		var orderBookFieldsString = configuration.get('fixmaster.orderBookFields') as string;
+		if (!orderBookFieldsString) {
+			return;
+		}
+		orderBookTags = [];
+		let fields = orderBookFieldsString.split(","); 
+		for (let field of fields) {
+			let definition = repository.definitionOfField(field);
+			if (!definition) {
+				window.showErrorMessage(`Unable to find a field with name or tag '${field}'`);
+			}
+			else {
+				if (!orderBookTags.find(tag => tag === definition.field.tag)) {
+					orderBookTags.push(definition.field.tag);
+				}
+			}
+		}
+		orderBook.fields = orderBookTags;
+	};
 
 	loadRepository();
 	loadDataDictionary();
@@ -78,9 +107,14 @@ export function activate(context: ExtensionContext) {
 		else if (evt.affectsConfiguration('fixmaster.quickFixDataDictionaryPath')) {
 			loadDataDictionary();
 		}
+		else if (evt.affectsConfiguration('fixmaster.orderBookFields')) {
+			loadOrderBookTags();
+		}
 	});
 
-	let format = (printer: (context: string, message:Message, repository:Repository, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, scope: CommandScope) => {
+	let format = (printer: (context: string, message:Message, repository:Repository, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
+				  scope: CommandScope,
+				  orderBook: OrderBook | null = null) => {
 
 		if (!repository) {
 			window.showErrorMessage('The repository has not been loaded - check the repositoryPath setting.');
@@ -92,6 +126,10 @@ export function activate(context: ExtensionContext) {
 		if (!activeTextEditor) {
 			window.showErrorMessage('No document is open or the file is too large.');
 			return;
+		}
+
+		if (orderBook) {
+			orderBook.clear();
 		}
 
 		const {document} = activeTextEditor;
@@ -163,7 +201,7 @@ export function activate(context: ExtensionContext) {
 							lastLineWasAMessage = false;
 							continue;
 						}
-
+					
 						var prettyPrint = true;
 						var include = true;
 
@@ -190,9 +228,17 @@ export function activate(context: ExtensionContext) {
 							if (prettyPrint) {
 								var pretty = printer(messageContext, message, repository, dataDictionary, nestedFieldIndent);
 								if (!lastLineWasAMessage) {
-									pretty = "\n" + pretty;	
+									pretty = "\n" + pretty;
 									lastLineWasAMessage = true;
 								}
+
+								if (orderBook) {
+									if (orderBook.process(message)) {
+										let orderReport = new OrderReport(repository, orderBook, orderBookTags);
+										pretty += "\n" + orderReport.toString() + "\n";			
+									}
+								}	
+						
 								edit.replace(document.uri, line.range, pretty);
 							}
 							else {
@@ -215,6 +261,10 @@ export function activate(context: ExtensionContext) {
 
 	commands.registerCommand('extension.format-pretty', () => {
 		format(prettyPrintMessage, CommandScope.Document);
+	});
+
+	commands.registerCommand('extension.format-pretty-with-order-book', () => {
+		format(prettyPrintMessage, CommandScope.Document, orderBook);
 	});
 
 	commands.registerCommand('extension.format-csv', () => {

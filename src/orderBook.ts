@@ -23,12 +23,20 @@ export class OrderBook {
         return processor(message);
     }
 
-    public get orders() : Iterator<Order> {
+    public get orders() : IterableIterator<Order> {
         return this._orders.values();
     }
 
     public get size() : number {
         return this._orders.size;
+    }
+
+    public clear() {
+        this._orders.clear();
+    }
+
+    public set fields(tags:number[]) {
+        this._tags = tags;
     }
 
     private processNewOrderSingle(message: FIX.Message) {
@@ -40,7 +48,7 @@ export class OrderBook {
         if (existing) {
             return false;
         }
-        const order = new Order(message);
+        const order = new Order(message, this._tags);
         this._orders.set(id, order);
         return true;
     }
@@ -99,7 +107,7 @@ export class OrderBook {
             return null;
         }
 
-        var clOrdId = message.fields.find(field => field.tag === FIX.OrigClOrdIdTag);
+        var clOrdId = message.fields.find(field => field.tag === FIX.origClOrdIdTag);
         if (!clOrdId) {
             clOrdId = message.fields.find(field => field.tag === FIX.clOrdIdTag);
             if (!clOrdId) {
@@ -117,5 +125,7 @@ export class OrderBook {
     private _messageProcessors: Record<string, (message:FIX.Message) => boolean> = {};
     
     private _orders: Map<string, Order> = new Map<string, Order>();
+
+    private _tags: number[] = [];
    
 }

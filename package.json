@@ -25,6 +25,7 @@
 	],
 	"activationEvents": [
 		"onCommand:extension.format-pretty",
+		"onCommand:extension.format-pretty-with-order-book",
 		"onCommand:extension.format-csv",
 		"onCommand:extension.format-pretty-selection",
 		"onCommand:extension.format-csv-selection",
@@ -36,6 +37,10 @@
 			{
 				"command": "extension.format-pretty",
 				"title": "FIX Master - Pretty Print"
+			},
+			{
+				"command": "extension.format-pretty-with-order-book",
+				"title": "FIX Master - Pretty Print with Order Book"
 			},
 			{
 				"command": "extension.format-csv",
@@ -60,12 +65,14 @@
 				  "command": "extension.format-pretty"
 				},
 				{
+				  "command": "extension.format-pretty-with-order-book"
+				},
+				{
 				  "command": "extension.format-csv"
 				},
 				{
 				  "when": "editorHasSelection",
 				  "command": "extension.format-pretty-selection"
-
 				},
 				{
 				  "when": "editorHasSelection",
@@ -149,6 +156,11 @@
 						"Delete Heartbeats and TestRequests from the output",
 						"Leave all Heartbeat and TestRequest messages in the output but do not pretty print"
 					]
+				},
+				"fixmaster.orderBookFields": {
+					"type": "string",
+					"default": "Symbol,OrdStatus,Side,OrderQty,Price,CumQty,AvgPx",
+					"description": "A comma separated list of fields to display in the order book when pretty printing. These can be field names or tag numbers."
 				}
 			}
 		}

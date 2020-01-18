@@ -26,6 +26,8 @@ FIX Master contains a rich data dictionary and you can lookup the definition of 
 
 **fixmaster.nestedFieldIndent** The number of spaces to indent fields belonging to nested groups
 
+**fixmaster.orderBookFields** The fields to display in the order book when pretty printing. These can be field names or tag numbers.
+
 ## Known Issues
 
 This extension is designed to parse FIX application log files which are typically very large, possibly 100s of MB. Visual Studio Code places limits on the size of files it reads so it

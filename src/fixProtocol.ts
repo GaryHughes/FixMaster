@@ -6,13 +6,21 @@ import stringify = require('csv-stringify/lib/sync.js');
 export const fixMessagePrefix = "8=FIX";
 export const fieldDelimiter = '\x01';
 export const fieldValueSeparator = '=';
+
+export const avgPxTag = 6;
 export const beginStringTag = 8;
 export const checkSumTag = 10;
+export const cumQtyTag = 14;
 export const msgTypeTag = 35;
 export const senderCompIdTag = 49;
 export const targetCompIdTag = 56;
 export const clOrdIdTag = 11;
-export const OrigClOrdIdTag = 41;
+export const orderQtyTag = 38;
+export const ordStatusTag = 39;
+export const origClOrdIdTag = 41;
+export const priceTag = 44; 
+export const sideTag = 54; 
+export const symbolTag = 55; 
 
 export const msgTypeHeartbeat = "0";
 export const msgTypeTestRequest = "1";
