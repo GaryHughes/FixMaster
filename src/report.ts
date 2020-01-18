@@ -43,6 +43,7 @@ export class Report {
     }
 
     public toString = () : string => {
+        let horizontalBar = "\u2015";
         var buffer = '';
         // Calculate the column widths
         var columnWidths: number[] = [this.columns.length];
@@ -96,7 +97,7 @@ export class Report {
         }
         // Add a separator between the headers and the values, 2 spaces between each column
         const totalWidth = columnWidths.reduce((sum, width) => sum + width, 0) + ((columnWidths.length - 1) * 2); 
-        buffer += "-".padStart(totalWidth, '-');
+        buffer += horizontalBar.padStart(totalWidth, horizontalBar);
         buffer += "\n";
         // Add the data rows        
         for (const row of this.rows) {
@@ -115,7 +116,7 @@ export class Report {
             buffer += '\n';
         }
         // Add the footer.
-        buffer += "-".padStart(totalWidth, '-');
+        buffer += horizontalBar.padStart(totalWidth, horizontalBar);
         if (this.footer.length > 0) {
             buffer += '\n';
             for (index = 0; index < this.columns.length; ++index) {
