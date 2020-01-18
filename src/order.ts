@@ -14,6 +14,7 @@ export class Order {
         this.senderCompId = this.extractFieldAsString(FIX.senderCompIdTag);
         this.targetCompId = this.extractFieldAsString(FIX.targetCompIdTag);
         this.clOrdId = this.extractFieldAsString(FIX.clOrdIdTag);
+        this.origClOrdId = this.extractFieldAsString(FIX.origClOrdIdTag);
         this.update(message);
     }
 
@@ -30,7 +31,7 @@ export class Order {
     {
         let field = this.message.fields.find(field => field.tag === tag);
         if (!field) {
-            throw Error("");
+            return "";
         }
         return field.value;
     }
@@ -40,6 +41,8 @@ export class Order {
     public readonly senderCompId: string;
     public readonly targetCompId: string;
     public readonly clOrdId: string;
+    // This isn't a part of the id but it's important for tacking cancel replace chains so track it directly.
+    public readonly origClOrdId: string;
     
     // Anything else goes in the configurable property bag.
     public readonly fields: Map<number, FIX.Field> = new Map<number, FIX.Field>();

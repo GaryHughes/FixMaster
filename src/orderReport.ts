@@ -1,8 +1,6 @@
 import { Repository } from './fixRepository';
 import { OrderBook } from './orderBook';
-import { Order } from './order';
 import { Report, ColumnJustification } from './report';
-import { reporters } from 'mocha';
 
 export class OrderReport
 {
@@ -11,6 +9,7 @@ export class OrderReport
         this._report.addColumn("SenderCompID");
         this._report.addColumn("TargetCompID");
         this._report.addColumn("ClOrdID");
+        this._report.addColumn("OrigClOrdID");
         var index = this._report.columns.length;
         for (let tag of tags) {
             let definition = repository.definitionOfField(tag);
@@ -32,12 +31,13 @@ export class OrderReport
 
         for (let order of this.orderBook.orders) {
             
-            var values = new Array(4 + this._fieldIndexes.size).fill(null);
+            var values = new Array(5 + this._fieldIndexes.size).fill(null);
             
             values[0] = order.beginString; 
             values[1] = order.senderCompId;
             values[2] = order.targetCompId;
             values[3] = order.clOrdId;
+            values[4] = order.origClOrdId;
             
             this._fieldIndexes.forEach((index, tag) => {
                 let field = order.fields.get(tag);
