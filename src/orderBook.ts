@@ -13,11 +13,11 @@ export class OrderBook {
 
     process(message: FIX.Message) {
         const msgType = message.msgType;
-        if (msgType === null) {
+        if (!msgType) {
             return false;
         }
         const processor = this._messageProcessors[msgType];
-        if (processor === null) {
+        if (!processor) {
             return false;
         }
         return processor(message);
