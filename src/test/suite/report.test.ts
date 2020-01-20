@@ -19,13 +19,13 @@ suite('Report Test Suite', () => {
         report.addRow("4", "Canceled", "Canceled", "FIX.2.7");	
 
         const expected = `Value  Name             Description       Added  
--------------------------------------------------
+―――――――――――――――――――――――――――――――――――――――――――――――――
 0      New              New               FIX.2.7
 1      PartiallyFilled  Partially filled  FIX.2.7
 2      Filled           Filled            FIX.2.7
 3      DoneForDay       Done for day      FIX.2.7
 4      Canceled         Canceled          FIX.2.7
--------------------------------------------------`;
+―――――――――――――――――――――――――――――――――――――――――――――――――`;
 
         assert.equal(expected, report.toString());
     });
