@@ -8,13 +8,14 @@ import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './opti
 import { definitionHtmlForField } from './html';
 import { OrderBook } from './orderBook';
 import { OrderReport } from './orderReport';
+import { MessageField } from './definitions';
 
 export function activate(context: ExtensionContext) {
 
 	var repository: Repository | null = null;
 	var dataDictionary: DataDictionary | null = null;
 	var orderBook = new OrderBook();
-	var orderBookTags: number[] = [];
+	var orderBookFields: MessageField[] = [];
 
 	const loadRepository = () => {
 
@@ -81,7 +82,7 @@ export function activate(context: ExtensionContext) {
 		if (!orderBookFieldsString) {
 			return;
 		}
-		orderBookTags = [];
+		orderBookFields = [];
 		let fields = orderBookFieldsString.split(","); 
 		for (let field of fields) {
 			let definition = repository.definitionOfField(field);
@@ -89,12 +90,12 @@ export function activate(context: ExtensionContext) {
 				window.showErrorMessage(`Unable to find a field with name or tag '${field}'`);
 			}
 			else {
-				if (!orderBookTags.find(tag => tag === definition.field.tag)) {
-					orderBookTags.push(definition.field.tag);
+				// The order book ins only intended to display a high level summary of the order state so we don't support repeating fields.
+				if (!orderBookFields.find(field => field.field.tag === definition.field.tag)) {
+					orderBookFields.push(definition);
 				}
 			}
 		}
-		orderBook.fields = orderBookTags;
 	};
 
 	loadRepository();
@@ -234,7 +235,7 @@ export function activate(context: ExtensionContext) {
 
 								if (orderBook) {
 									if (orderBook.process(message)) {
-										let orderReport = new OrderReport(repository, orderBook, orderBookTags);
+										let orderReport = new OrderReport(repository, orderBook, orderBookFields);
 										pretty += "\n" + orderReport.toString() + "\n";			
 									}
 								}	

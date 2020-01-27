@@ -23,8 +23,8 @@ export class OrderBook {
         return processor(message);
     }
 
-    public get orders() : IterableIterator<Order> {
-        return this._orders.values();
+    public get orders() : Map<string, Order> {
+        return this._orders;
     }
 
     public get size() : number {
@@ -33,10 +33,6 @@ export class OrderBook {
 
     public clear() {
         this._orders.clear();
-    }
-
-    public set fields(tags:number[]) {
-        this._tags = tags;
     }
 
     private processNewOrderSingle(message: FIX.Message) {
@@ -48,7 +44,7 @@ export class OrderBook {
         if (existing) {
             return false;
         }
-        const order = new Order(message, this._tags);
+        const order = new Order(message);
         this._orders.set(id, order);
         return true;
     }
@@ -71,6 +67,7 @@ export class OrderBook {
         if (!id) {
             return false;
         }
+
         return false;
     }
 
@@ -79,7 +76,12 @@ export class OrderBook {
         if (!id) {
             return false;
         }
-        return false;
+        var order = this._orders.get(id);
+        if (!order) {
+            return false;
+        }
+        order.update(message);
+        return true;
     }   
 
     private processOrderCancelReject(message: FIX.Message) {
@@ -87,7 +89,12 @@ export class OrderBook {
         if (!id) {
             return false;
         }
-        return false;
+        var order = this._orders.get(id);
+        if (!order) {
+            return false;
+        }
+        order.rollback();
+        return true;
     }
 
     idForMessage(message: FIX.Message, direction: FIX.Direction) {
@@ -126,6 +133,4 @@ export class OrderBook {
     
     private _orders: Map<string, Order> = new Map<string, Order>();
 
-    private _tags: number[] = [];
-   
 }

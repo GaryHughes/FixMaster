@@ -1,15 +1,8 @@
 import * as FIX from './fixProtocol';
 
-const identityTags: number[] = [ 
-    FIX.beginStringTag, 
-    FIX.senderCompIdTag, 
-    FIX.targetCompIdTag, 
-    FIX.clOrdIdTag 
-];
 export class Order {
 
-    constructor(readonly message: FIX.Message, tags: number[]) {
-        this._tags = tags.filter(tag => !identityTags.find(entry => entry === tag));     
+    constructor(readonly message: FIX.Message) {
         this.beginString = this.extractFieldAsString(FIX.beginStringTag);
         this.senderCompId = this.extractFieldAsString(FIX.senderCompIdTag);
         this.targetCompId = this.extractFieldAsString(FIX.targetCompIdTag);
@@ -19,12 +12,17 @@ export class Order {
     }
 
     public update(message: FIX.Message) {
-        for (let tag of this._tags) {
-            let field = message.fields.find(field => field.tag === tag);
-            if (field) {
-                this.fields.set(tag, field);
-            }
+        this.previousFields = this.fields;
+        this.fields = {};
+        for (const tag in this.previousFields) {
+            this.fields[tag] = this.previousFields[tag];
         }
+        message.fields.forEach((field, _) => this.fields[field.tag] = field);
+    }
+
+    public rollback() {
+        this.fields = this.previousFields;
+        this.previousFields = {};    
     }
 
     extractFieldAsString(tag: number) : string
@@ -44,8 +42,6 @@ export class Order {
     // This isn't a part of the id but it's important for tacking cancel replace chains so track it directly.
     public readonly origClOrdId: string;
     
-    // Anything else goes in the configurable property bag.
-    public readonly fields: Map<number, FIX.Field> = new Map<number, FIX.Field>();
-
-    private _tags: number[];
+    public fields: Record<number, FIX.Field> = {};
+    previousFields: Record<number, FIX.Field> = {};
 }

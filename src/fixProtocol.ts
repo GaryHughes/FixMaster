@@ -35,6 +35,15 @@ export const msgTypeNewOrderSingle = "D";
 export const msgTypeOrderCancelRequest = "F";
 export const msgTypeOrderCancelReplaceRequest = "G";
 
+export const ordStatusNew = '0';
+export const ordStatusPartiallyFilled = '1';
+export const ordStatusFilled = '2';
+export const ordStatusDoneForDay = '3';
+export const ordStatusCanceled = '4';
+export const ordStatusReplaced = '5';
+export const ordStatusPendingCancel = '6';
+export const ordStatusPendingReplace = 'E';
+
 export enum Direction {
     Incoming,
     Outgoing
