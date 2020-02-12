@@ -1,7 +1,5 @@
 import * as FIX from './fixProtocol';
 import * as clone from 'clone';
-import { exec } from 'child_process';
-import { Field } from './definitions';
 
 export class Order {
 
