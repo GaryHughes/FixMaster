@@ -50,14 +50,35 @@ export class OrderBook {
     }
 
     private processExecutionReport(message: FIX.Message) {
+
         const id = this.idForMessage(message, FIX.Direction.Incoming);
         if (!id) {
             return false;
         }
+
         var order = this._orders.get(id);
         if (!order) {
             return false;
         }
+
+        const execType = message.fields.find(field => field.tag === FIX.execTypeTag);
+
+        if (execType) {
+            if (execType.value === FIX.execTypeReplace) {
+                var replacement = order.replace(message);
+                // This is an inneficient message - fix.
+                var idFields = message.fields.filter(field => field.tag !== FIX.origClOrdIdTag && field.tag !== FIX.clOrdIdTag);
+                idFields.push(new FIX.Field(FIX.clOrdIdTag, replacement.clOrdId));
+                const idMessage = new FIX.Message(message.msgType, idFields);
+                const replacementId = this.idForMessage(idMessage, FIX.Direction.Incoming);
+                if (!replacementId) {
+                    return false;
+                }
+                this._orders.set(replacementId, replacement);
+                return true;
+            }
+        }
+      
         order.update(message);
         return true;
     }
@@ -67,7 +88,11 @@ export class OrderBook {
         if (!id) {
             return false;
         }
-
+        var order = this._orders.get(id);
+        if (!order) {
+            return false;
+        }
+        order.update(message);
         return false;
     }
 

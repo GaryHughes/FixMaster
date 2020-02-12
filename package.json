@@ -62,37 +62,37 @@
 		"menus": {
 			"commandPalette": [
 				{
-				  "command": "extension.format-pretty"
+					"command": "extension.format-pretty"
 				},
 				{
-				  "command": "extension.format-pretty-with-order-book"
+					"command": "extension.format-pretty-with-order-book"
 				},
 				{
-				  "command": "extension.format-csv"
+					"command": "extension.format-csv"
 				},
 				{
-				  "when": "editorHasSelection",
-				  "command": "extension.format-pretty-selection"
+					"when": "editorHasSelection",
+					"command": "extension.format-pretty-selection"
 				},
 				{
-				  "when": "editorHasSelection",
-				  "command": "extension.format-csv-selection"
+					"when": "editorHasSelection",
+					"command": "extension.format-csv-selection"
 				},
 				{
-				  "command": "extension.show-field"
+					"command": "extension.show-field"
 				}
-  			],
+			],
 			"editor/context": [
-			  {
-				"when": "editorHasSelection",
-				"command": "extension.format-pretty-selection",
-				"group": "1_modification"
-			  },
-			  {
-				"when": "editorHasSelection",
-				"command": "extension.format-csv-selection",
-				"group": "1_modification"
-			  }
+				{
+					"when": "editorHasSelection",
+					"command": "extension.format-pretty-selection",
+					"group": "1_modification"
+				},
+				{
+					"when": "editorHasSelection",
+					"command": "extension.format-csv-selection",
+					"group": "1_modification"
+				}
 			]
 		},
 		"configuration": {
@@ -184,7 +184,9 @@
 		"vscode-test": "^1.2.0"
 	},
 	"dependencies": {
+		"@types/clone": "^0.1.30",
 		"@types/xml2js": "^0.4.5",
+		"clone": "^2.1.2",
 		"csv-stringify": "^5.3.3",
 		"xml2js": "^0.4.22"
 	}

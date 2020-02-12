@@ -20,7 +20,8 @@ export const ordStatusTag = 39;
 export const origClOrdIdTag = 41;
 export const priceTag = 44; 
 export const sideTag = 54; 
-export const symbolTag = 55; 
+export const symbolTag = 55;
+export const execTypeTag = 150; 
 
 export const msgTypeHeartbeat = "0";
 export const msgTypeTestRequest = "1";
@@ -43,6 +44,8 @@ export const ordStatusCanceled = '4';
 export const ordStatusReplaced = '5';
 export const ordStatusPendingCancel = '6';
 export const ordStatusPendingReplace = 'E';
+
+export const execTypeReplace = "5";
 
 export enum Direction {
     Incoming,
