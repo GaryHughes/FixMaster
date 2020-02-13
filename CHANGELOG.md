@@ -9,6 +9,7 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - Command `FIX Master - Pretty Print with Order Book` which will track order messages and print an order book showing their state after each relevant message is printed.
+- A new setting `fixmaster.orderBookFields` that controls which fields will be included in the order book.
 
 ## [1.2.0] 2019-10-22
 
