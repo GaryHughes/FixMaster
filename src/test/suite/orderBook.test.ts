@@ -8,7 +8,8 @@ import {
   ordStatusCanceled,
   ordStatusReplaced,
   ordStatusPendingCancel,
-  ordStatusPendingReplace
+  ordStatusPendingReplace,
+  orderQtyTag
 } from '../../fixProtocol';
 
 suite('OrderBook Test Suite', () => {
@@ -134,7 +135,7 @@ suite('OrderBook Test Suite', () => {
             {
             assert.equal(book.size, 1);
             let order = book.orders.values().next().value as Order;
-            assert.equal(order.fields[ordStatusTag].value, ordStatusNew);
+            assert.equal(order.fields[ordStatusTag].value, ordStatusPendingCancel);
             }
             break;
           case 3:
@@ -188,7 +189,7 @@ suite('OrderBook Test Suite', () => {
             {
             assert.equal(book.size, 1);
             let order = book.orders.values().next().value as Order;
-            assert.equal(order.fields[ordStatusTag].value, ordStatusNew);
+            assert.equal(order.fields[ordStatusTag].value, ordStatusPendingCancel);
             }
             break;
           case 3:
@@ -212,13 +213,64 @@ suite('OrderBook Test Suite', () => {
 
     test('test order cancel replace request for known order accepted', () => {
       const messages: string[] = [
-        "8=FIXT.1.1\u00019=149\u000135=D\u000149=INITIATOR\u000156=ACCEPTOR\u000134=37\u000152=20200119-04:47:49.445\u000111=12\u000170=8\u0001100=AUTO\u000155=WTF.AX\u000154=1\u000160=20200119-04:47:47.562\u000138=20000\u000140=2\u000144=11.56\u000159=1\u000110=151\u0001",
-        "8=FIXT.1.1\u00019=175\u000135=8\u000149=ACCEPTOR\u000156=INITIATOR\u000134=45\u000152=20200119-04:47:54.334\u000139=0\u000111=12\u000137=INITIATOR-ACCEPTOR-12\u000117=6\u0001150=0\u0001151=20000\u000155=WTF.AX\u000154=1\u000138=20000\u000144=11.56\u000132=0\u000131=0\u000114=0\u00016=0\u000140=2\u000110=237\u0001",
-        "8=FIXT.1.1\u00019=188\u000135=G\u000149=INITIATOR\u000156=ACCEPTOR\u000134=39\u000152=20200119-04:48:11.022\u000137=INITIATOR-ACCEPTOR-12\u000141=12\u000111=13\u000170=8\u0001100=AUTO\u000155=WTF.AX\u000154=1\u000160=20200119-04:48:00.074\u000138=30000\u000140=2\u000144=10.35\u000159=1\u000158=Blah\u000110=015\u0001",
-        "8=FIXT.1.1\u00019=181\u000135=8\u000149=ACCEPTOR\u000156=INITIATOR\u000134=47\u000152=20200119-04:48:11.031\u000139=E\u000111=13\u000137=INITIATOR-ACCEPTOR-12\u000117=7\u0001150=E\u0001151=20000\u00011=12\u000155=WTF.AX\u000154=1\u000138=20000\u000144=11.56\u000132=0\u000131=0\u000114=0\u00016=0\u000140=2\u000110=018\u0001",
-        "8=FIXT.1.1\u00019=177\u000135=8\u000149=ACCEPTOR\u000156=INITIATOR\u000134=48\u000152=20200119-04:48:14.062\u000139=5\u000111=12\u000137=INITIATOR-ACCEPTOR-13\u000117=8\u0001150=5\u0001151=0\u000141=12\u000155=WTF.AX\u000154=1\u000138=30000\u000144=10.35\u000132=0\u000131=0\u000114=0\u00016=0\u000140=2\u000110=059\u0001"  
+        "8=FIXT.1.19=14835=D49=INITIATOR56=ACCEPTOR34=1052=20200119-02:35:09.99011=170=1100=AUTO55=WTF.AX54=160=20200119-02:30:33.80138=2000040=244=11.5659=110=061",
+        "8=FIXT.1.19=17335=849=ACCEPTOR56=INITIATOR34=1052=20200119-02:35:12.81039=011=137=INITIATOR-ACCEPTOR-117=1150=0151=2000055=WTF.AX54=138=2000044=11.5632=031=014=06=040=210=110",
+        "8=FIXT.1.19=17835=G49=INITIATOR56=ACCEPTOR34=1152=20200119-02:35:32.41637=INITIATOR-ACCEPTOR-141=111=270=1100=AUTO55=WTF.AX54=160=20200119-02:35:17.91038=4000040=244=11.56559=110=132",
+        "8=FIXT.1.19=17835=849=ACCEPTOR56=INITIATOR34=1152=20200119-02:35:32.43439=E11=237=INITIATOR-ACCEPTOR-117=2150=E151=2000041=155=WTF.AX54=138=2000044=11.5632=031=014=06=040=210=120",
+        "8=FIXT.1.19=17535=849=ACCEPTOR56=INITIATOR34=1252=20200119-02:35:34.87839=511=137=INITIATOR-ACCEPTOR-217=3150=5151=041=155=WTF.AX54=138=4000044=11.56532=031=014=06=040=210=218"
       ];
-
+      let book = new OrderBook();
+      var index = 0;
+      for (const text of messages) {
+        const message = parseMessage(text);
+        if (!message) {
+          assert.fail("message failed to parse");
+          return;
+        }
+        assert.equal(book.process(message), true);
+        switch (index) {
+          case 0:
+            assert.equal(book.size, 1);
+            break;
+          case 1:
+            {
+            assert.equal(book.size, 1);
+            let order = book.orders.values().next().value as Order;
+            assert.equal(order.fields[ordStatusTag].value, ordStatusNew);
+            assert.equal(order.fields[orderQtyTag].value, 20000);
+            }
+            break;
+          case 2:
+            {
+            assert.equal(book.size, 1);
+            let order = book.orders.values().next().value as Order;
+            assert.equal(order.fields[ordStatusTag].value, ordStatusPendingReplace);
+            assert.equal(order.fields[orderQtyTag].value, 20000);
+            }
+            break;
+          case 3:
+            {
+            assert.equal(book.size, 1);
+            let order = book.orders.values().next().value as Order;
+            assert.equal(order.fields[ordStatusTag].value, ordStatusPendingReplace);
+            assert.equal(order.fields[orderQtyTag].value, 20000);
+            }
+            break;
+          case 4:
+            {
+            assert.equal(book.size, 2);
+            let orders = book.orders.values();
+            let original = orders.next().value as Order;
+            let replacement = orders.next().value as Order;
+            assert.equal(original.fields[ordStatusTag].value, ordStatusReplaced);
+            assert.equal(replacement.fields[ordStatusTag].value, ordStatusNew);
+            assert.equal(original.fields[orderQtyTag].value, 20000);
+            assert.equal(replacement.fields[orderQtyTag].value, 40000);
+            }
+            break;
+        }
+        ++index;
+      }
     });
 
     test('test order cancel replace request for known order rejected', () => {
@@ -229,7 +281,50 @@ suite('OrderBook Test Suite', () => {
         "8=FIXT.1.1\u00019=182\u000135=8\u000149=ACCEPTOR\u000156=INITIATOR\u000134=59\u000152=20200119-04:52:29.874\u000139=E\u000111=15\u000137=INITIATOR-ACCEPTOR-14\u000117=10\u0001150=E\u0001151=20000\u000141=14\u000155=WTF.AX\u000154=1\u000138=20000\u000144=11.56\u000132=0\u000131=0\u000114=0\u00016=0\u000140=2\u000110=089\u0001",
         "8=FIXT.1.1\u00019=124\u000135=9\u000149=ACCEPTOR\u000156=INITIATOR\u000134=60\u000152=20200119-04:52:40.220\u000137=INITIATOR-ACCEPTOR-14\u000139=8\u000141=14\u0001434=2\u000111=15\u000158=Not telling\u000110=214\u0001"  
       ];
-
+      let book = new OrderBook();
+      var index = 0;
+      for (const text of messages) {
+        const message = parseMessage(text);
+        if (!message) {
+          assert.fail("message failed to parse");
+          return;
+        }
+        assert.equal(book.process(message), true);
+        switch (index) {
+          case 0:
+            assert.equal(book.size, 1);
+            break;
+          case 1:
+            {
+            assert.equal(book.size, 1);
+            let order = book.orders.values().next().value as Order;
+            assert.equal(order.fields[ordStatusTag].value, ordStatusNew);
+            }
+            break;
+          case 2:
+            {
+            assert.equal(book.size, 1);
+            let order = book.orders.values().next().value as Order;
+            assert.equal(order.fields[ordStatusTag].value, ordStatusPendingReplace);
+            }
+            break;
+          case 3:
+            {
+            assert.equal(book.size, 1);
+            let order = book.orders.values().next().value as Order;
+            assert.equal(order.fields[ordStatusTag].value, ordStatusPendingReplace);
+            }
+            break;
+          case 4:
+            {
+              assert.equal(book.size, 1);
+              let order = book.orders.values().next().value as Order;
+              assert.equal(order.fields[ordStatusTag].value, ordStatusNew);
+            }
+            break;
+        }
+        ++index;
+      }
     });
 
 });

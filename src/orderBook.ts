@@ -66,7 +66,7 @@ export class OrderBook {
         if (execType) {
             if (execType.value === FIX.execTypeReplace) {
                 var replacement = order.replace(message);
-                // This is an inneficient message - fix.
+                // This is an inneficient mess - fix.
                 var idFields = message.fields.filter(field => field.tag !== FIX.origClOrdIdTag && field.tag !== FIX.clOrdIdTag);
                 idFields.push(new FIX.Field(FIX.clOrdIdTag, replacement.clOrdId));
                 const idMessage = new FIX.Message(message.msgType, idFields);
@@ -93,7 +93,7 @@ export class OrderBook {
             return false;
         }
         order.update(message);
-        return false;
+        return true;
     }
 
     private processOrderCancelRequest(message: FIX.Message) {

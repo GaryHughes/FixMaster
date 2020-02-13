@@ -13,28 +13,38 @@ export class Order {
     }
 
     public update(message: FIX.Message) {
-        this.previousFields = this.fields;
-        this.fields = {};
-        for (const tag in this.previousFields) {
-            this.fields[tag] = this.previousFields[tag];
-        }
-        message.fields.forEach((field, _) => this.fields[field.tag] = field);
+
         if (message.msgType === FIX.msgTypeOrderCancelReplaceRequest) {
+            this._previousOrdStatus = this.fields[FIX.ordStatusTag];
             this._newClOrdId = message.fields.find(field => field.tag === FIX.clOrdIdTag);
+            message.fields.forEach((field, _) => this.pendingFields[field.tag] = field);
+            this.fields[FIX.ordStatusTag] = new FIX.Field(FIX.ordStatusTag, FIX.ordStatusPendingReplace);
+            return;
         }
-       
-        // This breaks the auto handling above so maybe just leave it out
-        // if (message.msgType === FIX.msgTypeOrderCancelRequest) {
-        //     this.fields[FIX.ordStatusTag] = new FIX.Field(FIX.ordStatusTag, FIX.ordStatusPendingCancel);
-        // }
-        // else if (message.msgType === FIX.msgTypeOrderCancelReplaceRequest) {
-        //     this.fields[FIX.ordStatusTag] = new FIX.Field(FIX.ordStatusTag, FIX.ordStatusPendingReplace);
-        // }
+
+        if (message.msgType === FIX.msgTypeOrderCancelRequest) {
+            this._previousOrdStatus = this.fields[FIX.ordStatusTag];
+            message.fields.forEach((field, _) => this.pendingFields[field.tag] = field);
+            this.fields[FIX.ordStatusTag] = new FIX.Field(FIX.ordStatusTag, FIX.ordStatusPendingCancel);
+            return;
+        }
+
+        message.fields.forEach((field, _) => this.fields[field.tag] = field);
+    }
+
+    public commit() {
+        for (const tag in this.pendingFields) {
+            this.fields[tag] = this.pendingFields[tag];
+        }
+        this.pendingFields = {};
     }
 
     public rollback() {
-        this.fields = this.previousFields;
-        this.previousFields = {};    
+        this.pendingFields = {};
+        if (this._previousOrdStatus) {
+            this.fields[FIX.ordStatusTag] = this._previousOrdStatus;
+            this._previousOrdStatus = undefined;
+        }
     }
 
     extractFieldAsString(tag: number) : string {
@@ -48,6 +58,8 @@ export class Order {
     public replace(executionReport:FIX.Message) {
         var replacement = clone<Order>(this);
         replacement.update(executionReport);
+        replacement.commit();
+        this.rollback();
         if (this.newClOrdId) {
             replacement.fields[FIX.clOrdIdTag] = this.newClOrdId;
             replacement.origClOrdId = replacement.clOrdId;
@@ -84,7 +96,9 @@ export class Order {
     public get newClOrdId() : FIX.Field | undefined {
         return this._newClOrdId;
     }
-   
+  
+    private _previousOrdStatus: FIX.Field | undefined;
+
     public fields: Record<number, FIX.Field> = {};
-    previousFields: Record<number, FIX.Field> = {};
+    public pendingFields: Record<number, FIX.Field> = {};
 }
