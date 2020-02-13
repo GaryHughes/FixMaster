@@ -39,8 +39,14 @@ export class OrderReport
             this._fields.forEach(definition => {
                 let field = order.fields[definition.field.tag];
                 if (field) {
+                    let pending = order.pendingFields[definition.field.tag];
                     var name = this.repository.symbolicNameOfValue(field.tag, field.value, undefined);
-                    values[index] = name || field.value;
+                    var value = name || field.value;
+                    if (pending && pending.value !== field.value) {
+                        var pendingName = this.repository.symbolicNameOfValue(pending.tag, pending.value, undefined);
+                        value += ` (${pendingName || pending.value})`;
+                    }
+                    values[index] = value;
                 }    
                 ++index;
             });

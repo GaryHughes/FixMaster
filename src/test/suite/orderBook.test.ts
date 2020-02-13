@@ -246,7 +246,8 @@ suite('OrderBook Test Suite', () => {
             let order = book.orders.values().next().value as Order;
             assert.equal(order.fields[ordStatusTag].value, ordStatusPendingReplace);
             assert.equal(order.fields[orderQtyTag].value, 20000);
-            }
+            assert.equal(order.pendingFields[orderQtyTag].value, 40000);
+          }
             break;
           case 3:
             {
@@ -254,6 +255,7 @@ suite('OrderBook Test Suite', () => {
             let order = book.orders.values().next().value as Order;
             assert.equal(order.fields[ordStatusTag].value, ordStatusPendingReplace);
             assert.equal(order.fields[orderQtyTag].value, 20000);
+            assert.equal(order.pendingFields[orderQtyTag].value, 40000);
             }
             break;
           case 4:
