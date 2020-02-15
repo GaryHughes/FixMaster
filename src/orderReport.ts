@@ -2,6 +2,8 @@ import { Repository } from './fixRepository';
 import { OrderBook } from './orderBook';
 import { Report, ColumnJustification } from './report';
 import { MessageField } from './definitions';
+import { Order } from './order';
+import * as FIX from  './fixProtocol';
 
 export class OrderReport
 {
@@ -29,7 +31,11 @@ export class OrderReport
                     let pending = order.pendingFields[definition.field.tag];
                     var name = this.repository.symbolicNameOfValue(field.tag, field.value, undefined);
                     var value = name || field.value;
-                    if (pending && pending.value !== field.value) {
+                    if (pending && pending.value !== field.value &&
+                        // identity fields change with ExecutionReports and OrderCancelReplace etc but we don't need or want to
+                        // see those changes.
+                        !Order.isIdentityField(field.tag)) 
+                    {
                         var pendingName = this.repository.symbolicNameOfValue(pending.tag, pending.value, undefined);
                         value += ` (${pendingName || pending.value})`;
                     }

@@ -3,13 +3,19 @@ import * as clone from 'clone';
 
 export class Order {
 
+    public static readonly identityFields = [FIX.senderCompIdTag, FIX.targetCompIdTag, FIX.clOrdIdTag, FIX.origClOrdIdTag];
+
+    public static isIdentityField(tag: number) {
+        return this.identityFields.includes(tag);
+    } 
+
     constructor(readonly message: FIX.Message) {
         this.beginString = this.extractFieldAsString(FIX.beginStringTag);
         this.senderCompId = this.extractFieldAsString(FIX.senderCompIdTag);
         this.targetCompId = this.extractFieldAsString(FIX.targetCompIdTag);
         this.clOrdId = this.extractFieldAsString(FIX.clOrdIdTag);
         this.origClOrdId = this.extractFieldAsString(FIX.origClOrdIdTag);
-        this.update(message);
+        message.fields.forEach((field, _) => this.fields[field.tag] = field);
     }
 
     public update(message: FIX.Message) {
@@ -17,24 +23,38 @@ export class Order {
         if (message.msgType === FIX.msgTypeOrderCancelReplaceRequest) {
             this._previousOrdStatus = this.fields[FIX.ordStatusTag];
             this._newClOrdId = message.fields.find(field => field.tag === FIX.clOrdIdTag);
-            message.fields.forEach((field, _) => this.pendingFields[field.tag] = field);
+            message.fields.forEach((field, _) => {
+                if (!Order.isIdentityField(field.tag)) {
+                    this.pendingFields[field.tag] = field;
+                }
+            });
             this.fields[FIX.ordStatusTag] = new FIX.Field(FIX.ordStatusTag, FIX.ordStatusPendingReplace);
             return;
         }
 
         if (message.msgType === FIX.msgTypeOrderCancelRequest) {
             this._previousOrdStatus = this.fields[FIX.ordStatusTag];
-            message.fields.forEach((field, _) => this.pendingFields[field.tag] = field);
+            message.fields.forEach((field, _) => {
+                if (!Order.isIdentityField(field.tag)) {
+                    this.pendingFields[field.tag] = field;
+                }
+            });
             this.fields[FIX.ordStatusTag] = new FIX.Field(FIX.ordStatusTag, FIX.ordStatusPendingCancel);
             return;
         }
 
-        message.fields.forEach((field, _) => this.fields[field.tag] = field);
+        message.fields.forEach((field, _) => {
+            if (!Order.isIdentityField(field.tag)) {
+                this.fields[field.tag] = field;
+            }
+        });
     }
 
     public commit() {
         for (const tag in this.pendingFields) {
-            this.fields[tag] = this.pendingFields[tag];
+            if (!Order.isIdentityField(Number.parseInt(tag))) {
+                this.fields[tag] = this.pendingFields[tag];
+            }
         }
         this.pendingFields = {};
     }
@@ -62,6 +82,7 @@ export class Order {
         this.rollback();
         if (this.newClOrdId) {
             replacement.fields[FIX.clOrdIdTag] = this.newClOrdId;
+            replacement.fields[FIX.origClOrdIdTag] = new FIX.Field(FIX.origClOrdIdTag, replacement.clOrdId);
             replacement.origClOrdId = replacement.clOrdId;
             replacement.clOrdId = this.newClOrdId.value;
             
@@ -69,6 +90,7 @@ export class Order {
             const clOrdId = executionReport.fields.find(field => field.tag === FIX.clOrdIdTag);
             if (clOrdId) {
                 replacement.fields[FIX.clOrdIdTag] = clOrdId;
+                replacement.fields[FIX.origClOrdIdTag] = new FIX.Field(FIX.origClOrdIdTag, replacement.clOrdId);
                 replacement.origClOrdId = replacement.clOrdId;
                 replacement.clOrdId = clOrdId.value;
             }
