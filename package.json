@@ -3,7 +3,7 @@
 	"displayName": "FIX Master",
 	"description": "FIX Protocol Formatter and Data Dictionary",
 	"icon": "images/fixMaster.png",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"publisher": "geh-fixmaster",
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"repository": {
@@ -24,12 +24,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.format-pretty",
-		"onCommand:extension.format-pretty-with-order-book",
-		"onCommand:extension.format-csv",
-		"onCommand:extension.format-pretty-selection",
-		"onCommand:extension.format-csv-selection",
-		"onCommand:extension.show-field"
+		"*"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -161,6 +156,11 @@
 					"type": "string",
 					"default": "SenderCompID,TargetCompID,ClOrdID,OrigClOrdID,Side,Symbol,OrdType,OrderQty,Price,CumQty,AvgPx,OrdStatus",
 					"description": "A comma separated list of fields to display in the order book when pretty printing. These can be field names or tag numbers."
+				},
+				"fixmaster.hoversEnabled": {
+					"type": "boolean",
+					"default": true,
+					"description": "Controls whether or not to pretty print any message on the line under the cursor in a toolip"
 				}
 			}
 		}

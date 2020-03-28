@@ -1,4 +1,4 @@
-import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, WebviewPanel, ViewColumn, Uri } from 'vscode';
+import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, TextDocument, ViewColumn, Uri, languages, Hover, MarkdownString, Position, Range } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Repository } from './fixRepository';
@@ -110,6 +110,40 @@ export function activate(context: ExtensionContext) {
 		}
 		else if (evt.affectsConfiguration('fixmaster.orderBookFields')) {
 			loadOrderBookTags();
+		}
+	});
+
+	languages.registerHoverProvider(
+		{ pattern: '**/*.*' }, 
+		{ provideHover(document: TextDocument, position: Position) {
+			const configuration = workspace.getConfiguration();
+			const hoversEnabled = configuration.get("fixmaster.hoversEnabled") as boolean;
+			if (!hoversEnabled) {
+				return;
+			}
+			if (!repository) {
+				window.showErrorMessage('The repository has not been loaded - check the repositoryPath setting.');
+				return;
+			}
+			const line = document.lineAt(position);	
+			const fixMessageIndex = line.text.indexOf(fixMessagePrefix); 
+			if (fixMessageIndex < 0) {
+				return;
+			}
+			const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
+			const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
+			const rawText = line.text.substr(fixMessageIndex);
+			const message = parseMessage(rawText, fieldSeparator);	
+			if (!message) {
+				return;
+			}
+			const start = new Position(position.line, fixMessageIndex);
+			const end = new Position(position.line, fixMessageIndex + rawText.length);
+			const range = new Range(start, end);
+			const text = prettyPrintMessage('', message, repository, dataDictionary, nestedFieldIndent);
+			const markdown = new MarkdownString();
+			markdown.appendCodeblock(text);
+			return new Hover(markdown, range);
 		}
 	});
 

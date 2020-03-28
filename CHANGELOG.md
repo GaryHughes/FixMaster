@@ -4,6 +4,26 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [1.4.0] 2010-03-28
+
+### Added
+
+- Hover support to pretty print the message on the line under the cursor in a tooltip.
+  - It is recommended to decrease `editor.hover.delay` to a smaller value like 100 to make this more responsive.
+  - The tooltip can also be triggered by `editor.action.showHover` keyboard shortcut.
+  - The parsed message will be highlighted however the default highlight color is quite subtle so you may want to change it to something stronger by adding the following to `settings.json` and adjusting the color to suit your taste.
+  ```
+  "workbench.colorCustomizations": {
+        "editor.hoverHighlightBackground": "#5f615f"
+    }
+  ```
+- A new setting `fixmaster.hoversEnabled` to control whether the hover tooltips are enabled.  
+
+## Changed
+
+- FIX Master will now load when Visual Studio Code starts, not when one of it's commands are run for the first time.
+  - This is so the hover tooltips work with no user action.
+
 ## [1.3.0] 2020-02-16
 
 ### Added
