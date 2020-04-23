@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/garyedwardhughes/FixMaster/_apis/build/status/GaryHughes.FixMaster?branchName=master)](https://dev.azure.com/garyedwardhughes/FixMaster/_build/latest?definitionId=2&branchName=master)
+![FIX Master Build](https://github.com/GaryHughes/FixMaster/workflows/FIX%20Master%20Build/badge.svg)
 
 # FIX Master
 
@@ -27,6 +27,8 @@ FIX Master contains a rich data dictionary and you can lookup the definition of 
 **fixmaster.nestedFieldIndent** The number of spaces to indent fields belonging to nested groups
 
 **fixmaster.orderBookFields** The fields to display in the order book when pretty printing. These can be field names or tag numbers.
+
+**fixmaster.hoversEnabled** Controls whether hover tooltips are enabled. If true FIX Master will look for a FIX message on the current editor line and pretty print it in a tooltip if found.ß
 
 ## Known Issues
 
