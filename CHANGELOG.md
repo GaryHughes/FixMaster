@@ -4,7 +4,14 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [1.4.0] 2010-03-28
+## [1.5.0] 2020-05-13
+
+### Added
+
+- Messages containing fields of type 'data' are now parsed.
+  - Because these fields can contain binary data the value will be base64 encoded when pretty printed.
+
+## [1.4.0] 2020-03-28
 
 ### Added
 

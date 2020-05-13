@@ -2,6 +2,7 @@ import * as FIX from './fixRepository';
 import * as xml from './fixRepositoryXml';
 import { DataDictionary } from './quickFixDataDictionary';
 import stringify = require('csv-stringify/lib/sync.js');
+import base64 = require('base-64');
 
 export const fixMessagePrefix = "8=FIX";
 export const fieldDelimiter = '\x01';
@@ -180,7 +181,7 @@ export class Message {
     
 }
 
-export function parseMessage(text: string, separator: string | undefined = undefined) {
+export function parseMessage(text: string, repository: FIX.Repository | null = null, separator: string | undefined = undefined) {
 
     if (!separator) {
         separator = fieldDelimiter;
@@ -204,19 +205,44 @@ export function parseMessage(text: string, separator: string | undefined = undef
             tag += token;
         }
 
-        for (; index < length; ++index) {
-            let token = text[index];
-            if (token === separator) {
-                ++index;
-                break;
-            }
-            value += token;
-        }
-
         let intTag = parseInt(tag);
 
         if (isNaN(intTag)) {
             continue;
+        }
+
+        let definition = repository?.definitionOfField(tag);
+        
+        if (definition?.field.type === 'data') {
+            if (fields.length === 0) {
+                // We need the previous field to read the expected length
+                return null;
+            }    
+            let length = parseInt(fields[fields.length - 1].value);
+            if (isNaN(length)) {
+                // Previous field is not an int so this message is malformed
+                return null;
+            }
+            if (index + length >= text.length) {
+                // Incorrect length or some of the message is missing
+                return null;
+            }
+            value = base64.encode(text.substr(index, length));
+            index += length;
+            if (text[index] !== separator) {
+                return null;
+            }
+        }
+        else {
+
+            for (; index < length; ++index) {
+                let token = text[index];
+                if (token === separator) {
+                    ++index;
+                    break;
+                }
+                value += token;
+            }
         }
 
         let field = new Field(intTag, value);

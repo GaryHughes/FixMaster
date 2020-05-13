@@ -133,7 +133,7 @@ export function activate(context: ExtensionContext) {
 			const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
 			const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
 			const rawText = line.text.substr(fixMessageIndex);
-			const message = parseMessage(rawText, fieldSeparator);	
+			const message = parseMessage(rawText, repository, fieldSeparator);	
 			if (!message) {
 				return;
 			}
@@ -230,7 +230,7 @@ export function activate(context: ExtensionContext) {
 							messageContext = match[0];	
 						}
 
-						const message = parseMessage(line.text.substr(fixMessageIndex), fieldSeparator);	
+						const message = parseMessage(line.text.substr(fixMessageIndex), repository, fieldSeparator);	
 
 						if (!message) {
 							lastLineWasAMessage = false;

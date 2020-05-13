@@ -1,5 +1,7 @@
 import * as assert from 'assert';
 import { before } from 'mocha';
+import * as path from 'path';
+import { Repository } from '../../fixRepository';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
@@ -28,7 +30,7 @@ suite('FIX Protocol Test Suite', () => {
 
     test('Parse Message Wtih Custom Field Delimiter', () => {
         let text = "8=FIX.4.4|9=72|35=A|49=ACCEPTOR|56=INITIATOR|34=1|52=20190816-10:34:27.742|98=0|108=30|10=012|";
-        let message = parseMessage(text, "|");
+        let message = parseMessage(text, null, "|");
         if (!message) {
             assert.fail("message failed to parse");
             return;
@@ -74,5 +76,18 @@ suite('FIX Protocol Test Suite', () => {
             return;
         }
         assert.equal(false, message.isAdministrative());
+    });
+
+    test('Parse message with a data field', () => {
+        let repository = new Repository(path.join(__dirname, "../../../repository"), true);
+        let text = "8=FIX.4.4\u00019=167\u000135=D\u000149=INITIATOR\u000156=ACCEPTOR\u000134=2752\u000152=20200114-08:13:20.041\u000111=61\u000170=60\u0001100=AUTO\u000155=BHP.AX\u000154=1\u000160=20200114-08:12:59.397\u000138=10000\u000140=2\u000144=20\u000159=1\u000193=20\u000189=ABCDEF\u0001ABCDEFABC\u0001DEF\u000110=220\u0001";        
+        let message = parseMessage(text, repository);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        assert.equal(20, message.fields.length);
+        let signature = message.fields[18];
+        assert.equal('QUJDREVGAUFCQ0RFRkFCQwFERUY=', signature.value);
     });
 });
