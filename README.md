@@ -1,5 +1,3 @@
-![FIX Master Build](https://github.com/GaryHughes/FixMaster/workflows/FIX%20Master%20Build/badge.svg)
-
 # FIX Master
 
 FIX Master is designed to parse FIX messages from log files and pretty print them in a structured format displaying the names for fields, messages, and enumerated values.
