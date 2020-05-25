@@ -21,6 +21,20 @@
 			"script": "compile",
 			"group": "build",
 			"problemMatcher": []
+		},
+		{
+			"type": "npm",
+			"script": "lint",
+			"problemMatcher": [],
+			"label": "npm: lint",
+			"detail": "eslint -c .eslintrc.js --ext .ts ./"
+		},
+		{
+			"type": "eslint",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"label": "eslint: lint whole folder"
 		}
 	]
 }
