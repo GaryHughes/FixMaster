@@ -234,7 +234,27 @@ export class Orchestration
 
     load_fields(repository: any)
     {
-
+        /*
+        <fixr:fields>
+		  <fixr:field id="1" name="Account" type="String" added="FIX.2.7" abbrName="Acct">
+			    <fixr:annotation>
+				    <fixr:documentation purpose="SYNOPSIS">
+                      Account mnemonic as agreed between buy and sell sides, e.g. broker and institution or investor/intermediary and fund manager.
+                  </fixr:documentation>
+			    </fixr:annotation>
+          </fixr:field>
+        */
+        repository.fields[0].field.forEach((element:any) => {
+            let field = new Field(
+                element.$.id,
+                element.$.name,
+                element.$.type,
+                element.$.added,
+                this.extract_synopsis(element)
+            );
+            this.fields.push(field);
+            // self.fields[field.id] = field
+        });
     }
 
     load_components(repository: any)
