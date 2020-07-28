@@ -7,19 +7,21 @@ suite('FIX Orchestra Test Suite', () => {
 
     var orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations/FIX Standard"));
    
-    /*
+    /* 
     test('Strict field name lookup', () => {
         const FIX_4_2 = orchestra.orchestrations[0];
         const FIX_4_4 = orchestra.orchestrations[1];
         const quoteRequest = orchestra.definitionOfMessage("R", FIX_4_2);
         const quote = orchestra.definitionOfMessage("S", FIX_4_4);
         orchestra.nameLookup = NameLookup.Strict;
-        assert.equal("PrevClosePx", orchestra.definitionOfField(140, FIX_4_2, quoteRequest).field.name);
-        assert.equal("", orchestra.definitionOfField(200, FIX_4_2, quoteRequest).field.name);
-        assert.equal("MaturityMonthYear", orchestra.definitionOfField(200, FIX_4_4, quote).field.name);
-        assert.equal("FIX.4.1", orchestra.definitionOfField(200, FIX_4_4, quote).field.added);
+        assert.equal("PrevClosePx", orchestra.definitionOfField(140, FIX_4_2, quoteRequest)?.field.name);
+        assert.equal("", orchestra.definitionOfField(200, FIX_4_2, quoteRequest)?.field.name);
+        assert.equal("MaturityMonthYear", orchestra.definitionOfField(200, FIX_4_4, quote)?.field.name);
+        assert.equal("FIX.4.1", orchestra.definitionOfField(200, FIX_4_4, quote)?.field.added);
     });
-
+    */
+  
+    /*
     test('Promiscuous field name lookup', () => {
         const FIX_4_2 = orchestra.orchestrations[0];
         const FIX_4_4 = orchestra.orchestrations[1];
@@ -76,19 +78,18 @@ suite('FIX Orchestra Test Suite', () => {
         const message = orchestra.definitionOfMessage("R", FIX_5_0SP2);
         assert.equal("SideTradeReportingIndicator", orchestra.definitionOfField(2671, FIX_5_0SP2, message).field.name);
     });
+    */
 
     test('Field lookup by name', () => {
-        assert.equal(59, orchestra.definitionOfField('TimeInForce').field.tag);    
+        assert.equal(59, orchestra.definitionOfField('TimeInForce')?.field.tag);    
     });
 
     test('Field lookup by name is not case sensitive', () => {
-        assert.equal(59, orchestra.definitionOfField('timeinforce').field.tag);    
+        assert.equal(59, orchestra.definitionOfField('timeinforce')?.field.tag);    
     });
-    */
-
+   
     test('Lookup removed field', () => {
-        let o = orchestra.definitionOfField(20);
-        //assert.equal('ExecTransType', orchestra.definitionOfField(20).field.name);
+        assert.equal('ExecTransType', orchestra.definitionOfField(20)?.field.name);
     });
-  
+   
 });

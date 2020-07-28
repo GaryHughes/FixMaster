@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 import { setFlagsFromString } from 'v8';
 import { Repository } from './fixRepository';
+import * as fix from './definitions';
 
 // "@typescript-eslint/class-name-casing": "warn",
 
@@ -33,17 +34,6 @@ class CodeSet
                 readonly type: string, 
                 readonly synopsis: string, 
                 readonly codes: Code[])
-    {
-    }
-}
-
-class Field
-{
-    constructor(readonly id: string, 
-                readonly name: string, 
-                readonly type: string, 
-                readonly added: string, 
-                readonly synopsis: string)
     {
     }
 }
@@ -116,10 +106,13 @@ export class Orchestration
 
     data_types: DataType[] = [];
     code_sets: CodeSet[] = [];
-    fields: Field[] = [];
+    
+    public fields: fix.Field[] = [];
+    public fieldsByName: Record<string, fix.Field> = {};
+
     components: Component[] = [];
     groups: Group[] = [];
-    messages: Message[] = [];
+    public messages: Record<string, fix.Message> = {};
 
     extract_synopsis(element: any)
     {
@@ -155,13 +148,19 @@ export class Orchestration
 
         search(element);
         
+        var result: string | undefined = undefined;
+
         for (const item of documentation) {
             if (item[0].$.purpose === 'SYNOPSIS') {
-                return item[0]['_'];
+                result = item[0]['_'];
             }
-        }  
+        }
 
-        return '';
+        if (!result) {
+            result = documentation[0];
+        }
+
+        return result ?? ' ';
     }
 
     load_data_types(repository: any)
@@ -244,22 +243,33 @@ export class Orchestration
 			    </fixr:annotation>
           </fixr:field>
         */
+        var maxTag = Number(0);
         repository.fields[0].field.forEach((element:any) => {
-            let field = new Field(
-                element.$.id,
+            let field = new fix.Field(
+                Number(element.$.id),
                 element.$.name,
                 element.$.type,
+                '', // TODO - remove this when we've ripped out th repository
+                this.extract_synopsis(element),
                 element.$.added,
-                this.extract_synopsis(element)
             );
-            this.fields.push(field);
-            // self.fields[field.id] = field
+            this.fieldsByName[field.name.toUpperCase()] = field;
+            if (field.tag > maxTag) {
+                maxTag = field.tag;
+            }
         });
+        this.fields = new Array(maxTag);
+        for (let name in this.fieldsByName) {
+            const field = this.fieldsByName[name];
+            this.fields[field.tag] = this.fieldsByName[name];
+        }
     }
 
     extract_references(element: any)
     {
         let references: Reference[] = [];
+
+        // TOOD - these have documentation as well
 
         element.fieldref?.forEach((refElement:any) => {
             references.push(new Reference(
@@ -357,7 +367,43 @@ export class Orchestration
 
     load_messages(repository: any)
     {
-        
-    }
+        /*
+        <fixr:messages>
+          <fixr:message name="Heartbeat" id="1" msgType="0" category="Session" added="FIX.2.7" abbrName="Heartbeat">
+              <fixr:structure>
+                  <fixr:componentRef id="1024" presence="required" added="FIX.2.7">
+                      <fixr:annotation>
+                          <fixr:documentation>
+                              MsgType = 0
+                          </fixr:documentation>
+                      </fixr:annotation>
+                  </fixr:componentRef>
+        */
+        repository.messages[0].message.forEach((element:any) => {
+            let structure = this.extract_references(element.structure);
 
+            /*
+            constructor(readonly componentID: string, 
+                readonly msgType: string, 
+                readonly name: string, 
+                readonly categoryID: string, 
+                readonly sectionID: string, 
+                readonly notReqXML: string, 
+                readonly description: string, 
+                readonly added: string, 
+                readonly fields: MessageField[])
+            */
+
+            let message = new Message(
+                element.$.id,
+                element.$.name,
+                element.$.msgType,
+                element.$.category,
+                element.$.added,
+                '', //this.extract_synopsis(element),
+                this.extract_references(element.structure)
+            );
+            // this.messages[message.id] = message;
+        });
+    }
 }
