@@ -48,7 +48,7 @@ export class OrderReport
         }
 
         return this._report.toString();
-    }
+    };
 
     private _report: Report = new Report();
     private _fields: MessageField[];

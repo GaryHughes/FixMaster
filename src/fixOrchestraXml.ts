@@ -40,8 +40,8 @@ class CodeSet
 
 class Reference
 {
-    constructor(readonly field_id: string | undefined, 
-                readonly group_id: string | undefined, 
+    constructor(readonly field_id: number | undefined, 
+                readonly group_id: number | undefined, 
                 readonly component_id: string | undefined, 
                 readonly presence: string, 
                 readonly added: string)
@@ -62,24 +62,11 @@ class Component
 
 class Group
 {
-    constructor(readonly id: string, 
+    constructor(readonly id: number,
                 readonly name: string, 
                 readonly added: string, 
                 readonly category: string, 
                 readonly references: Reference[])
-    {
-    }
-}
-
-class Message
-{
-   constructor(readonly id: string, 
-               readonly name: string, 
-               readonly msg_type: string, 
-               readonly category: string, 
-               readonly added: string, 
-               readonly synopsis: string, 
-               readonly references: Reference[])
     {
     }
 }
@@ -94,7 +81,8 @@ export class Orchestration
         function nameToLowerCase(name: string){
             return name?.toLowerCase();
         }
-        parseString(buffer, { tagNameProcessors: [stripNS, nameToLowerCase] }, function (err:any, result:any) {
+        parseString(buffer, { tagNameProcessors: [stripNS, nameToLowerCase], explicitChildren: true, preserveChildrenOrder: true }, function (err:any, result:any) {
+            orc.version = result.repository.$.version;
             orc.load_data_types(result.repository);
             orc.load_code_sets(result.repository);
             orc.load_fields(result.repository);
@@ -104,14 +92,17 @@ export class Orchestration
         });
     }
 
-    data_types: DataType[] = [];
-    code_sets: CodeSet[] = [];
-    
+    public version: String = "";
+
+    public dataTypes: DataType[] = [];
+    public codeSets: CodeSet[] = [];
+    public codeSetsById: Record<string, CodeSet> = {};
+
     public fields: fix.Field[] = [];
     public fieldsByName: Record<string, fix.Field> = {};
 
-    components: Component[] = [];
-    groups: Group[] = [];
+    public components: Record<string, Component> = {};
+    public groups: Record<number, Group> = {};
     public messages: Record<string, fix.Message> = {};
 
     extract_synopsis(element: any)
@@ -190,7 +181,7 @@ export class Orchestration
                 element.$.added,
                 this.extract_synopsis(element)
             ); 
-            this.data_types.push(data_type);
+            this.dataTypes.push(data_type);
             // self.data_types[dataType.name] = dataType
         });
     }
@@ -226,8 +217,8 @@ export class Orchestration
                 this.extract_synopsis(element),
                 codes
             );
-            this.code_sets.push(codeset);
-            // self.code_sets[code_set.name] = code_set
+            this.codeSets.push(codeset);
+            this.codeSetsById[codeset.id] = codeset;
         });
     }
 
@@ -271,37 +262,63 @@ export class Orchestration
 
         // TOOD - these have documentation as well
 
-        element.fieldref?.forEach((refElement:any) => {
-            references.push(new Reference(
-                refElement.$.id,
-                undefined,
-                undefined,
-                refElement.$.presence,
-                refElement.$.added
-            ));  
-        });
-
-        element.groupref?.forEach((refElement:any) => {
-            references.push(new Reference(
-                undefined,
-                refElement.$.id,
-                undefined,
-                refElement.$.presence,
-                refElement.$.added
-            ));  
-        });
-
-        element.componentref?.forEach((refElement:any) => {
-            references.push(new Reference(
-                undefined,
-                undefined,
-                refElement.$.id,
-                refElement.$.presence,
-                refElement.$.added
-            ));  
+        element.$$.forEach((refElement:any) => {
+            if (refElement['#name'] === 'fieldref') {
+                references.push(new Reference(
+                    Number(refElement.$.id),
+                    undefined,
+                    undefined,
+                    refElement.$.presence,
+                    refElement.$.added
+                ));  
+            }
+            else if (refElement['#name'] === 'groupref') {
+                references.push(new Reference(
+                    undefined,
+                    refElement.$.id,
+                    undefined,
+                    refElement.$.presence,
+                    refElement.$.added
+                ));  
+            }
+            else if (refElement['#name'] === 'componentref') {
+                references.push(new Reference(
+                    undefined,
+                    undefined,
+                    refElement.$.id,
+                    refElement.$.presence,
+                    refElement.$.added
+                ));  
+            }
         });
 
         return references;
+    }
+
+    references_to_fields(references: Reference[], depth: number)
+    {
+        var result: fix.MessageField[] = [];
+        for (const reference of references) {
+            if (reference.field_id) {
+                const source = this.fields[reference.field_id];
+                result.push(new fix.MessageField(source, reference.presence === 'required', reference.added, depth));    
+            }
+            else if (reference.group_id) {
+               try {
+                    const group = this.groups[reference.group_id];
+                    result = result.concat(this.references_to_fields(group.references, depth + 1));
+               }
+               catch (Exception) {
+                    // Broken groupRef in FIX44
+                    // https://github.com/FIXTradingCommunity/orchestrations/issues/11
+               }
+            }
+            else if (reference.component_id) {
+                const component = this.components[reference.component_id];
+                result = result.concat(this.references_to_fields(component.references, depth));
+            }
+        }
+        return result;
     }
 
     load_components(repository: any)
@@ -324,8 +341,7 @@ export class Orchestration
                 element.$.added,
                 this.extract_references(element)
             );
-            this.components.push(component);
-            // self.fields[field.id] = field
+            this.components[component.id] = component;
         });
     }
 
@@ -352,16 +368,15 @@ export class Orchestration
               </fixr:annotation>
            </fixr:group>
         */
-        repository.groups[0].group.forEach((element:any) => {
+        repository.groups[0].group?.forEach((element:any) => {
             let group = new Group(
-                element.$.id,
+                Number(element.$.id),
                 element.$.name,
                 element.$.added,
                 element.$.category,
                 this.extract_references(element)
             );
-            this.groups.push(group);
-            // self.groups[group.id] = group
+            this.groups[group.id] = group;
         });
     }
 
@@ -380,30 +395,20 @@ export class Orchestration
                   </fixr:componentRef>
         */
         repository.messages[0].message.forEach((element:any) => {
-            let structure = this.extract_references(element.structure);
-
-            /*
-            constructor(readonly componentID: string, 
-                readonly msgType: string, 
-                readonly name: string, 
-                readonly categoryID: string, 
-                readonly sectionID: string, 
-                readonly notReqXML: string, 
-                readonly description: string, 
-                readonly added: string, 
-                readonly fields: MessageField[])
-            */
-
-            let message = new Message(
+            let references = this.extract_references(element.structure[0]);
+            let fields = this.references_to_fields(references, 0);
+            let message = new fix.Message(
                 element.$.id,
-                element.$.name,
                 element.$.msgType,
+                element.$.name,
                 element.$.category,
-                element.$.added,
+                '', // TODO get rid of this when we drop the repository
+                '', // TODO get rid of this when we drop the repository
                 '', //this.extract_synopsis(element),
-                this.extract_references(element.structure)
+                element.$.added,
+                fields
             );
-            // this.messages[message.id] = message;
+            this.messages[message.msgType] = message;
         });
     }
 }

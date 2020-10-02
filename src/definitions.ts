@@ -64,6 +64,10 @@ export class Field {
         let dataType = this.type.toLowerCase();
         return numericTypes.indexOf(dataType) >= 0;
     }
+
+    public toString = () : string => {
+        return `Field(${this.name}=${this.tag})`;
+    }
 }
 
 // 
