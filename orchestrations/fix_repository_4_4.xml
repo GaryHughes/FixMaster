@@ -4,7 +4,7 @@
     <dc:title>Orchestra</dc:title>
   <dc:creator>https://github.com/GaryHughes/fixorchestra</dc:creator>
   <dc:publisher>Gary Hughes</dc:publisher>
-  <dc:date>2020-09-26T07:19:11.605848 UTC</dc:date>
+  <dc:date>2020-10-03T04:10:44.293001 UTC</dc:date>
   <dc:format>Orchestra schema</dc:format>
   <dc:source>FIX Unified Repository</dc:source>
   </fixr:metadata>
@@ -592,17 +592,17 @@ YYYY = 0000-9999, MM = 01-12, DD = 01-31.</fixr:documentation>
       </fixr:annotation>
     </fixr:codeSet>
   <fixr:codeSet name="IOIQtyCodeSet" id="27" type="String">
-      <fixr:code name="Small" id="27001" value="S" added="FIX.4.4">
+      <fixr:code name="Small" id="27001" value="S" added="FIX.4.4" addedEP="25">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Small</fixr:documentation>
         </fixr:annotation>
       </fixr:code>
-    <fixr:code name="Medium" id="27002" value="M" added="FIX.4.4">
+    <fixr:code name="Medium" id="27002" value="M" added="FIX.4.4" addedEP="25">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Medium</fixr:documentation>
         </fixr:annotation>
       </fixr:code>
-    <fixr:code name="Large" id="27003" value="L" added="FIX.4.4">
+    <fixr:code name="Large" id="27003" value="L" added="FIX.4.4" addedEP="25">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Large</fixr:documentation>
         </fixr:annotation>
@@ -2301,12 +2301,12 @@ In Fixed Income the contents of this field may influence the instrument definiti
       </fixr:annotation>
     </fixr:codeSet>
   <fixr:codeSet name="SettlCurrFxRateCalcCodeSet" id="156" type="char">
-      <fixr:code name="Multiply" id="156001" value="M" added="FIX.4.4">
+      <fixr:code name="Multiply" id="156001" value="M" added="FIX.4.4" addedEP="38">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Multiply</fixr:documentation>
         </fixr:annotation>
       </fixr:code>
-    <fixr:code name="Divide" id="156002" value="D" added="FIX.4.4">
+    <fixr:code name="Divide" id="156002" value="D" added="FIX.4.4" addedEP="38">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Divide</fixr:documentation>
         </fixr:annotation>
@@ -2896,22 +2896,22 @@ NOTE: Additional values may be used by mutual agreement of the counterparties)</
       </fixr:annotation>
     </fixr:codeSet>
   <fixr:codeSet name="SettlDeliveryTypeCodeSet" id="172" type="int">
-      <fixr:code name="Versus" id="172001" value="0" added="FIX.4.4">
+      <fixr:code name="Versus" id="172001" value="0" added="FIX.4.4" addedEP="35">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">"Versus. Payment": Deliver (if Sell) or Receive (if Buy) vs. (Against) Payment</fixr:documentation>
         </fixr:annotation>
       </fixr:code>
-    <fixr:code name="Free" id="172002" value="1" added="FIX.4.4">
+    <fixr:code name="Free" id="172002" value="1" added="FIX.4.4" addedEP="35">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">"Free": Deliver (if Sell) or Receive (if Buy) Free</fixr:documentation>
         </fixr:annotation>
       </fixr:code>
-    <fixr:code name="TriParty" id="172003" value="2" added="FIX.4.4">
+    <fixr:code name="TriParty" id="172003" value="2" added="FIX.4.4" addedEP="35">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Tri-Party</fixr:documentation>
         </fixr:annotation>
       </fixr:code>
-    <fixr:code name="HoldInCustody" id="172004" value="3" added="FIX.4.4">
+    <fixr:code name="HoldInCustody" id="172004" value="3" added="FIX.4.4" addedEP="35">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Hold In Custody</fixr:documentation>
         </fixr:annotation>
@@ -3507,12 +3507,12 @@ NOTE: Additional values may be used by mutual agreement of the counterparties)</
       </fixr:annotation>
     </fixr:codeSet>
   <fixr:codeSet name="AggregatedBookCodeSet" id="266" type="Boolean">
-      <fixr:code name="BookEntriesToBeAggregated" id="266001" value="Y" added="FIX.4.4">
+      <fixr:code name="BookEntriesToBeAggregated" id="266001" value="Y" added="FIX.4.4" addedEP="34">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">one book entry per side per price</fixr:documentation>
         </fixr:annotation>
       </fixr:code>
-    <fixr:code name="BookEntriesShouldNotBeAggregated" id="266002" value="N" added="FIX.4.4">
+    <fixr:code name="BookEntriesShouldNotBeAggregated" id="266002" value="N" added="FIX.4.4" addedEP="34">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Multiple entries per side per price allowed</fixr:documentation>
         </fixr:annotation>
@@ -7923,17 +7923,17 @@ Primarily used by futures exchanges to indicate the CTICode (customer type indic
       </fixr:annotation>
     </fixr:codeSet>
   <fixr:codeSet name="SettlSessIDCodeSet" id="716" type="String">
-      <fixr:code name="Intraday" id="716001" value="ITD" added="FIX.4.4">
+      <fixr:code name="Intraday" id="716001" value="ITD" added="FIX.4.4" addedEP="1">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Intraday</fixr:documentation>
         </fixr:annotation>
       </fixr:code>
-    <fixr:code name="RegularTradingHours" id="716002" value="RTH" added="FIX.4.4">
+    <fixr:code name="RegularTradingHours" id="716002" value="RTH" added="FIX.4.4" addedEP="1">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Regular Trading Hours</fixr:documentation>
         </fixr:annotation>
       </fixr:code>
-    <fixr:code name="ElectronicTradingHours" id="716003" value="ETH" added="FIX.4.4">
+    <fixr:code name="ElectronicTradingHours" id="716003" value="ETH" added="FIX.4.4" addedEP="1">
         <fixr:annotation>
           <fixr:documentation purpose="SYNOPSIS">Electronic Trading Hours</fixr:documentation>
         </fixr:annotation>

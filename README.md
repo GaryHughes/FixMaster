@@ -10,9 +10,9 @@ FIX Master contains a rich data dictionary and you can lookup the definition of 
 
 ## Extension Settings
 
-**fixmaster.repositoryPath** Path to a fixtrading.org XML Repository. FIX Master includes a copy of the repository that it will use by default.
+**fixmaster.orchestraPath** Path to a directory containing fixtrading.org Orchestrations. FIX Master includes orchestrations for FIX.4.2, FIX.4.4, and FIX.5.0SP2 EP 258, that it will use by default.
 
-**fixmaster.quickFixDataDictionaryPath** Path to a QuickFix XML data dictionary. This can be used to supplement the fixtrading.org repository with custom field definitions.
+**fixmaster.quickFixDataDictionaryPath** Path to a QuickFix XML data dictionary. This can be used to supplement the fixtrading.org orchestrations with custom field definitions.
 
 **fixmaster.nameLookup** `(Strict,Promiscuous)` Governs how names are found for messages, fields, and enumerated values.
 
@@ -35,4 +35,4 @@ doesn't use excessive amounts of memory and negatively affect performance and po
 
 ## Acknowledgements
 
-This extension includes parts of the www.fixtrading.org XML Repository Copyright (c) FIX Protocol Ltd. All Rights Reserved.
+This extension includes orchestrations generated from the www.fixtrading.org XML Repository Copyright (c) FIX Protocol Ltd. All Rights Reserved.

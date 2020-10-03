@@ -138,5 +138,5 @@ export class Report {
         }
 
         return buffer;
-    }
+    };
 }

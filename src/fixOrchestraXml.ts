@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 import { setFlagsFromString } from 'v8';
-import { Repository } from './fixRepository';
 import * as fix from './definitions';
 
 // "@typescript-eslint/class-name-casing": "warn",
@@ -18,13 +17,18 @@ class DataType
 
 class Code
 {
-   constructor(readonly id: string, 
-               readonly name: string, 
-               readonly value: string, 
-               readonly added: string, 
-               readonly synopsis: string)
-   {
-   }
+    constructor(readonly id: string,
+                readonly name: string,
+                readonly value: string, 
+                readonly added: string, 
+                readonly synopsis: string,
+                readonly addedEP: string,
+                readonly updated: string,
+                readonly updatedEP: string,
+                readonly deprecated: string,
+                readonly deprecatedEP: string)
+    {
+    }
 }
 
 class CodeSet
@@ -92,7 +96,7 @@ export class Orchestration
         });
     }
 
-    public version: String = "";
+    public version: string = "";
 
     public dataTypes: DataType[] = [];
     public codeSets: CodeSet[] = [];
@@ -207,7 +211,12 @@ export class Orchestration
                     codeElement.$.name,
                     codeElement.$.value,
                     codeElement.$.added,
-                    this.extract_synopsis(codeElement)
+                    this.extract_synopsis(codeElement),
+                    codeElement.$.addedEP,
+                    codeElement.$.updated,
+                    codeElement.$.updatedEP,
+                    codeElement.$.deprecated,
+                    codeElement.$.deprecatedEP
                 )); 
             });
             let codeset = new CodeSet(
