@@ -3,7 +3,7 @@
 	"displayName": "FIX Master",
 	"description": "FIX Protocol Formatter and Data Dictionary",
 	"icon": "images/fixMaster.png",
-	"version": "1.5.0",
+	"version": "1.6.0",
 	"publisher": "geh-fixmaster",
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"repository": {
@@ -17,7 +17,7 @@
 		"name": "Gary Hughes"
 	},
 	"engines": {
-		"vscode": "^1.43.0"
+		"vscode": "^1.49.0"
 	},
 	"categories": [
 		"Formatters",
