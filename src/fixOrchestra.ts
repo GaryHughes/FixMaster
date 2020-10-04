@@ -118,7 +118,7 @@ export class Orchestra
             if (codeset) {
                 const code = codeset.codes.find(entry => entry.value === value);
                 if (code) {
-                    return code.synopsis;
+                    return code.name;
                 }
             }
         }
@@ -128,7 +128,7 @@ export class Orchestra
             if (codeset) {
                 const code = codeset.codes.find(entry => entry.value === value);
                 if (code) {
-                    return code.synopsis;
+                    return code.name;
                 }
             }        
         }
