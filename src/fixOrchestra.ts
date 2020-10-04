@@ -4,6 +4,7 @@ import * as xml from './fixOrchestraXml';
 import * as fix from './definitions';
 import { NameLookup } from './options';
 import { print } from 'util';
+import { listenerCount } from 'process';
 
 export class Orchestra
 {
@@ -14,8 +15,22 @@ export class Orchestra
                           .map(entry => entry.name);
 
         this.orchestrations = filenames.map(entry => new xml.Orchestration(path.join(root, entry)));  
-        // TODO 
-        this.latestOrchestration = this.orchestrations[this.orchestrations.length - 2];
+        
+        this.orchestrations.sort((left: xml.Orchestration, right: xml.Orchestration) => {  
+            if (left.version < right.version) {
+                return -1;
+            }
+            if (left.version > right.version) {
+                return 1;
+            }
+            return 0;
+        });
+        
+        if (this.orchestrations.length === 0) {
+            throw new Error(`failed to load any orchestration files from the directory '${root}'`);     
+        }
+
+        this.latestOrchestration = this.orchestrations[this.orchestrations.length - 1];
     }
 
     orchestrations: xml.Orchestration[];
