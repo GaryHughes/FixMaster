@@ -4,19 +4,19 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [1.6.0] 2020-MM-dd
+## [1.6.0] 2020-10-10
+
+### Added
+
+- FIX Orchestra support has been added. This is now the default data dictionary format.
+  - Orchestrations for FIX.4.2, FIX.4.4, and FIX.5.0SP2 EP 258 are included.
+  - A new setting `fixmaster.orchestraPath` has been added. This should be a directory containing FIX Orchestra XML files.
 
 ### Removed
 
 - FIX Repository support has been removed.
   - A copy of the fixtrading.org XML Repository is no longer included.
   - The setting `fixmaster.repositoryPath` has been removed.
-
-### Added
-
-- FIX Orchestra support has been added. This is now the default data dictiomnary format.
-  - Orchestrations for FIX.4.2, FIX.4.4, and FIX.5.0SP2 EP 258 are included.
-  - A new setting `fixmaster.orchestraPath` has been added. This should be a directory containing FIX Orchestra XML files.
 
 ## [1.5.0] 2020-05-13
 
