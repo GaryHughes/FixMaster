@@ -50,9 +50,9 @@ class Field
 
 class Reference
 {
-    constructor(readonly field_id: string, 
-                readonly group_id: string, 
-                readonly component_id: string, 
+    constructor(readonly field_id: string | undefined, 
+                readonly group_id: string | undefined, 
+                readonly component_id: string | undefined, 
                 readonly presence: string, 
                 readonly added: string)
     {
@@ -65,7 +65,7 @@ class Component
                 readonly name: string, 
                 readonly category: string, 
                 readonly added: string, 
-                readonly references: string)
+                readonly references: Reference[])
     {
     }
 }
@@ -76,7 +76,7 @@ class Group
                 readonly name: string, 
                 readonly added: string, 
                 readonly category: string, 
-                readonly references: string)
+                readonly references: Reference[])
     {
     }
 }
@@ -89,7 +89,7 @@ class Message
                readonly category: string, 
                readonly added: string, 
                readonly synopsis: string, 
-               readonly references: string)
+               readonly references: Reference[])
     {
     }
 }
@@ -257,19 +257,107 @@ export class Orchestration
         });
     }
 
+    extract_references(element: any)
+    {
+        let references: Reference[] = [];
+
+        element.fieldref?.forEach((refElement:any) => {
+            references.push(new Reference(
+                refElement.$.id,
+                undefined,
+                undefined,
+                refElement.$.presence,
+                refElement.$.added
+            ));  
+        });
+
+        element.groupref?.forEach((refElement:any) => {
+            references.push(new Reference(
+                undefined,
+                refElement.$.id,
+                undefined,
+                refElement.$.presence,
+                refElement.$.added
+            ));  
+        });
+
+        element.componentref?.forEach((refElement:any) => {
+            references.push(new Reference(
+                undefined,
+                undefined,
+                refElement.$.id,
+                refElement.$.presence,
+                refElement.$.added
+            ));  
+        });
+
+        return references;
+    }
+
     load_components(repository: any)
     {
-
+        /*
+        <fixr:component name="DiscretionInstructions" id="1001" category="Common" added="FIX.4.4" abbrName="DiscInstr">
+          <fixr:fieldRef id="388" added="FIX.4.4">
+              <fixr:annotation>
+                  <fixr:documentation>
+                      What the discretionary price is related to (e.g. primary price, display price etc)
+                  </fixr:documentation>
+              </fixr:annotation>
+          </fixr:fieldRef>
+        */
+        repository.components[0].component.forEach((element:any) => {
+            let component = new Component(
+                element.$.id,
+                element.$.name,
+                element.$.category,
+                element.$.added,
+                this.extract_references(element)
+            );
+            this.components.push(component);
+            // self.fields[field.id] = field
+        });
     }
 
     load_groups(repository: any)
     {
-
+        /*
+        <fixr:groups>
+          <fixr:group id="1007" added="FIX.4.4" name="LegStipulations" category="Common" abbrName="Stip">
+              <fixr:numInGroup id="683"/>
+              <fixr:fieldRef id="688" added="FIX.4.4">
+                  <fixr:annotation>
+                      <fixr:documentation>
+                          Required if NoLegStipulations &gt;0
+                      </fixr:documentation>
+                  </fixr:annotation>
+              </fixr:fieldRef>
+              <fixr:fieldRef id="689" added="FIX.4.4">
+                  <fixr:annotation>
+                      <fixr:documentation/>
+                  </fixr:annotation>
+              </fixr:fieldRef>
+              <fixr:annotation>
+                  <fixr:documentation/>
+              </fixr:annotation>
+           </fixr:group>
+        */
+        repository.groups[0].group.forEach((element:any) => {
+            let group = new Group(
+                element.$.id,
+                element.$.name,
+                element.$.added,
+                element.$.category,
+                this.extract_references(element)
+            );
+            this.groups.push(group);
+            // self.groups[group.id] = group
+        });
     }
 
     load_messages(repository: any)
     {
-
+        
     }
 
 }
