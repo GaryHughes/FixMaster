@@ -3,22 +3,19 @@ import * as path from 'path';
 import * as xml from './fixOrchestraXml';
 import * as fix from './definitions';
 import { NameLookup } from './options';
+import { print } from 'util';
 
 export class Orchestra
 {
     constructor(root: string) {
     
-        let directories = fs.readdirSync(root, { withFileTypes: true })
-                            .filter(entry => entry.isFile() && entry.name.endsWith(".xml"))
-                            .map(entry => entry.name);
+        let filenames = fs.readdirSync(root, { withFileTypes: true })
+                          .filter(entry => entry.isFile() && entry.name.endsWith(".xml"))
+                          .map(entry => entry.name);
 
-        this.orchestrations = directories.map(entry => new xml.Orchestration(path.join(root, entry)));   
+        this.orchestrations = filenames.map(entry => new xml.Orchestration(path.join(root, entry)));  
+        // TODO 
         this.latestOrchestration = this.orchestrations[this.orchestrations.length - 2];
-
-        for (let orchestratation of this.orchestrations) {
-            // TODO - force load
-            //const _ = orchestratation.fields;
-        }
     }
 
     orchestrations: xml.Orchestration[];
@@ -41,7 +38,7 @@ export class Orchestra
         }
 
         if (!isNaN(tag)) {
-            /*
+            
             if (message) {
                 const field = message.fields.find(f => f.field.tag === tag);
                 if (field) {
@@ -49,8 +46,7 @@ export class Orchestra
                     return field;
                 }
             }
-            */
-
+           
             if (this.nameLookup === NameLookup.Promiscuous) {
 
                 if (orchestration && tag < orchestration.fields.length) {
@@ -102,7 +98,27 @@ export class Orchestra
 
     descriptionOfValue(tag: number, value:string, orchestratation: xml.Orchestration | undefined) 
     {
-    
+        if (orchestratation) {
+            const codeset = orchestratation.codeSetsById[tag];
+            if (codeset) {
+                const code = codeset.codes.find(entry => entry.value === value);
+                if (code) {
+                    return code.synopsis;
+                }
+            }
+        }
+
+        if (this.nameLookup === NameLookup.Promiscuous) {
+            const codeset = this.latestOrchestration.codeSetsById[tag];
+            if (codeset) {
+                const code = codeset.codes.find(entry => entry.value === value);
+                if (code) {
+                    return code.synopsis;
+                }
+            }        
+        }
+
+        return "";
     }
 
     symbolicNameOfValue(tag: number, value:string, orchestratation: xml.Orchestration | undefined) 
