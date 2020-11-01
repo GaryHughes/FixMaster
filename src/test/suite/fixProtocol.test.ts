@@ -1,14 +1,14 @@
 import * as assert from 'assert';
 import { before } from 'mocha';
 import * as path from 'path';
-import { Repository } from '../../fixRepository';
+import { Orchestra } from '../../fixOrchestra';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
 // import * as myExtension from '../extension';
 
-import { fixMessagePrefix, parseMessage, prettyPrintMessage } from '../../fixProtocol';
+import { parseMessage } from '../../fixProtocol';
 
 suite('FIX Protocol Test Suite', () => {
 
@@ -79,9 +79,9 @@ suite('FIX Protocol Test Suite', () => {
     });
 
     test('Parse message with a data field', () => {
-        let repository = new Repository(path.join(__dirname, "../../../repository"), true);
+        let orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
         let text = "8=FIX.4.4\u00019=167\u000135=D\u000149=INITIATOR\u000156=ACCEPTOR\u000134=2752\u000152=20200114-08:13:20.041\u000111=61\u000170=60\u0001100=AUTO\u000155=BHP.AX\u000154=1\u000160=20200114-08:12:59.397\u000138=10000\u000140=2\u000144=20\u000159=1\u000193=20\u000189=ABCDEF\u0001ABCDEFABC\u0001DEF\u000110=220\u0001";        
-        let message = parseMessage(text, repository);
+        let message = parseMessage(text, orchestra);
         if (!message) {
             assert.fail("message failed to parse");
             return;

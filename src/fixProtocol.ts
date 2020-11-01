@@ -1,5 +1,5 @@
-import * as FIX from './fixRepository';
-import * as xml from './fixRepositoryXml';
+import * as FIX from './fixOrchestra';
+import * as xml from './fixOrchestraXml';
 import { DataDictionary } from './quickFixDataDictionary';
 import stringify = require('csv-stringify/lib/sync.js');
 import base64 = require('base-64');
@@ -102,28 +102,28 @@ export class Message {
         this.fields = fields;
     }
 
-    describe(repository: FIX.Repository, quickFix: DataDictionary | null) {
+    describe(orchestra: FIX.Orchestra, quickFix: DataDictionary | null) {
         // TODO - This is all a bit messier than I'd like - review.
         const beginString = this.fields.find(field => field.tag === beginStringTag);
      
-        var version: xml.Version | undefined;
+        var version: xml.Orchestration | undefined;
 
         if (beginString) {
-            version = repository.versions.find(v => v.beginString === beginString.value);        
+            version = orchestra.orchestrations.find(v => v.version === beginString.value);        
         }
      
         const msgTypeField = this.fields.find(field => field.tag === msgTypeTag);
         
         if (msgTypeField && msgTypeField.value.length > 0) {
             const msgType = msgTypeField.value;
-            const messageDefinition = repository.definitionOfMessage(msgType, version);
+            const messageDefinition = orchestra.definitionOfMessage(msgType, version);
             const fieldDescriptions = this.fields.map(field => {
-                var definition = repository.definitionOfField(field.tag, version, messageDefinition);
+                var definition = orchestra.definitionOfField(field.tag, version, messageDefinition);
                 // TODO - change this to return tag === NaN 
-                if (definition.field.description.length === 0 && quickFix) {
+                if (definition?.field.description.length === 0 && quickFix) {
                     definition = quickFix.definitionOfField(field.tag, undefined, undefined);
                 }
-                var valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
+                var valueDescription = orchestra.descriptionOfValue(field.tag, field.value, version);
                 if (valueDescription.length === 0 && quickFix) {
                     valueDescription = quickFix.descriptionOfValue(field.tag, field.value);
                 }
@@ -131,9 +131,9 @@ export class Message {
                                             field.value, 
                                             definition ? definition.field.name : "", 
                                             valueDescription, 
-                                            definition.required,
-                                            definition.indent,
-                                            definition.field.type);          
+                                            definition ? definition.required : false,
+                                            definition ? definition.indent : 0,
+                                            definition ? definition.field.type : "");          
             });
             return new MessageDescription(msgType, 
                                           messageDefinition ? messageDefinition.name : "", 
@@ -144,20 +144,21 @@ export class Message {
         // and lookup the fields in isolation, this means we don't have required or indent properties but still better
         // than nothing.
         const fieldDescriptions = this.fields.map(field => {
-            var definition = repository.definitionOfField(field.tag, version, undefined);
+            var definition = orchestra.definitionOfField(field.tag, version, undefined);
             // TODO - change this to return tag === NaN
-            if (definition.field.description.length === 0 && quickFix) {
+            if (definition?.field.description.length === 0 && quickFix) {
                 definition = quickFix.definitionOfField(field.tag, undefined, undefined);
             }
-            const valueDescription = repository.descriptionOfValue(field.tag, field.value, version);
+            const valueDescription = orchestra.descriptionOfValue(field.tag, field.value, version);
             return new FieldDescription(field.tag, 
                                         field.value, 
-                                        definition.field.name, 
+                                        definition ? definition.field.name : "", 
                                         valueDescription, 
-                                        definition.required,
-                                        definition.indent,
-                                        definition.field.type);
-        });
+                                        definition ? definition.required : false,
+                                        definition ? definition.indent : 0,
+                                        definition ? definition.field.type : "");
+            }
+        );
 
         return new MessageDescription("", "", fieldDescriptions);
     }
@@ -181,7 +182,7 @@ export class Message {
     
 }
 
-export function parseMessage(text: string, repository: FIX.Repository | null = null, separator: string | undefined = undefined) {
+export function parseMessage(text: string, orchestra: FIX.Orchestra | null = null, separator: string | undefined = undefined) {
 
     if (!separator) {
         separator = fieldDelimiter;
@@ -211,7 +212,7 @@ export function parseMessage(text: string, repository: FIX.Repository | null = n
             continue;
         }
 
-        let definition = repository?.definitionOfField(tag);
+        let definition = orchestra?.definitionOfField(tag);
         
         if (definition?.field.type === 'data') {
             if (fields.length === 0) {
@@ -270,12 +271,12 @@ export function parseMessage(text: string, repository: FIX.Repository | null = n
     return message;
 }
 
-export function prettyPrintMessage(context: string, message:Message, repository:FIX.Repository, quickFix: DataDictionary | null, nestedFieldIndent: number) {
+export function prettyPrintMessage(context: string, message: Message, orchestra: FIX.Orchestra, quickFix: DataDictionary | null, nestedFieldIndent: number) {
     
     var buffer: string = "";
     var widestFieldName: number = 0;
  
-    const description = message.describe(repository, quickFix);
+    const description = message.describe(orchestra, quickFix);
     
     description.fields.forEach(field => {
         if (field.name.length > widestFieldName) {
@@ -311,10 +312,10 @@ export function prettyPrintMessage(context: string, message:Message, repository:
     return buffer;
 }
 
-export function csvPrintMessage(context: string, message:Message, repository:FIX.Repository, quickFix: DataDictionary | null, _: number) {
+export function csvPrintMessage(context: string, message: Message, orchestra: FIX.Orchestra, quickFix: DataDictionary | null, _: number) {
 
     var buffer: string = "";
-    const description = message.describe(repository, quickFix);
+    const description = message.describe(orchestra, quickFix);
     
     if (context && context.length > 0) {
         buffer += context + " ";

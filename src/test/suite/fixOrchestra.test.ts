@@ -61,7 +61,7 @@ suite('FIX Orchestra Test Suite', () => {
         assert.strictEqual("FIX.4.2", FIX_4_2.version);
         assert.strictEqual("FIX.4.4", FIX_4_4.version);
         orchestra.nameLookup = NameLookup.Strict;
-        assert.strictEqual("Filled", orchestra.descriptionOfValue(39, "2", FIX_4_2));
+        assert.strictEqual("Partially filled", orchestra.descriptionOfValue(39, "1", FIX_4_2));
         assert.strictEqual("", orchestra.descriptionOfValue(937, "1", FIX_4_2));
         assert.strictEqual("Full", orchestra.descriptionOfValue(937, "1", FIX_4_4));
     });
@@ -72,7 +72,7 @@ suite('FIX Orchestra Test Suite', () => {
         assert.strictEqual("FIX.4.2", FIX_4_2.version);
         assert.strictEqual("FIX.4.4", FIX_4_4.version);
         orchestra.nameLookup = NameLookup.Promiscuous;
-        assert.strictEqual("Filled", orchestra.descriptionOfValue(39, "2", FIX_4_2));
+        assert.strictEqual("Partially filled", orchestra.descriptionOfValue(39, "1", FIX_4_2));
         assert.strictEqual("Full", orchestra.descriptionOfValue(937, "1", FIX_4_2));
         assert.strictEqual("Full", orchestra.descriptionOfValue(937, "1", FIX_4_4));
     });
@@ -99,6 +99,11 @@ suite('FIX Orchestra Test Suite', () => {
    
     test('Lookup removed field', () => {
         assert.equal('ExecTransType', orchestra.definitionOfField(20)?.field.name);
+    });
+
+    test('symbolic name lookup', () => {
+        orchestra.nameLookup = NameLookup.Promiscuous;
+        assert.equal('PartiallyFilled', orchestra.symbolicNameOfValue(39, "1", undefined));
     });
    
 });

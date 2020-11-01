@@ -1,4 +1,4 @@
-import { Repository } from './fixRepository';
+import { Orchestra } from './fixOrchestra';
 import { OrderBook } from './orderBook';
 import { Report, ColumnJustification } from './report';
 import { MessageField } from './definitions';
@@ -7,7 +7,7 @@ import * as FIX from  './fixProtocol';
 
 export class OrderReport
 {
-    public constructor(readonly repository: Repository, readonly orderBook: OrderBook, readonly fields: MessageField[]) {
+    public constructor(readonly orchestra: Orchestra, readonly orderBook: OrderBook, readonly fields: MessageField[]) {
         this._fields = fields;
         for (let definition of this._fields) {
             let justification = ColumnJustification.Left;
@@ -29,14 +29,14 @@ export class OrderReport
                 let field = order.fields[definition.field.tag];
                 if (field) {
                     let pending = order.pendingFields[definition.field.tag];
-                    var name = this.repository.symbolicNameOfValue(field.tag, field.value, undefined);
+                    var name = this.orchestra.symbolicNameOfValue(field.tag, field.value, undefined);
                     var value = name || field.value;
                     if (pending && pending.value !== field.value &&
                         // identity fields change with ExecutionReports and OrderCancelReplace etc but we don't need or want to
                         // see those changes.
                         !Order.isIdentityField(field.tag)) 
                     {
-                        var pendingName = this.repository.symbolicNameOfValue(pending.tag, pending.value, undefined);
+                        var pendingName = this.orchestra.symbolicNameOfValue(pending.tag, pending.value, undefined);
                         value += ` (${pendingName || pending.value})`;
                     }
                     values[index] = value;

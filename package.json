@@ -93,10 +93,10 @@
 		"configuration": {
 			"title": "FIX Master",
 			"properties": {
-				"fixmaster.repositoryPath": {
+				"fixmaster.orchestraPath": {
 					"type": "string",
 					"default": null,
-					"description": "Path to a fixtrading.org XML Repository. FIX Master includes a copy of the repository that it will use by default."
+					"description": "Path to a directory containing fixtrading.org Orchestrations. FIX Master includes a set of orchestrations that it will use by default."
 				},
 				"fixmaster.quickFixDataDictionaryPath": {
 					"type": "string",

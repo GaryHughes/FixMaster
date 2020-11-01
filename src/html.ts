@@ -1,5 +1,5 @@
 import { MessageField } from './definitions';
-import { Repository } from './fixRepository';
+import { Orchestra } from './fixOrchestra';
 import { Uri } from 'vscode';
 
 function htmlHead(stylesheetPaths: Uri[], scriptPaths: Uri[]) {
@@ -22,22 +22,22 @@ function normaliseId(value: string) {
     return value.split(".").join("");
 }
 
-export function definitionHtmlForField(definition: MessageField, repository: Repository, stylesheetPaths: Uri[], scriptPaths: Uri[], preferedBeginString: string | undefined = undefined) {
+export function definitionHtmlForField(definition: MessageField, orchestra: Orchestra, stylesheetPaths: Uri[], scriptPaths: Uri[], preferedBeginString: string | undefined = undefined) {
 
     if (!preferedBeginString) {
-        preferedBeginString = repository.latestVersion.beginString;
+        preferedBeginString = orchestra.latestOrchestration.version;
     }
 
     // The requested field might not be available in the preferred version and we don't
     // want that tab to be selected so find a version it is available in.
-    const preferredVersion = repository.versions.find(version => version.beginString === preferedBeginString);
+    const preferredVersion = orchestra.orchestrations.find(orchestration => orchestration.version === preferedBeginString);
     if (preferredVersion) {
         var preferredDefinition = preferredVersion.fields[definition.field.tag];
         if (isNaN(preferredDefinition.tag)) {
-            for (const version of repository.versions.slice().reverse()) {
-                preferredDefinition = version.fields[definition.field.tag];    
+            for (const orchestration of orchestra.orchestrations.slice().reverse()) {
+                preferredDefinition = orchestration.fields[definition.field.tag];    
                 if (!isNaN(preferredDefinition.tag)) {
-                    preferedBeginString = version.beginString;
+                    preferedBeginString = orchestration.version;
                     break;
                 }   
             }
@@ -49,22 +49,23 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
     html += '<div>';
     html += '<br>';
     html += '<ul class="nav nav-pills">';
-    for (const version of repository.versions) {
+    for (const orchestration of orchestra.orchestrations) {
         var style = 'nav-link';
       
-        const versionDefinition = version.fields[definition.field.tag];
+        const versionDefinition = orchestration.fields[definition.field.tag];
         if (!versionDefinition || isNaN(versionDefinition.tag)) {
             style += ' disabled';
         }
-        else if (version.beginString === preferedBeginString) {
+        else if (orchestration.version === preferedBeginString) {
             style += ' active';
         }
 
         html += '<li class="nav-item">';
-        html += `   <a class="${style}" href="#${normaliseId(version.beginString)}" data-toggle="pill">${version.beginString}`;
-        if (version.extensionPack) {
-            html += "/EP" + version.extensionPack;
-        }
+        html += `   <a class="${style}" href="#${normaliseId(orchestration.version)}" data-toggle="pill">${orchestration.version}`;
+        // TODO
+        // if (version.extensionPack) {
+        //     html += "/EP" + version.extensionPack;
+        // }
         html += '</a>';
         html += '</li>';
     }
@@ -73,20 +74,20 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
     html += '</div>';
     html += '<div class="tab-content">';
 
-    for (const version of repository.versions) {
-        const values = version.enumeratedTags[definition.field.tag];
+    for (const orchestration of orchestra.orchestrations) {
+        const codeSet = orchestration.codeSetsById[definition.field.tag];
         style = 'tab-pane';
-        if (version.beginString === preferedBeginString) {
+        if (orchestration.version === preferedBeginString) {
             style += ' active';
         }
-        html += `   <div class="${style}" id="${normaliseId(version.beginString)}">`;
+        html += `   <div class="${style}" id="${normaliseId(orchestration.version)}">`;
 
-        const versionDefinition = version.fields[definition.field.tag];
+        const versionDefinition = orchestration.fields[definition.field.tag];
         if (versionDefinition) {
             html += '       <p>' + versionDefinition.description.split('\n').join('<br>') + '</p>';
         }
 
-        if (values && values.length > 0) {
+        if (codeSet && codeSet.codes.length > 0) {
             /* we shouldn't add table-dark here but I don't know how to do this dynamically based on the theme and it looks ok
                in both themes anyway because we explicitly override the background and text colors in the css. */
             html += '       <table class="table table-dark table-sm">';
@@ -94,32 +95,30 @@ export function definitionHtmlForField(definition: MessageField, repository: Rep
             html += '               <trow><th class="text-center">Value</th><th>Name</th><th>Description</th><th>Added</th><th>Updated</th><th>Deprecated</th></trow>';
             html += '           </thead>';
             html += '           <tbody>';
-            if (values) {
-                for (const enumValue of values) {
-                    html += '   <tr>';
-                    html += '   <td class="text-center">' + enumValue.value + '</td>';
-                    html += '   <td>' + enumValue.symbolicName + '</td>';
-                    html += '   <td>' + enumValue.description + '</td>';
-                    if (enumValue.addedEP && enumValue.addedEP.length > 0) {
-                        html += '   <td>' + enumValue.added + "/EP" + enumValue.addedEP + '</td>';
-                    }
-                    else {
-                        html += '   <td>' + enumValue.added + '</td>';
-                    }
-                    if (enumValue.updatedEP && enumValue.updatedEP.length > 0) {
-                        html += '   <td>' + enumValue.updated + "/EP" + enumValue.updatedEP + '</td>';
-                    }
-                    else {
-                        html += '   <td>' + enumValue.updated + '</td>';
-                    }
-                    if (enumValue.deprecatedEP && enumValue.deprecatedEP.length > 0) {
-                        html += '   <td>' + enumValue.deprecated + "/EP" + enumValue.deprecatedEP + '</td>';
-                    }
-                    else {
-                        html += '   <td>' + enumValue.deprecated + '</td>';
-                    }
-                    html += '   </tr>';
+            for (const code of codeSet.codes) {
+                html += '   <tr>';
+                html += '   <td class="text-center">' + code.value + '</td>';
+                html += '   <td>' + code.name + '</td>';
+                html += '   <td>' + code.synopsis + '</td>';
+                if (code.addedEP && code.addedEP.length > 0) {
+                    html += '   <td>' + code.added + "/EP" + code.addedEP + '</td>';
                 }
+                else {
+                    html += '   <td>' + (code.added ?? '') + '</td>';
+                }
+                if (code.updatedEP && code.updatedEP.length > 0) {
+                    html += '   <td>' + code.updated + "/EP" + code.updatedEP + '</td>';
+                }
+                else {
+                    html += '   <td>' + (code.updated ?? '') + '</td>';
+                }
+                if (code.deprecatedEP && code.deprecatedEP.length > 0) {
+                    html += '   <td>' + code.deprecated + "/EP" + code.deprecatedEP + '</td>';
+                }
+                else {
+                    html += '   <td>' + (code.deprecated ?? '') + '</td>';
+                }
+                html += '   </tr>';
             }
             html += '           </tbody>';
             html += '       </table>';

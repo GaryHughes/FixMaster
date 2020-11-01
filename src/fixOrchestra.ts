@@ -123,7 +123,27 @@ export class Orchestra
 
     symbolicNameOfValue(tag: number, value:string, orchestratation: xml.Orchestration | undefined) 
     {
-    
+        if (orchestratation) {
+            const codeset = orchestratation.codeSetsById[tag];
+            if (codeset) {
+                const code = codeset.codes.find(entry => entry.value === value);
+                if (code) {
+                    return code.name;
+                }
+            }
+        }
+
+        if (this.nameLookup === NameLookup.Promiscuous) {
+            const codeset = this.latestOrchestration.codeSetsById[tag];
+            if (codeset) {
+                const code = codeset.codes.find(entry => entry.value === value);
+                if (code) {
+                    return code.name;
+                }
+            }        
+        }
+
+        return "";
     }
 
 

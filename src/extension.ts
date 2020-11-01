@@ -1,7 +1,7 @@
 import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, TextDocument, ViewColumn, Uri, languages, Hover, MarkdownString, Position, Range } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { Repository } from './fixRepository';
+import { Orchestra } from './fixOrchestra';
 import { DataDictionary } from './quickFixDataDictionary';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtocol';
 import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
@@ -12,33 +12,33 @@ import { MessageField } from './definitions';
 
 export function activate(context: ExtensionContext) {
 
-	var repository: Repository | null = null;
+	var orchestra: Orchestra | null = null;
 	var dataDictionary: DataDictionary | null = null;
 	var orderBook = new OrderBook();
 	var orderBookFields: MessageField[] = [];
 
-	const loadRepository = () => {
+	const loadOrchestra = () => {
 
 		window.withProgress({
 			location: ProgressLocation.Notification,
-			title: "Loading the FIX repository...",
+			title: "Loading the FIX orchestra...",
 			cancellable: false
 		}, (progress, token) => {
 			return new Promise(resolve => {
 				setTimeout(() => {
 					const configuration = workspace.getConfiguration();
-					var repositoryPath = configuration.get('fixmaster.repositoryPath') as string;
-					if (!repositoryPath) {
-						repositoryPath = "./repository";
+					var orchestraPath = configuration.get('fixmaster.orchestraPath') as string;
+					if (!orchestraPath) {
+						orchestraPath = "./orchestrations";
 					}
-					if (!path.isAbsolute(repositoryPath)) {
-						repositoryPath = path.join(context.extensionPath, repositoryPath);
+					if (!path.isAbsolute(orchestraPath)) {
+						orchestraPath = path.join(context.extensionPath, orchestraPath);
 					}
-					if (!fs.existsSync(repositoryPath)) {
-						window.showErrorMessage("The repository path '" + repositoryPath + "' cannot be found.");
+					if (!fs.existsSync(orchestraPath)) {
+						window.showErrorMessage("The orchestra path '" + orchestraPath + "' cannot be found.");
 					}
 					else {
-						repository = new Repository(repositoryPath, true);
+						orchestra = new Orchestra(orchestraPath);
 						loadOrderBookTags();
 					}
 					resolve();
@@ -74,7 +74,7 @@ export function activate(context: ExtensionContext) {
 	};
 
 	const loadOrderBookTags = () => {
-		if (!repository) {
+		if (!orchestra) {
 			return;
 		}
 		const configuration = workspace.getConfiguration();
@@ -85,25 +85,25 @@ export function activate(context: ExtensionContext) {
 		orderBookFields = [];
 		let fields = orderBookFieldsString.split(","); 
 		for (let field of fields) {
-			let definition = repository.definitionOfField(field);
-			if (!definition) {
-				window.showErrorMessage(`Unable to find a field with name or tag '${field}'`);
-			}
-			else {
+			let definition = orchestra.definitionOfField(field);
+			if (definition) {
 				// The order book ins only intended to display a high level summary of the order state so we don't support repeating fields.
-				if (!orderBookFields.find(field => field.field.tag === definition.field.tag)) {
+				if (!orderBookFields.find(field => field.field.tag === definition?.field.tag)) {
 					orderBookFields.push(definition);
 				}
+			}
+			else {
+				window.showErrorMessage(`Unable to find a field with name or tag '${field}'`);
 			}
 		}
 	};
 
-	loadRepository();
+	loadOrchestra();
 	loadDataDictionary();
 
 	workspace.onDidChangeConfiguration(evt => {
-		if (evt.affectsConfiguration('fixmaster.repositoryPath')) {
-			loadRepository();
+		if (evt.affectsConfiguration('fixmaster.orchhestraPath')) {
+			loadOrchestra();
 		}
 		else if (evt.affectsConfiguration('fixmaster.quickFixDataDictionaryPath')) {
 			loadDataDictionary();
@@ -121,8 +121,8 @@ export function activate(context: ExtensionContext) {
 			if (!hoversEnabled) {
 				return;
 			}
-			if (!repository) {
-				window.showErrorMessage('The repository has not been loaded - check the repositoryPath setting.');
+			if (!orchestra) {
+				window.showErrorMessage('The orchestra has not been loaded - check the orchestraPath setting.');
 				return;
 			}
 			const line = document.lineAt(position);	
@@ -133,26 +133,26 @@ export function activate(context: ExtensionContext) {
 			const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
 			const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
 			const rawText = line.text.substr(fixMessageIndex);
-			const message = parseMessage(rawText, repository, fieldSeparator);	
+			const message = parseMessage(rawText, orchestra, fieldSeparator);	
 			if (!message) {
 				return;
 			}
 			const start = new Position(position.line, fixMessageIndex);
 			const end = new Position(position.line, fixMessageIndex + rawText.length);
 			const range = new Range(start, end);
-			const text = prettyPrintMessage('', message, repository, dataDictionary, nestedFieldIndent);
+			const text = prettyPrintMessage('', message, orchestra, dataDictionary, nestedFieldIndent);
 			const markdown = new MarkdownString();
 			markdown.appendCodeblock(text);
 			return new Hover(markdown, range);
 		}
 	});
 
-	let format = (printer: (context: string, message:Message, repository:Repository, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
+	let format = (printer: (context: string, message:Message, orchestra:Orchestra, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
 				  scope: CommandScope,
 				  orderBook: OrderBook | null = null) => {
 
-		if (!repository) {
-			window.showErrorMessage('The repository has not been loaded - check the repositoryPath setting.');
+		if (!orchestra) {
+			window.showErrorMessage('The orchestra has not been loaded - check the orchestraPath setting.');
 			return;
 		}
 
@@ -177,7 +177,7 @@ export function activate(context: ExtensionContext) {
 		const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
 		const administrativeMessageBehaviour = AdministrativeMessageBehaviour[configuration.get("fixmaster.administrativeMessageBehaviour") as keyof typeof AdministrativeMessageBehaviour];
 
-		repository.nameLookup = NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof NameLookup];
+		orchestra.nameLookup = NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof NameLookup];
 
 		window.withProgress({
 			location: ProgressLocation.Notification,
@@ -192,8 +192,8 @@ export function activate(context: ExtensionContext) {
 
 				setTimeout(() => {
 
-					if (!repository) {
-						// We should never get here but but the compiler complains repository migth be undefined
+					if (!orchestra) {
+						// We should never get here but but the compiler complains orchestra might be undefined
 						// in the call to printer below.
 						resolve();
 						return;
@@ -230,7 +230,7 @@ export function activate(context: ExtensionContext) {
 							messageContext = match[0];	
 						}
 
-						const message = parseMessage(line.text.substr(fixMessageIndex), repository, fieldSeparator);	
+						const message = parseMessage(line.text.substr(fixMessageIndex), orchestra, fieldSeparator);	
 
 						if (!message) {
 							lastLineWasAMessage = false;
@@ -261,7 +261,7 @@ export function activate(context: ExtensionContext) {
 
 						if (include) {
 							if (prettyPrint) {
-								var pretty = printer(messageContext, message, repository, dataDictionary, nestedFieldIndent);
+								var pretty = printer(messageContext, message, orchestra, dataDictionary, nestedFieldIndent);
 								if (!lastLineWasAMessage) {
 									pretty = "\n" + pretty;
 									lastLineWasAMessage = true;
@@ -269,7 +269,7 @@ export function activate(context: ExtensionContext) {
 
 								if (orderBook) {
 									if (orderBook.process(message)) {
-										let orderReport = new OrderReport(repository, orderBook, orderBookFields);
+										let orderReport = new OrderReport(orchestra, orderBook, orderBookFields);
 										pretty += "\n" + orderReport.toString() + "\n";			
 									}
 								}	
@@ -316,7 +316,7 @@ export function activate(context: ExtensionContext) {
 					
 	commands.registerCommand('extension.show-field', async () => {
 
-		if (!repository) {
+		if (!orchestra) {
 			return;
 		}
 
@@ -326,7 +326,7 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
-		const definition = repository.definitionOfField(fieldTagOrName);
+		const definition = orchestra.definitionOfField(fieldTagOrName);
 
 		if (!definition || isNaN(definition.field.tag)) {
 			window.showErrorMessage(`Can't find a field with Tag or Name '${fieldTagOrName}'`);
@@ -357,7 +357,7 @@ export function activate(context: ExtensionContext) {
 			stylesheetPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'css', source))));
 		} 
 
-		const html = definitionHtmlForField(definition, repository, stylesheetPaths, scriptPaths);
+		const html = definitionHtmlForField(definition, orchestra, stylesheetPaths, scriptPaths);
 
 		if (!html) {
 			return;
