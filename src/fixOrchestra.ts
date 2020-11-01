@@ -26,19 +26,87 @@ export class Orchestra
 
     nameLookup: NameLookup = NameLookup.Promiscuous;
 
-    definitionOfField(tagOrName: number | string, orchestratation: xml.Orchestration | undefined = undefined, message: fix.Message | undefined = undefined) : fix.MessageField | undefined {
-        return undefined;
+    definitionOfField(tagOrName: number | string, orchestration: xml.Orchestration | undefined = undefined, message: fix.Message | undefined = undefined) : fix.MessageField | undefined 
+    {
+        var tag = Number(tagOrName);
+        
+        if (isNaN(tag)) {
+            var o = orchestration ?? this.latestOrchestration;
+            if (o) {
+                const field = o.fieldsByName[tagOrName.toString().toUpperCase()];
+                if (field) {
+                    tag = field.tag;
+                }
+            }
+        }
+
+        if (!isNaN(tag)) {
+            /*
+            if (message) {
+                const field = message.fields.find(f => f.field.tag === tag);
+                if (field) {
+                    // Best case scenario, we found the requested field on the specified message.
+                    return field;
+                }
+            }
+            */
+
+            if (this.nameLookup === NameLookup.Promiscuous) {
+
+                if (orchestration && tag < orchestration.fields.length) {
+                    // Next best case, this field is not defined for this specified message but it is a valid
+                    // field for this version.
+                    const field = orchestration?.fields[tag];
+                    if (field) {
+                        return new fix.MessageField(field, false, "", 0);
+                    }
+                }
+
+                // Last chance, check all versions.
+                for (const orchestration of this.orchestrations) {
+                    if (tag < orchestration.fields.length) {
+                        const field = orchestration.fields[tag];
+                        if (field && !isNaN(field.tag)) {
+                            return new fix.MessageField(field, false, "", 0);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Always return a valid object to simplify calling code.
+        // TODO - change this to return tag === NaN
+        const field = new fix.Field(tag, "", "", "", "", "");
+        return new fix.MessageField(field, false, "", 0);
     }
  
-    definitionOfMessage(msgType: string, orchestratation: xml.Orchestration | undefined = undefined) {
+    definitionOfMessage(msgType: string, orchestratation: xml.Orchestration | undefined = undefined) 
+    {
+         // TODO - name lookups
+
+         if (orchestratation) {
+            const message = orchestratation.messages[msgType];
+            if (message) {
+                return message;
+            }
+        } 
+
+        if (this.nameLookup === NameLookup.Promiscuous) {
+            return this.latestOrchestration.messages[msgType]; 
+        }
+
+        // Always return a valid object to simplify calling code.
+        const fields: fix.MessageField[] = [];
+        return new fix.Message("", msgType, "", "", "", "", "", "", fields);
+    }
+
+    descriptionOfValue(tag: number, value:string, orchestratation: xml.Orchestration | undefined) 
+    {
     
     }
 
-    descriptionOfValue(tag: number, value:string, orchestratation: xml.Orchestration | undefined) {
-    
-    }
-
-    symbolicNameOfValue(tag: number, value:string, orchestratation: xml.Orchestration | undefined) {
+    symbolicNameOfValue(tag: number, value:string, orchestratation: xml.Orchestration | undefined) 
+    {
     
     }
 
