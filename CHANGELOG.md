@@ -4,6 +4,10 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [1.6.0] 2020-MM-dd
+
+
+
 ## [1.5.0] 2020-05-13
 
 ### Added
