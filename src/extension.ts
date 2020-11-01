@@ -102,7 +102,7 @@ export function activate(context: ExtensionContext) {
 	loadDataDictionary();
 
 	workspace.onDidChangeConfiguration(evt => {
-		if (evt.affectsConfiguration('fixmaster.orchhestraPath')) {
+		if (evt.affectsConfiguration('fixmaster.orchestraPath')) {
 			loadOrchestra();
 		}
 		else if (evt.affectsConfiguration('fixmaster.quickFixDataDictionaryPath')) {
