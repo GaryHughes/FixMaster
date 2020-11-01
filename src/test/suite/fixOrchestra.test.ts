@@ -61,7 +61,7 @@ suite('FIX Orchestra Test Suite', () => {
         assert.strictEqual("FIX.4.2", FIX_4_2.version);
         assert.strictEqual("FIX.4.4", FIX_4_4.version);
         orchestra.nameLookup = NameLookup.Strict;
-        assert.strictEqual("Partially filled", orchestra.descriptionOfValue(39, "1", FIX_4_2));
+        assert.strictEqual("PartiallyFilled", orchestra.descriptionOfValue(39, "1", FIX_4_2));
         assert.strictEqual("", orchestra.descriptionOfValue(937, "1", FIX_4_2));
         assert.strictEqual("Full", orchestra.descriptionOfValue(937, "1", FIX_4_4));
     });
@@ -72,7 +72,7 @@ suite('FIX Orchestra Test Suite', () => {
         assert.strictEqual("FIX.4.2", FIX_4_2.version);
         assert.strictEqual("FIX.4.4", FIX_4_4.version);
         orchestra.nameLookup = NameLookup.Promiscuous;
-        assert.strictEqual("Partially filled", orchestra.descriptionOfValue(39, "1", FIX_4_2));
+        assert.strictEqual("PartiallyFilled", orchestra.descriptionOfValue(39, "1", FIX_4_2));
         assert.strictEqual("Full", orchestra.descriptionOfValue(937, "1", FIX_4_2));
         assert.strictEqual("Full", orchestra.descriptionOfValue(937, "1", FIX_4_4));
     });
