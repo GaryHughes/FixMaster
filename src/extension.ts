@@ -41,7 +41,7 @@ export function activate(context: ExtensionContext) {
 						orchestra = new Orchestra(orchestraPath);
 						loadOrderBookTags();
 					}
-					resolve();
+					resolve(undefined);
 				}, 0);
 			});
 		});
@@ -67,7 +67,7 @@ export function activate(context: ExtensionContext) {
 					else {
 						dataDictionary = await DataDictionary.parse(path);
 					}
-					resolve();
+					resolve(undefined);
 				}, 0);
 			});
 		});	
@@ -195,7 +195,7 @@ export function activate(context: ExtensionContext) {
 					if (!orchestra) {
 						// We should never get here but but the compiler complains orchestra might be undefined
 						// in the call to printer below.
-						resolve();
+						resolve(undefined);
 						return;
 					}
 
@@ -298,7 +298,7 @@ export function activate(context: ExtensionContext) {
 
 					workspace.applyEdit(edit);
 					
-					resolve();
+					resolve(undefined);
 				}, 0);
 			});
 		});
