@@ -4,6 +4,12 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [1.6.1]
+
+### Fixed
+
+- Fixed a bug that would cause the extension to fail if it was configured to delete administrative messages and the last line in file being processed was an administrative message.
+
 ## [1.6.0] 2020-10-10
 
 ### Added
