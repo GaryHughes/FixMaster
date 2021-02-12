@@ -282,7 +282,17 @@ export function activate(context: ExtensionContext) {
 							}
 						}
 						else {
-							edit.delete(document.uri, line.range.with(undefined, document.lineAt(index + 1).range.start));
+							let nextLineIndex = index + 1;
+							if (nextLineIndex >= document.lineCount) {
+								// If we try and delete using the next line start index as the end range when we are deleting
+								// the last line in the document the editor dies.
+								edit.delete(document.uri, line.range.with(undefined, document.lineAt(index).range.end));
+							}
+							else {
+								// Specifying the start of the next line as the end of the range to delete includes the newline
+								// terminator. Just using the end of the current line leaves extra new lines in the output.
+								edit.delete(document.uri, line.range.with(undefined, document.lineAt(nextLineIndex).range.start));
+							}
 						}
 					}
 
