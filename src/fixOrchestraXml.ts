@@ -313,14 +313,8 @@ export class Orchestration
                 result.push(new fix.MessageField(source, reference.presence === 'required', reference.added, depth));    
             }
             else if (reference.group_id) {
-               try {
-                    const group = this.groups[reference.group_id];
-                    result = result.concat(this.references_to_fields(group.references, depth + 1));
-               }
-               catch (Exception) {
-                    // Broken groupRef in FIX44
-                    // https://github.com/FIXTradingCommunity/orchestrations/issues/11
-               }
+                const group = this.groups[reference.group_id];
+                result = result.concat(this.references_to_fields(group.references, depth + 1));
             }
             else if (reference.component_id) {
                 const component = this.components[reference.component_id];
