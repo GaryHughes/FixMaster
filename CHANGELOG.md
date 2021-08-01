@@ -4,6 +4,18 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [1.7.0]
+
+### Changed
+
+- The orchestrations are now generated from FIX.5.0SP2 EP 264.
+- The FIX.5.0.* orchestration is now called FIX.Latest to match the versioning scheme of the specifications published by fixtrading.org.
+
+### Fixed
+
+- The orchestrations now include group definitions.
+- The Nested Field Indent setting is now respected when pretty printing.
+
 ## [1.6.1]
 
 ### Fixed

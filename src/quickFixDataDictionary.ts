@@ -164,9 +164,12 @@ export class DataDictionary {
 
         var componentsByName: Record<string, any> = {};
 
-        json.fix.components[0].component.forEach((element:any) => {
-            componentsByName[element.$.name] = element;
-        });
+        let component = json.fix.components[0].component;
+        if (component) {
+            json.fix.components[0].component.forEach((element:any) => {
+                componentsByName[element.$.name] = element;
+            });
+        }
     
         json.fix.messages[0].message.forEach((element:any) => {
         
