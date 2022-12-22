@@ -176,10 +176,13 @@ export class DataDictionary {
             var fields: MessageField[] = [];
            
             let processChildren = (children: any[], indent: number, fieldsByName: Record<string, Field>) => {
+                if (children === undefined || children === null) {
+                    return;
+                } 
                 children.forEach((child: any) => {
                     switch (child["#name"]) {
                         case "field": {
-                            const name = child.$.name;    
+                            const name = child.$.name;
                             const required = child.$.required === 'Y';
                             const field = fieldsByName[name];
                             if (field) {
