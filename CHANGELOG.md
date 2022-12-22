@@ -4,7 +4,7 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [1.7.0]
+## [1.7.0] 2022-12-22
 
 ### Changed
 
@@ -17,7 +17,7 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 - The Nested Field Indent setting is now respected when pretty printing.
 - Fixed an exception that could cause QuickFix data dictionary loading to fail.
 
-## [1.6.1]
+## [1.6.1] 2021-02-12
 
 ### Fixed
 
