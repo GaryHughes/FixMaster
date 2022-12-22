@@ -15,6 +15,7 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - The orchestrations now include group definitions.
 - The Nested Field Indent setting is now respected when pretty printing.
+- Fixed an exception that could cause QuickFix data dictionary loading to fail.
 
 ## [1.6.1]
 
