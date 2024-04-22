@@ -177,8 +177,6 @@
 		"@types/mocha": "^10.0.1",
 		"@types/node": "^20.12.7",
 		"@types/vscode": "^1.88.0",
-		"@typescript-eslint/eslint-plugin": "^6.4.1",
-		"@typescript-eslint/parser": "^6.4.1",
 		"@vscode/test-electron": "^2.3.4",
 		"eslint": "^9.1.0",
 		"glob": "^10.3.3",
