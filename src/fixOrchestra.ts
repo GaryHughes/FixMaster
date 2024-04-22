@@ -3,8 +3,6 @@ import * as path from 'path';
 import * as xml from './fixOrchestraXml';
 import * as fix from './definitions';
 import { NameLookup } from './options';
-import { print } from 'util';
-import { listenerCount } from 'process';
 
 export class Orchestra
 {
