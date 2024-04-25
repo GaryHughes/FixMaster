@@ -10,6 +10,10 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - The `fixmaster.orchestraPath` and `fixmaster.quickFixDataDictionaryPath` settings can now include `${workspaceFolder}`.
 
+### Changed
+
+- Errors raised when parsing invalid orchestrations and QuickFix data dictionary files will now be displayed to the user.
+
 ## [1.7.0] 2022-12-22
 
 ### Changed
