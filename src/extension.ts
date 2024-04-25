@@ -75,8 +75,12 @@ export function activate(context: ExtensionContext) {
 		}, (progress, token) => {
 			return new Promise(resolve => {
 				setTimeout(() => {
-					orchestra = new Orchestra(orchestraPath as string);
-					loadOrderBookTags();
+					try {
+						orchestra = new Orchestra(orchestraPath as string);
+						loadOrderBookTags();
+					} catch (err) {
+						window.showErrorMessage("Unable to load an orchestra from '" + orchestraPath + "' - " + err);
+					}
 					resolve(undefined);
 				}, 0);
 			});
@@ -84,16 +88,26 @@ export function activate(context: ExtensionContext) {
 	};
 
 	const loadDataDictionary = () => {
+		
 		dataDictionary = null;
 		const configuration = workspace.getConfiguration();
 		var path = configuration.get('fixmaster.quickFixDataDictionaryPath') as string | undefined;
+		
 		if (!path) {
 			return;
 		}
+		
 		path = resolvePathVariables(path, "QuickFix data dictionary");
+		
 		if (path == undefined) {
-			return
+			return;
 		}
+
+		if (!fs.existsSync(path as string)) {
+			window.showErrorMessage("The QuickFix data dictionary path '" + path + "' cannot be found.");
+			return;
+		}
+
 		window.withProgress({
 			location: ProgressLocation.Notification,
 			title: "Loading the QuickFix data dictionary...",
@@ -101,11 +115,10 @@ export function activate(context: ExtensionContext) {
 		}, (progress, token) => {
 			return new Promise(resolve => {
 				setTimeout(async () => {
-					if (!fs.existsSync(path as string)) {
-						window.showErrorMessage("The QuickFix data dictionary path '" + path + "' cannot be found.");
-					}
-					else {
+					try {
 						dataDictionary = await DataDictionary.parse(path as string);
+					} catch (err) {
+						window.showErrorMessage("Unable to load a QuickFix data dictionary from '" + path + "' - " + err);
 					}
 					resolve(undefined);
 				}, 0);
