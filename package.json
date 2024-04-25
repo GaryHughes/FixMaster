@@ -17,7 +17,7 @@
 		"name": "Gary Hughes"
 	},
 	"engines": {
-		"vscode": "^1.74.0"
+		"vscode": "^1.88.0"
 	},
 	"categories": [
 		"Formatters",
