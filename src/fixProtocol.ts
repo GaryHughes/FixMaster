@@ -1,7 +1,7 @@
 import * as FIX from './fixOrchestra';
 import * as xml from './fixOrchestraXml';
 import { DataDictionary } from './quickFixDataDictionary';
-import stringify = require('csv-stringify/lib/sync.js');
+import { stringify } from 'csv-stringify/sync';
 import base64 = require('base-64');
 
 export const fixMessagePrefix = "8=FIX";

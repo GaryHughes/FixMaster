@@ -10,9 +10,9 @@ FIX Master contains a rich data dictionary and you can lookup the definition of 
 
 ## Extension Settings
 
-**fixmaster.orchestraPath** Path to a directory containing fixtrading.org Orchestrations. FIX Master includes orchestrations for FIX.4.2, FIX.4.4, and FIX.5.0SP2 EP 258, that it will use by default.
+**fixmaster.orchestraPath** Path to a directory containing fixtrading.org Orchestrations. FIX Master includes orchestrations for FIX.4.2, FIX.4.4, and FIX.5.0SP2 EP 258, that it will use by default. This path can include ${workspaceFolder}.
 
-**fixmaster.quickFixDataDictionaryPath** Path to a QuickFix XML data dictionary. This can be used to supplement the fixtrading.org orchestrations with custom field definitions.
+**fixmaster.quickFixDataDictionaryPath** Path to a QuickFix XML data dictionary. This can be used to supplement the fixtrading.org orchestrations with custom field definitions. This path can include ${workspaceFolder}.
 
 **fixmaster.nameLookup** `(Strict,Promiscuous)` Governs how names are found for messages, fields, and enumerated values.
 

@@ -4,6 +4,16 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [unreleased]
+
+### Added
+
+- The `fixmaster.orchestraPath` and `fixmaster.quickFixDataDictionaryPath` settings can now include `${workspaceFolder}`.
+
+### Changed
+
+- Errors raised when parsing invalid orchestrations and QuickFix data dictionary files will now be displayed to the user.
+
 ## [1.7.0] 2022-12-22
 
 ### Changed

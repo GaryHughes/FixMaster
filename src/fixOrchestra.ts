@@ -3,8 +3,6 @@ import * as path from 'path';
 import * as xml from './fixOrchestraXml';
 import * as fix from './definitions';
 import { NameLookup } from './options';
-import { print } from 'util';
-import { listenerCount } from 'process';
 
 export class Orchestra
 {
@@ -14,7 +12,14 @@ export class Orchestra
                           .filter(entry => entry.isFile() && entry.name.endsWith(".xml"))
                           .map(entry => entry.name);
 
-        this.orchestrations = filenames.map(entry => new xml.Orchestration(path.join(root, entry)));  
+        this.orchestrations = filenames.map(entry => {
+            const orchestraPath = path.join(root, entry); 
+            try {
+                return new xml.Orchestration(orchestraPath)
+            } catch (err) {
+                throw new Error(`failed to load orchestra file '${orchestraPath}' - ${err}`);
+            }
+        });  
         
         this.orchestrations.sort((left: xml.Orchestration, right: xml.Orchestration) => {  
             if (left.version < right.version) {
