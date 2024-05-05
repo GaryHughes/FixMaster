@@ -1,4 +1,4 @@
-import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, TextDocument, ViewColumn, Uri, languages, Hover, MarkdownString, Position, Range } from 'vscode';
+import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, TextDocument, ViewColumn, Uri, languages, Hover, MarkdownString, Position, Range, TextEditor, TextEditorEdit } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Orchestra } from './fixOrchestra';
@@ -9,6 +9,8 @@ import { definitionHtmlForField } from './html';
 import { OrderBook } from './orderBook';
 import { OrderReport } from './orderReport';
 import { MessageField } from './definitions';
+import { text } from 'stream/consumers';
+import { setDefaultAutoSelectFamilyAttemptTimeout } from 'net';
 
 export function activate(context: ExtensionContext) {
 
@@ -200,7 +202,7 @@ export function activate(context: ExtensionContext) {
 		}
 	});
 
-	let format = (printer: (context: string, message:Message, orchestra:Orchestra, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
+	let format = async (printer: (context: string, message:Message, orchestra:Orchestra, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
 				  scope: CommandScope,
 				  orderBook: OrderBook | null = null) => {
 
@@ -220,9 +222,27 @@ export function activate(context: ExtensionContext) {
 			orderBook.clear();
 		}
 
-		const {document} = activeTextEditor;
+		const sourceDocument = activeTextEditor.document;
 
-		const edit = new WorkspaceEdit();
+		let document = await workspace.openTextDocument()
+			.then(document => window.showTextDocument(document))
+			.then(editor => editor.document);
+
+		let edit = new WorkspaceEdit();
+		
+		if (scope == CommandScope.Document) {
+			edit.insert(document.uri, new Position(0, 0), sourceDocument.getText());
+		}
+		else {
+			const selection = activeTextEditor.selection;
+			if (selection) {
+				const range = new Range(selection.start, selection.end); 	
+				const text = activeTextEditor.document.getText(range);
+				edit.insert(document.uri, new Position(0, 0), text);
+			}
+		}
+
+		await workspace.applyEdit(edit);
 
 		const configuration = workspace.getConfiguration();
 		const prefixPattern = configuration.get("fixmaster.prefixPattern") as string;
@@ -252,18 +272,13 @@ export function activate(context: ExtensionContext) {
 						return;
 					}
 
+					const edit = new WorkspaceEdit();
+
 					var lastLineWasAMessage = false;
 
 					var index = 0;
 					var maxIndex = document.lineCount;
 					
-					if (scope === CommandScope.Selection) {
-						if (activeTextEditor.selection) {
-							index = activeTextEditor.selection.start.line;
-							maxIndex = activeTextEditor.selection.end.line + 1;
-						}
-					}
-
 					for (; index < maxIndex; ++index) {
 
 						const line = document.lineAt(index);
@@ -357,24 +372,28 @@ export function activate(context: ExtensionContext) {
 		});
 	};
 
-	commands.registerCommand('extension.format-pretty', () => {
-		format(prettyPrintMessage, CommandScope.Document);
+	commands.registerCommand('extension.format-pretty', async () => {
+		await format(prettyPrintMessage, CommandScope.Document);
 	});
 
-	commands.registerCommand('extension.format-pretty-with-order-book', () => {
-		format(prettyPrintMessage, CommandScope.Document, orderBook);
+	commands.registerCommand('extension.format-pretty-with-order-book', async () => {
+		await format(prettyPrintMessage, CommandScope.Document, orderBook);
 	});
 
-	commands.registerCommand('extension.format-csv', () => {
-		format(csvPrintMessage, CommandScope.Document);
+	commands.registerCommand('extension.format-csv', async () => {
+		await format(csvPrintMessage, CommandScope.Document);
 	});
 
-	commands.registerCommand('extension.format-pretty-selection', () => {
-		format(prettyPrintMessage, CommandScope.Selection);
+	commands.registerCommand('extension.format-pretty-selection', async () => {
+		await format(prettyPrintMessage, CommandScope.Selection);
 	});
 
-	commands.registerCommand('extension.format-csv-selection', () => {
-		format(csvPrintMessage, CommandScope.Selection);
+	commands.registerCommand('extension.format-pretty-selection-with-order-book', async () => {
+		await format(prettyPrintMessage, CommandScope.Selection, orderBook);
+	});
+
+	commands.registerCommand('extension.format-csv-selection', async () => {
+		await format(csvPrintMessage, CommandScope.Selection);
 	});
 					
 	commands.registerCommand('extension.show-field', async () => {

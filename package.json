@@ -46,6 +46,10 @@
 				"title": "FIX Master - Pretty Print Selection"
 			},
 			{
+				"command": "extension.format-pretty-selection-with-order-book",
+				"title": "FIX Master - Pretty Print Selection with Order Book"
+			},
+			{
 				"command": "extension.format-csv-selection",
 				"title": "FIX Master - CSV Format Selection"
 			},
@@ -71,6 +75,10 @@
 				},
 				{
 					"when": "editorHasSelection",
+					"command": "extension.format-pretty-selection-with-order-book"
+				},
+				{
+					"when": "editorHasSelection",
 					"command": "extension.format-csv-selection"
 				},
 				{
@@ -81,6 +89,11 @@
 				{
 					"when": "editorHasSelection",
 					"command": "extension.format-pretty-selection",
+					"group": "1_modification"
+				},
+				{
+					"when": "editorHasSelection",
+					"command": "extension.format-pretty-selection-with-order-book",
 					"group": "1_modification"
 				},
 				{
