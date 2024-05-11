@@ -1,0 +1,60 @@
+{
+    "scopeName": "source.fix",
+    "patterns": [{ "include": "#fix-message" }],
+    "repository": {
+        "patterns": [
+            { "include": "#fix-message" }, 
+            { "include": "#fix-field" }
+        ],
+        "fix-message": {
+            "name": "fix-message",
+            "begin": "^\\s*({)\\s*$",
+            "end": "^\\s*(})\\s*$",
+            "beginCaptures": {
+                "0": { "name": "fix.message.open" }
+            },
+            "endCaptures": {
+                "0": { "name": "fix.message.close" }
+            },
+            "patterns": [
+                { "include": "#fix-field" }
+            ]
+        },
+        "fix-field": {
+            "name": "fix-field",
+            "match": "^\\s*([a-zA-Z]+)\\s+(\\()([0-9]+)(\\))\\s+(.*)$",
+            "captures": {
+                "1": { "name": "fix.field.name" },
+                "2": { "name": "fix.field.tag.open" },
+                "3": { "name": "fix.field.tag" },
+                "4": { "name": "fix.field.tag.close" },
+                "5": { 
+                    "patterns": [
+                        { "include": "#fix-field-enumerated" },
+                        { "include": "#fix-field-simple" }
+                    ] 
+                }
+            }
+        },
+        "fix-field-enumerated": {
+            "name": "fix-field-enumerated",
+            "match": "\\s*([a-zA-Z0-9]+)\\s+(-)\\s+(.*)\\s*$",
+            "captures": {
+                "1": { "name": "fix-field-enumerated-value" },
+                "2": { "name": "fix-field-enumerated-separator" }, 
+                "3": { "name": "fix-field-enumerated-description" }
+            }    
+        },
+        "fix-field-simple": {
+            "name": "fix-field-simple",
+            "match": "(.*)",
+            "captures": {
+                "1": { "name": "fix-field-value" }
+            }
+        }
+    }
+  }
+
+
+
+  

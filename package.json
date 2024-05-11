@@ -28,6 +28,19 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"languages": [
+			{
+			  "id": "FIX",
+			  "extensions": [".fix"]
+			}
+		],
+		"grammars": [
+			{
+			  "language": "FIX",
+			  "scopeName": "source.fix",
+			  "path": "./syntaxes/fix.grammar.json"
+			}
+		],
 		"commands": [
 			{
 				"command": "extension.format-pretty",

@@ -222,7 +222,7 @@ export function activate(context: ExtensionContext) {
 
 		const sourceDocument = activeTextEditor.document;
 
-		let document = await workspace.openTextDocument()
+		let document = await workspace.openTextDocument({ language: "FIX" })
 			.then(document => window.showTextDocument(document))
 			.then(editor => editor.document);
 
