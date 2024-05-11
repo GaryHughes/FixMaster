@@ -9,8 +9,6 @@ import { definitionHtmlForField } from './html';
 import { OrderBook } from './orderBook';
 import { OrderReport } from './orderReport';
 import { MessageField } from './definitions';
-import { text } from 'stream/consumers';
-import { setDefaultAutoSelectFamilyAttemptTimeout } from 'net';
 
 export function activate(context: ExtensionContext) {
 
