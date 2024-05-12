@@ -11,6 +11,9 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 - The `fixmaster.orchestraPath` and `fixmaster.quickFixDataDictionaryPath` settings can now include `${workspaceFolder}`.
 - A new selection formatting command, this is available in the command palette and the editor context menu when there is selected text.
   - `FIX Master - Pretty Print Selection with Order Book`
+- The extension now contributes a `FIX` language.
+  - Pretty printed files will have this language set.
+  - The `FIX` language has it's own grammar and theme that are used to provide basic syntax highlighting that is more regular than the default `log` formatting that was previously applied.
 
 ### Changed
 
