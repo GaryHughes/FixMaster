@@ -1,11 +1,10 @@
 {
     "scopeName": "text.fix",
-    "patterns": [{ "include": "#fix-message" }],
+    "patterns": [
+        { "include": "#fix-message" }, 
+        { "include": "#fix-orderbook" } 
+    ],
     "repository": {
-        "patterns": [
-            { "include": "#fix-message" }, 
-            { "include": "#fix-field" }
-        ],
         "fix-message": {
             "name": "fix-message",
             "begin": "^\\s*({)\\s*$",
@@ -51,6 +50,47 @@
             "captures": {
                 "1": { "name": "fix.field.value" }
             }
+        },
+        "fix-orderbook": {
+            "name": "fix-orderbook",
+            "begin": "^\\s*(―+)\\s*$",
+            "end": "^\\s*(―+)\\s*$",
+            "beginCaptures": {
+                "1": { "name": "fix.orderbook.open" }
+            },
+            "endCaptures": {
+                "1": { "name": "fix.orderbook.close" }
+            },
+            "patterns": [
+                { "name": "fix.orderbook.side.buy", "match": "\\s+Buy\\s+" },
+                { "name": "fix.orderbook.side.sell", "match": "\\s+Sell\\s+" },
+                { "name": "fix.orderbook.ordstatus.new", "match": "\\s+New\\s+" },
+                { "name": "fix.orderbook.ordstatus.partially-filled", "match": "\\s+PartiallyFilled\\s+" },
+                { "name": "fix.orderbook.ordstatus.filled", "match": "\\s+Filled\\s+" },
+                { "name": "fix.orderbook.ordstatus.done-for-day", "match": "\\s+DoneForDay\\s+" },
+                { "name": "fix.orderbook.ordstatus.canceled", "match": "\\s+Canceled\\s+" },
+                { "name": "fix.orderbook.ordstatus.replaced", "match": "\\s+Replaced\\s+" },
+                { "name": "fix.orderbook.ordstatus.pending-cancel", "match": "\\s+PendingCancel\\s+" },
+                { "name": "fix.orderbook.ordstatus.stopped", "match": "\\s+Stopped\\s+" },
+                { "name": "fix.orderbook.ordstatus.rejected", "match": "\\s+Rejected\\s+" },
+                { "name": "fix.orderbook.ordstatus.suspended", "match": "\\s+Suspended\\s+" },
+                { "name": "fix.orderbook.ordstatus.pending-new", "match": "\\s+PendingNew\\s+" },
+                { "name": "fix.orderbook.ordstatus.calculated", "match": "\\s+Calculated\\s+" },
+                { "name": "fix.orderbook.ordstatus.expired", "match": "\\s+Expired\\s+" },
+                { "name": "fix.orderbook.ordstatus.accepted-for-bidding", "match": "\\s+AcceptedForBidding\\s+" },
+                { "name": "fix.orderbook.ordstatus.pending-replace", "match": "\\s+PendingReplace\\s+" },
+
+                { 
+                    "name": "fix.orderbook.pending-replace",
+                    "match": "\\s([-+]?\\d*\\.?\\d+)\\s+(\\()([-+]?\\d*\\.?\\d+)(\\))\\s",
+                    "captures": {
+                        "1": { "name": "fix.orderbook.pending-replace.current.value" },
+                        "2": { "name": "fix.orderbook.pending-replace.new.open" },
+                        "3": { "name": "fix.orderbook.pending-replace.new.value" },
+                        "4": { "name": "fix.orderbook.pending-replace.new.close" }
+                    }
+                }
+            ]
         }
     }
   }
