@@ -1,5 +1,5 @@
 {
-    "scopeName": "source.fix",
+    "scopeName": "text.fix",
     "patterns": [{ "include": "#fix-message" }],
     "repository": {
         "patterns": [
@@ -40,16 +40,16 @@
             "name": "fix-field-enumerated",
             "match": "\\s*([a-zA-Z0-9]+)\\s+(-)\\s+(.*)\\s*$",
             "captures": {
-                "1": { "name": "fix-field-enumerated-value" },
-                "2": { "name": "fix-field-enumerated-separator" }, 
-                "3": { "name": "fix-field-enumerated-description" }
+                "1": { "name": "fix.field.enumerated.value" },
+                "2": { "name": "fix.field.enumerated.separator" }, 
+                "3": { "name": "fix.field.enumerated.value.name" }
             }    
         },
         "fix-field-simple": {
             "name": "fix-field-simple",
             "match": "(.*)",
             "captures": {
-                "1": { "name": "fix-field-value" }
+                "1": { "name": "fix.field.value" }
             }
         }
     }

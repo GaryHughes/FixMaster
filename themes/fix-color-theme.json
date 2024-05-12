@@ -1,0 +1,48 @@
+{
+    "$schema": "vscode://schemas/color-theme",
+    "name": "FIX Theme",
+    "tokenColors": [
+        {
+            "scope": "fix.message.open",
+            "settings": {
+                "foreground": "#868686"
+            }
+        },
+        {
+            "scope": "fix.message.close",
+            "settings": {
+                "foreground": "#868686"
+            }
+        },
+        {
+            "scope": "fix.field.tag.open",
+            "settings": {
+                "foreground": "#868686"
+            }
+        },
+        {
+            "scope": "fix.field.tag",
+            "settings": {
+                "foreground": "#4daafc"
+            }
+        },
+        {
+            "scope": "fix.field.tag.close",
+            "settings": {
+                "foreground": "#868686"
+            }
+        },
+        {
+            "scope": "fix.field.enumerated.separator",
+            "settings": {
+                "foreground": "#868686"
+            }
+        },
+        {
+            "scope": "fix.field.enumerated.value.name",
+            "settings": {
+                "foreground": "#868686"
+            }
+        }
+    ]
+}

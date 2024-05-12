@@ -37,10 +37,17 @@
 		"grammars": [
 			{
 			  "language": "FIX",
-			  "scopeName": "source.fix",
+			  "scopeName": "text.fix",
 			  "path": "./syntaxes/fix.grammar.json"
 			}
 		],
+		"themes": [
+            {
+                "label": "FIX",
+                "id": "FIX",
+                "path": "./themes/fix-color-theme.json"
+            }
+        ],
 		"commands": [
 			{
 				"command": "extension.format-pretty",
