@@ -6,16 +6,19 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [unreleased]
 
+### Changed
+
+- Errors raised when parsing invalid orchestrations and QuickFix data dictionary files will now be displayed to the user.
+- Formatting and pretty printing commands now copy their output to a new editor. 
+
 ### Added
 
 - The `fixmaster.orchestraPath` and `fixmaster.quickFixDataDictionaryPath` settings can now include `${workspaceFolder}`.
 - A new selection formatting command, this is available in the command palette and the editor context menu when there is selected text.
   - `FIX Master - Pretty Print Selection with Order Book`
-
-### Changed
-
-- Errors raised when parsing invalid orchestrations and QuickFix data dictionary files will now be displayed to the user.
-- Formatting and pretty printing commands now copy their output to a new editor. 
+- The extension now contributes a `FIX` language.
+  - Pretty printed files will have this language set.
+  - The `FIX` language has it's own grammar and theme that are used to provide basic syntax highlighting that is more regular than the default `log` formatting that was previously applied.
 
 ## [1.7.0] 2022-12-22
 
