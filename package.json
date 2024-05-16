@@ -43,6 +43,7 @@
 		],
 		"configurationDefaults": {
 			"editor.tokenColorCustomizations": {
+				
 				"textMateRules": [
 					{ "scope": "fix.message.open", "settings": { "foreground": "#868686" } },
 					{ "scope": "fix.message.close", "settings": { "foreground": "#868686" } },
@@ -60,10 +61,10 @@
 					{ "scope": "fix.orderbook.ordstatus.pending-new", "settings": { "foreground": "#E58C77" } },
 					{ "scope": "fix.orderbook.ordstatus.pending-cancel", "settings": { "foreground": "#E58C77" } },
 					{ "scope": "fix.orderbook.ordstatus.pending-replace", "settings": { "foreground": "#E58C77" } },
-					{ "scope": "fix.orderbook.ordstatus.expired", "settings": { "foreground": "#e90729" } },
-					{ "scope": "fix.orderbook.ordstatus.rejected", "settings": { "foreground": "#e90729" } },
-					{ "scope": "fix.orderbook.ordstatus.stopped", "settings": { "foreground": "#e90729" } },
-					{ "scope": "fix.orderbook.ordstatus.suspended", "settings": { "foreground": "#e90729" } },
+					{ "scope": "fix.orderbook.ordstatus.expired", "settings": { "foreground": "#DA4939" } },
+					{ "scope": "fix.orderbook.ordstatus.rejected", "settings": { "foreground": "#DA4939" } },
+					{ "scope": "fix.orderbook.ordstatus.stopped", "settings": { "foreground": "#DA4939" } },
+					{ "scope": "fix.orderbook.ordstatus.suspended", "settings": { "foreground": "#DA4939" } },
 					{ "scope": "fix.orderbook.ordstatus.filled", "settings": { "foreground": "#868686" } },
 					{ "scope": "fix.orderbook.ordstatus.done-for-day", "settings": { "foreground": "#868686" } },
 					{ "scope": "fix.orderbook.ordstatus.canceled", "settings": { "foreground": "#868686" } },
