@@ -18,7 +18,7 @@ This format is based on [Keep a Changelog](http://keepachangelog.com/).
   - `FIX Master - Pretty Print Selection with Order Book`
 - The extension now contributes a `FIX` language.
   - Pretty printed files will have this language set.
-  - The `FIX` language has it's own grammar and theme that are used to provide basic syntax highlighting that is more regular than the default `log` formatting that was previously applied.
+  - The `FIX` language has it's own grammar and color settings that are used to provide basic syntax highlighting that is more regular than the default `log` formatting that was previously applied.
 
 ## [1.7.0] 2022-12-22
 
