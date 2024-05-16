@@ -4,10 +4,6 @@ FIX Master is designed to parse FIX messages from log files and pretty print the
 
 ![fixmaster](images/fixMaster.gif)
 
-FIX Master contains a rich data dictionary and you can lookup the definition of fields for all known FIX versions.
-
-![fixmaster](images/fixMasterFieldLookup.gif)
-
 ## Extension Settings
 
 **fixmaster.orchestraPath** Path to a directory containing fixtrading.org Orchestrations. FIX Master includes orchestrations for FIX.4.2, FIX.4.4, and FIX.5.0SP2 EP 258, that it will use by default. This path can include ${workspaceFolder}.
