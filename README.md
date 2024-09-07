@@ -22,7 +22,9 @@ FIX Master is designed to parse FIX messages from log files and pretty print the
 
 **fixmaster.orderBookFields** The fields to display in the order book when pretty printing. These can be field names or tag numbers.
 
-**fixmaster.hoversEnabled** Controls whether hover tooltips are enabled. If true FIX Master will look for a FIX message on the current editor line and pretty print it in a tooltip if found.ß
+**fixmaster.hoversEnabled** Controls whether hover tooltips are enabled. If true FIX Master will look for a FIX message on the current editor line and pretty print it in a tooltip if found.
+
+**fixmaster.editorReuse** `(New,Append,Replace)` Controls the behaviour when pretty printed output is generated.
 
 ## Known Issues
 

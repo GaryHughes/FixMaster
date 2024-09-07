@@ -16,3 +16,9 @@ export enum NameLookup {
     Strict,
     Promiscuous
 }
+
+export enum EditorReuse {
+	New,
+	Append,
+	Replace
+}

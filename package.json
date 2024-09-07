@@ -222,6 +222,21 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Controls whether or not to pretty print any message on the line under the cursor in a toolip"
+				},
+				"fixmaster.editorReuse": {
+					"type": "string",
+					"description": "Controls the behaviour when pretty printed output is generated",
+					"default": "New",
+					"enum": [
+						"New",
+						"Append",
+						"Replace"	
+					],
+					"enumDescriptions": [
+						"Copy the pretty printed output to a new file",
+						"Append the pretty printed output to the existing FIX file if there is one",
+						"Replace the content of any existing FIX file with the pretty printed output"
+					]
 				}
 			}
 		}

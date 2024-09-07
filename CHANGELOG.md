@@ -4,6 +4,15 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## []
+
+### Added
+
+- A new setting `fixmaster.editorReuse` to control where pretty printed text is generated. 
+  - `New` - Copy the pretty printed output to a new file.
+  - `Append` - Append the pretty printed output to the existing FIX file if there is one.
+  - `Replace` - Replace the content of any existing FIX file with the pretty printed output.
+
 ## [2.0.0] 2024-05-17
 
 ### Changed
