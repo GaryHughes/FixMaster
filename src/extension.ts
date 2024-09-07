@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { Orchestra } from './fixOrchestra';
 import { DataDictionary } from './quickFixDataDictionary';
 import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtocol';
-import { AdministrativeMessageBehaviour, CommandScope, NameLookup } from './options';
+import { AdministrativeMessageBehaviour, CommandScope, EditorReuse, NameLookup } from './options';
 import { definitionHtmlForField } from './html';
 import { OrderBook } from './orderBook';
 import { OrderReport } from './orderReport';
@@ -200,6 +200,29 @@ export function activate(context: ExtensionContext) {
 		}
 	});
 
+	let getDocument = async (editorReuse:EditorReuse) : Promise<TextDocument> => {
+
+		if (editorReuse != EditorReuse.New) {
+			const document = workspace.textDocuments.find(document => { return document.languageId === 'FIX' })
+			if (document) {
+				if (editorReuse === EditorReuse.Replace) {
+					let edit = new WorkspaceEdit();
+					var firstLine = document.lineAt(0);
+					var lastLine = document.lineAt(document.lineCount - 1);
+					var textRange = new Range(firstLine.range.start, lastLine.range.end);
+					edit.delete(document.uri, textRange)
+					await workspace.applyEdit(edit);
+				}
+				await window.showTextDocument(document)
+				return document
+			}
+		}
+
+		return  await workspace.openTextDocument({ language: 'FIX' })
+			.then(document => window.showTextDocument(document))
+			.then(editor => editor.document);
+	};
+
 	let format = async (printer: (context: string, message:Message, orchestra:Orchestra, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
 				  scope: CommandScope,
 				  orderBook: OrderBook | null = null) => {
@@ -222,27 +245,33 @@ export function activate(context: ExtensionContext) {
 
 		const sourceDocument = activeTextEditor.document;
 
-		let document = await workspace.openTextDocument({ language: "FIX" })
-			.then(document => window.showTextDocument(document))
-			.then(editor => editor.document);
+		const configuration = workspace.getConfiguration();
+		const editorReuse = EditorReuse[configuration.get("fixmaster.editorReuse") as keyof typeof EditorReuse];
 
+		let document = await getDocument(editorReuse)
+		
 		let edit = new WorkspaceEdit();
+
+		var index = 0;
+
+		if (editorReuse === EditorReuse.Append) {
+			index = document.lineCount - 1			
+		}
 		
 		if (scope == CommandScope.Document) {
-			edit.insert(document.uri, new Position(0, 0), sourceDocument.getText());
+			edit.insert(document.uri, new Position(index, 0), sourceDocument.getText());
 		}
 		else {
 			const selection = activeTextEditor.selection;
 			if (selection) {
 				const range = new Range(selection.start, selection.end); 	
 				const text = activeTextEditor.document.getText(range);
-				edit.insert(document.uri, new Position(0, 0), text);
+				edit.insert(document.uri, new Position(index, 0), text);
 			}
 		}
 
 		await workspace.applyEdit(edit);
 
-		const configuration = workspace.getConfiguration();
 		const prefixPattern = configuration.get("fixmaster.prefixPattern") as string;
 		const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
 		const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
@@ -274,7 +303,6 @@ export function activate(context: ExtensionContext) {
 
 					var lastLineWasAMessage = false;
 
-					var index = 0;
 					var maxIndex = document.lineCount;
 					
 					for (; index < maxIndex; ++index) {
