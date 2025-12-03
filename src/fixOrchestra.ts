@@ -15,7 +15,7 @@ export class Orchestra
         this.orchestrations = filenames.map(entry => {
             const orchestraPath = path.join(root, entry); 
             try {
-                return new xml.Orchestration(orchestraPath)
+                return new xml.Orchestration(orchestraPath);
             } catch (err) {
                 throw new Error(`failed to load orchestra file '${orchestraPath}' - ${err}`);
             }
