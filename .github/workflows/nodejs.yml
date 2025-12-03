@@ -26,6 +26,14 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run build --if-present
-#   - run: npm test
-#     env:
-#       CI: true
+    - run: sudo apt-get update && sudo apt-get install -y xvfb
+    - name: Start Xvfb
+      run: |
+        Xvfb :99 -screen 0 1280x1024x24 -ac &>/dev/null &
+        sleep 1
+      shell: bash
+    - name: Run tests
+      run: npm test
+      env:
+        DISPLAY: :99
+        CI: true
