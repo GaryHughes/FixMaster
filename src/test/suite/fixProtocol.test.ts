@@ -8,7 +8,7 @@ import { Orchestra } from '../../fixOrchestra';
 import * as vscode from 'vscode';
 // import * as myExtension from '../extension';
 
-import { parseMessage } from '../../fixProtocol';
+import { parseMessage, fixFormatPrintMessage, parsePrettyPrintedMessage, prettyPrintMessage } from '../../fixProtocol';
 
 suite('FIX Protocol Test Suite', () => {
 
@@ -80,7 +80,7 @@ suite('FIX Protocol Test Suite', () => {
 
     test('Parse message with a data field', () => {
         let orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
-        let text = "8=FIX.4.4\u00019=167\u000135=D\u000149=INITIATOR\u000156=ACCEPTOR\u000134=2752\u000152=20200114-08:13:20.041\u000111=61\u000170=60\u0001100=AUTO\u000155=BHP.AX\u000154=1\u000160=20200114-08:12:59.397\u000138=10000\u000140=2\u000144=20\u000159=1\u000193=20\u000189=ABCDEF\u0001ABCDEFABC\u0001DEF\u000110=220\u0001";        
+        let text = "8=FIX.4.4\u00019=167\u000135=D\u000149=INITIATOR\u000156=ACCEPTOR\u000134=2752\u000152=20200114-08:13:20.041\u000111=61\u000170=60\u0001100=AUTO\u000155=BHP.AX\u000154=1\u000160=20200114-08:12:59.397\u000138=10000\u000140=2\u000144=20\u000159=1\u000193=20\u000189=ABCDEF\u0001ABCDEFABC\u0001DEF\u000110=220\u0001";
         let message = parseMessage(text, orchestra);
         if (!message) {
             assert.fail("message failed to parse");
@@ -89,5 +89,307 @@ suite('FIX Protocol Test Suite', () => {
         assert.equal(20, message.fields.length);
         let signature = message.fields[18];
         assert.equal('QUJDREVGAUFCQ0RFRkFCQwFERUY=', signature.value);
+    });
+
+    test('fixFormatPrintMessage outputs raw FIX format', () => {
+        let orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
+        let text = "8=FIX.4.4\u00019=72\u000135=A\u000149=ACCEPTOR\u000156=INITIATOR\u000134=1\u000152=20190816-10:34:27.742\u000198=0\u0001108=30\u000110=012\u0001";
+        let message = parseMessage(text);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        let output = fixFormatPrintMessage("", message, orchestra, null, 0);
+        // Remove the trailing newline for comparison
+        output = output.trimEnd();
+        assert.equal(text, output);
+    });
+
+    test('fixFormatPrintMessage with context prefix', () => {
+        let orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
+        let text = "8=FIX.4.4\u00019=72\u000135=A\u000149=ACCEPTOR\u000156=INITIATOR\u000134=1\u000152=20190816-10:34:27.742\u000198=0\u0001108=30\u000110=012\u0001";
+        let message = parseMessage(text);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        let context = "2024-01-15 10:30:45.123";
+        let output = fixFormatPrintMessage(context, message, orchestra, null, 0);
+        // Check that context appears at the beginning
+        assert.ok(output.startsWith(context + " "));
+        // Check that the FIX message follows
+        assert.ok(output.includes("8=FIX.4.4"));
+    });
+
+    test('fixFormatPrintMessage with NewOrderSingle', () => {
+        let orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
+        let text = "8=FIX.4.4\u00019=140\u000135=D\u000149=INITIATOR\u000156=ACCEPTOR\u000134=2282\u000152=20190929-04:51:00.849\u000111=50\u000170=49\u0001100=AUTO\u000155=WTF\u000154=1\u000160=20190929-04:35:33.562\u000138=10000\u000140=1\u000159=1\u000110=129\u0001";
+        let message = parseMessage(text);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        let output = fixFormatPrintMessage("", message, orchestra, null, 0);
+        output = output.trimEnd();
+        assert.equal(text, output);
+    });
+
+    test('fixFormatPrintMessage with data field decodes base64', () => {
+        let orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
+        let originalText = "8=FIX.4.4\u00019=167\u000135=D\u000149=INITIATOR\u000156=ACCEPTOR\u000134=2752\u000152=20200114-08:13:20.041\u000111=61\u000170=60\u0001100=AUTO\u000155=BHP.AX\u000154=1\u000160=20200114-08:12:59.397\u000138=10000\u000140=2\u000144=20\u000159=1\u000193=20\u000189=ABCDEF\u0001ABCDEFABC\u0001DEF\u000110=220\u0001";
+        let message = parseMessage(originalText, orchestra);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        let output = fixFormatPrintMessage("", message, orchestra, null, 0);
+        output = output.trimEnd();
+        // The output should match the original since data fields are decoded from base64
+        assert.equal(originalText, output);
+    });
+
+    test('fixFormatPrintMessage round-trip preserves message', () => {
+        let orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
+        let originalText = "8=FIX.4.4\u00019=72\u000135=A\u000149=ACCEPTOR\u000156=INITIATOR\u000134=1\u000152=20190816-10:34:27.742\u000198=0\u0001108=30\u000110=012\u0001";
+
+        // Parse the message
+        let message = parseMessage(originalText);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+
+        // Convert back to FIX format
+        let output = fixFormatPrintMessage("", message, orchestra, null, 0);
+        output = output.trimEnd();
+
+        // Parse again
+        let reparsed = parseMessage(output);
+        if (!reparsed) {
+            assert.fail("reparsed message failed to parse");
+            return;
+        }
+
+        // Check that field counts match
+        assert.equal(message.fields.length, reparsed.fields.length);
+
+        // Check that all field values match
+        for (let i = 0; i < message.fields.length; i++) {
+            assert.equal(message.fields[i].tag, reparsed.fields[i].tag);
+            assert.equal(message.fields[i].value, reparsed.fields[i].value);
+        }
+    });
+
+    test('parsePrettyPrintedMessage parses basic message', () => {
+        let prettyText = `Logon
+{
+    BeginString (8) FIX.4.4
+    BodyLength (9) 72
+       MsgType (35) A
+  SenderCompID (49) ACCEPTOR
+  TargetCompID (56) INITIATOR
+     MsgSeqNum (34) 1
+   SendingTime (52) 20190816-10:34:27.742
+  EncryptMethod (98) 0
+ HeartBtInt (108) 30
+      CheckSum (10) 012
+}`;
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        assert.equal(10, message.fields.length);
+        assert.equal(8, message.fields[0].tag);
+        assert.equal("FIX.4.4", message.fields[0].value);
+        assert.equal(35, message.fields[2].tag);
+        assert.equal("A", message.fields[2].value);
+        assert.equal("A", message.msgType);
+    });
+
+    test('parsePrettyPrintedMessage handles enumerated values', () => {
+        let prettyText = `NewOrderSingle
+{
+    BeginString (8) FIX.4.4
+       MsgType (35) D - NewOrderSingle
+          Side (54) 1 - Buy
+       OrdType (40) 2 - Limit
+}`;
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        assert.equal(4, message.fields.length);
+        // Check that enumerated values are parsed correctly (should extract "1" from "1 - Buy")
+        let sideField = message.fields.find(f => f.tag === 54);
+        assert.ok(sideField);
+        assert.equal("1", sideField.value);
+
+        let ordTypeField = message.fields.find(f => f.tag === 40);
+        assert.ok(ordTypeField);
+        assert.equal("2", ordTypeField.value);
+    });
+
+    test('parsePrettyPrintedMessage handles NewOrderSingle', () => {
+        let prettyText = `NewOrderSingle
+{
+    BeginString (8) FIX.4.4
+       MsgType (35) D - NewOrderSingle
+  SenderCompID (49) INITIATOR
+  TargetCompID (56) ACCEPTOR
+       ClOrdID (11) ORDER123
+          Side (54) 1 - Buy
+        Symbol (55) AAPL
+      OrderQty (38) 100
+       OrdType (40) 2 - Limit
+         Price (44) 150.50
+}`;
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        assert.equal(10, message.fields.length);
+        assert.equal("D", message.msgType);
+
+        let clOrdIdField = message.fields.find(f => f.tag === 11);
+        assert.ok(clOrdIdField);
+        assert.equal("ORDER123", clOrdIdField.value);
+
+        let priceField = message.fields.find(f => f.tag === 44);
+        assert.ok(priceField);
+        assert.equal("150.50", priceField.value);
+    });
+
+    test('parsePrettyPrintedMessage returns null for empty input', () => {
+        let prettyText = ``;
+        let message = parsePrettyPrintedMessage(prettyText);
+        assert.equal(null, message);
+    });
+
+    test('parsePrettyPrintedMessage returns null for no fields', () => {
+        let prettyText = `NewOrderSingle
+{
+}`;
+        let message = parsePrettyPrintedMessage(prettyText);
+        assert.equal(null, message);
+    });
+
+    test('parsePrettyPrintedMessage handles message without header', () => {
+        let prettyText = `{
+    BeginString (8) FIX.4.4
+       MsgType (35) A
+}`;
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        assert.equal(2, message.fields.length);
+        assert.equal("A", message.msgType);
+    });
+
+    test('parsePrettyPrintedMessage ignores non-field lines', () => {
+        let prettyText = `NewOrderSingle
+{
+    This is a comment line
+    BeginString (8) FIX.4.4
+    Another comment
+       MsgType (35) D - NewOrderSingle
+    More comments here
+          Side (54) 1 - Buy
+}`;
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+        // Should only parse lines with (tag) pattern
+        assert.equal(3, message.fields.length);
+        assert.equal("D", message.msgType);
+    });
+
+    test('parsePrettyPrintedMessage round-trip with prettyPrintMessage', () => {
+        let orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
+        let originalRaw = "8=FIX.4.4\u00019=72\u000135=A\u000149=ACCEPTOR\u000156=INITIATOR\u000134=1\u000152=20190816-10:34:27.742\u000198=0\u0001108=30\u000110=012\u0001";
+
+        // Parse raw message
+        let originalMessage = parseMessage(originalRaw);
+        if (!originalMessage) {
+            assert.fail("original message failed to parse");
+            return;
+        }
+
+        // Convert to pretty print
+        let prettyText = prettyPrintMessage("", originalMessage, orchestra, null, 0);
+
+        // Parse pretty printed back to message
+        let reparsedMessage = parsePrettyPrintedMessage(prettyText);
+        if (!reparsedMessage) {
+            assert.fail("reparsed message failed to parse");
+            return;
+        }
+
+        // Check that field counts match
+        assert.equal(originalMessage.fields.length, reparsedMessage.fields.length);
+
+        // Check that all field values match
+        for (let i = 0; i < originalMessage.fields.length; i++) {
+            assert.equal(originalMessage.fields[i].tag, reparsedMessage.fields[i].tag);
+            assert.equal(originalMessage.fields[i].value, reparsedMessage.fields[i].value);
+        }
+    });
+
+    test('parsePrettyPrintedMessage full round-trip: raw -> pretty -> parse -> raw', () => {
+        let orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
+        let originalRaw = "8=FIX.4.4\u00019=140\u000135=D\u000149=INITIATOR\u000156=ACCEPTOR\u000134=2282\u000152=20190929-04:51:00.849\u000111=50\u000170=49\u0001100=AUTO\u000155=WTF\u000154=1\u000160=20190929-04:35:33.562\u000138=10000\u000140=1\u000159=1\u000110=129\u0001";
+
+        // Step 1: Parse raw FIX
+        let step1 = parseMessage(originalRaw);
+        if (!step1) {
+            assert.fail("step 1 failed");
+            return;
+        }
+
+        // Step 2: Convert to pretty print
+        let prettyText = prettyPrintMessage("", step1, orchestra, null, 0);
+
+        // Step 3: Parse pretty printed
+        let step3 = parsePrettyPrintedMessage(prettyText);
+        if (!step3) {
+            assert.fail("step 3 failed");
+            return;
+        }
+
+        // Step 4: Convert back to raw FIX
+        let finalRaw = fixFormatPrintMessage("", step3, orchestra, null, 0);
+        finalRaw = finalRaw.trimEnd();
+
+        // Verify: original raw should equal final raw
+        assert.equal(originalRaw, finalRaw);
+    });
+
+    test('parsePrettyPrintedMessage handles fields with special characters', () => {
+        let prettyText = `NewOrderSingle
+{
+    BeginString (8) FIX.4.4
+       MsgType (35) D - NewOrderSingle
+        Symbol (55) ABC.XYZ
+          Text (58) Test order with spaces and symbols!
+}`;
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse");
+            return;
+        }
+
+        let symbolField = message.fields.find(f => f.tag === 55);
+        assert.ok(symbolField);
+        assert.equal("ABC.XYZ", symbolField.value);
+
+        let textField = message.fields.find(f => f.tag === 58);
+        assert.ok(textField);
+        assert.equal("Test order with spaces and symbols!", textField.value);
     });
 });

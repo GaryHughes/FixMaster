@@ -316,14 +316,14 @@ export function csvPrintMessage(context: string, message: Message, orchestra: FI
 
     var buffer: string = "";
     const description = message.describe(orchestra, quickFix);
-    
+
     if (context && context.length > 0) {
         buffer += context + " ";
     }
 
     if (description.messageName && description.messageName.length > 0) {
         buffer += description.messageName + "\n";
-    }  
+    }
 
     buffer += "{\n";
 
@@ -341,4 +341,103 @@ export function csvPrintMessage(context: string, message: Message, orchestra: FI
     buffer += "}\n";
 
     return buffer;
+}
+
+export function fixFormatPrintMessage(context: string, message: Message, orchestra: FIX.Orchestra, quickFix: DataDictionary | null, _: number) {
+
+    var buffer: string = "";
+    const description = message.describe(orchestra, quickFix);
+
+    if (context && context.length > 0) {
+        buffer += context + " ";
+    }
+
+    // Get the BeginString field to determine FIX version for data field handling
+    const beginString = message.fields.find(field => field.tag === beginStringTag);
+    var version: xml.Orchestration | undefined;
+
+    if (beginString) {
+        version = orchestra.orchestrations.find(v => v.version === beginString.value);
+    }
+
+    // Build the raw FIX message
+    message.fields.forEach((field, index) => {
+        buffer += `${field.tag}${fieldValueSeparator}`;
+
+        // Check if this is a data field (base64 encoded) that needs decoding
+        let definition = orchestra.definitionOfField(field.tag, version, undefined);
+        if (definition?.field.type === 'data') {
+            // Decode base64 encoded data fields back to their original form
+            try {
+                const decoded = base64.decode(field.value);
+                buffer += decoded;
+            } catch (err) {
+                // If decoding fails, use the value as-is
+                buffer += field.value;
+            }
+        } else {
+            buffer += field.value;
+        }
+
+        buffer += fieldDelimiter;
+    });
+
+    buffer += "\n";
+
+    return buffer;
+}
+
+export function parsePrettyPrintedMessage(text: string): Message | null {
+    // Pattern to match pretty-printed fields: FieldName (tag) value
+    // or: FieldName (tag) value - description (for enumerated values)
+    const fieldPattern = /^\s*\w+\s+\((\d+)\)\s+(.+?)(?:\s+-\s+.+)?$/;
+
+    const lines = text.split('\n');
+    const fields: Field[] = [];
+    var msgType: string | null = null;
+    var inMessage = false;
+
+    for (const line of lines) {
+        // Check for message start
+        if (line.trim() === '{') {
+            inMessage = true;
+            continue;
+        }
+
+        // Check for message end
+        if (line.trim() === '}') {
+            break;
+        }
+
+        // Skip message name line (doesn't have parentheses)
+        if (!inMessage || !line.includes('(')) {
+            continue;
+        }
+
+        const match = fieldPattern.exec(line);
+        if (match) {
+            const tag = parseInt(match[1]);
+            let value = match[2].trim();
+
+            // For enumerated values, extract just the value part before the dash
+            // Example: "1 - Buy" -> "1"
+            const dashIndex = value.indexOf(' - ');
+            if (dashIndex > 0) {
+                value = value.substring(0, dashIndex).trim();
+            }
+
+            const field = new Field(tag, value);
+            fields.push(field);
+
+            if (tag === msgTypeTag) {
+                msgType = value;
+            }
+        }
+    }
+
+    if (fields.length === 0) {
+        return null;
+    }
+
+    return new Message(msgType, fields);
 }

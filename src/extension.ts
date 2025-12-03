@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Orchestra } from './fixOrchestra';
 import { DataDictionary } from './quickFixDataDictionary';
-import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtocol';
+import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, fixFormatPrintMessage, parsePrettyPrintedMessage, Message } from './fixProtocol';
 import { AdministrativeMessageBehaviour, CommandScope, EditorReuse, NameLookup } from './options';
 import { definitionHtmlForField } from './html';
 import { OrderBook } from './orderBook';
@@ -421,7 +421,80 @@ export function activate(context: ExtensionContext) {
 	commands.registerCommand('extension.format-csv-selection', async () => {
 		await format(csvPrintMessage, CommandScope.Selection);
 	});
-					
+
+	commands.registerCommand('extension.format-raw-fix', async () => {
+		await formatRawFix(CommandScope.Document);
+	});
+
+	commands.registerCommand('extension.format-raw-fix-selection', async () => {
+		await formatRawFix(CommandScope.Selection);
+	});
+
+	let formatRawFix = async (scope: CommandScope) => {
+		if (!orchestra) {
+			window.showErrorMessage('The orchestra has not been loaded - check the orchestraPath setting.');
+			return;
+		}
+
+		const {activeTextEditor} = window;
+
+		if (!activeTextEditor) {
+			window.showErrorMessage('No document is open or the file is too large.');
+			return;
+		}
+
+		const sourceDocument = activeTextEditor.document;
+		let text: string;
+
+		if (scope === CommandScope.Document) {
+			text = sourceDocument.getText();
+		} else {
+			const selection = activeTextEditor.selection;
+			if (!selection) {
+				window.showErrorMessage('No text selected.');
+				return;
+			}
+			const range = new Range(selection.start, selection.end);
+			text = sourceDocument.getText(range);
+		}
+
+		// Parse pretty-printed messages and convert to raw FIX
+		const lines = text.split('\n');
+		let output = '';
+		let currentMessageLines: string[] = [];
+		let inMessage = false;
+
+		for (const line of lines) {
+			if (line.trim() === '{') {
+				inMessage = true;
+				currentMessageLines = [line];
+			} else if (line.trim() === '}') {
+				currentMessageLines.push(line);
+				inMessage = false;
+
+				// Parse this message block
+				const messageText = currentMessageLines.join('\n');
+				const message = parsePrettyPrintedMessage(messageText);
+
+				if (message) {
+					const rawFix = fixFormatPrintMessage('', message, orchestra, dataDictionary, 0);
+					output += rawFix;
+				}
+
+				currentMessageLines = [];
+			} else if (inMessage) {
+				currentMessageLines.push(line);
+			} else if (!inMessage && line.trim().length > 0) {
+				// Preserve non-message lines (like headers, timestamps, etc.)
+				output += line + '\n';
+			}
+		}
+
+		// Create a new document with the raw FIX output
+		const document = await workspace.openTextDocument({ content: output, language: 'plaintext' });
+		await window.showTextDocument(document, ViewColumn.Beside);
+	};
+
 	commands.registerCommand('extension.show-field', async () => {
 
 		if (!orchestra) {

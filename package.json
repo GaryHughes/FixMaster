@@ -102,6 +102,14 @@
 				"title": "FIX Master - CSV Format Selection"
 			},
 			{
+				"command": "extension.format-raw-fix",
+				"title": "FIX Master - Convert to Raw FIX"
+			},
+			{
+				"command": "extension.format-raw-fix-selection",
+				"title": "FIX Master - Convert Selection to Raw FIX"
+			},
+			{
 				"command": "extension.show-field",
 				"title": "FIX Master - Show the definition of a field"
 			}
@@ -130,6 +138,13 @@
 					"command": "extension.format-csv-selection"
 				},
 				{
+					"command": "extension.format-raw-fix"
+				},
+				{
+					"when": "editorHasSelection",
+					"command": "extension.format-raw-fix-selection"
+				},
+				{
 					"command": "extension.show-field"
 				}
 			],
@@ -147,6 +162,11 @@
 				{
 					"when": "editorHasSelection",
 					"command": "extension.format-csv-selection",
+					"group": "1_modification"
+				},
+				{
+					"when": "editorHasSelection",
+					"command": "extension.format-raw-fix-selection",
 					"group": "1_modification"
 				}
 			]
