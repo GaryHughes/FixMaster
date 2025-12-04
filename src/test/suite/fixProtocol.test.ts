@@ -392,4 +392,74 @@ suite('FIX Protocol Test Suite', () => {
         assert.ok(textField);
         assert.equal("Test order with spaces and symbols!", textField.value);
     });
+
+    test('parsePrettyPrintedMessage normalizes Windows line endings (CRLF)', () => {
+        // Use \r\n (Windows) line endings
+        let prettyText = "NewOrderSingle\r\n{\r\n    BeginString (8) FIX.4.4\r\n       MsgType (35) D - NewOrderSingle\r\n          Side (54) 1 - Buy\r\n}";
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse with Windows line endings");
+            return;
+        }
+        assert.equal(3, message.fields.length);
+        assert.equal(8, message.fields[0].tag);
+        assert.equal("FIX.4.4", message.fields[0].value);
+        assert.equal(35, message.fields[1].tag);
+        assert.equal("D", message.fields[1].value);
+        assert.equal(54, message.fields[2].tag);
+        assert.equal("1", message.fields[2].value);
+        assert.equal("D", message.msgType);
+    });
+
+    test('parsePrettyPrintedMessage normalizes old Mac line endings (CR)', () => {
+        // Use \r (old Mac) line endings
+        let prettyText = "NewOrderSingle\r{\r    BeginString (8) FIX.4.4\r       MsgType (35) D - NewOrderSingle\r          Side (54) 1 - Buy\r}";
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse with old Mac line endings");
+            return;
+        }
+        assert.equal(3, message.fields.length);
+        assert.equal(8, message.fields[0].tag);
+        assert.equal("FIX.4.4", message.fields[0].value);
+        assert.equal(35, message.fields[1].tag);
+        assert.equal("D", message.fields[1].value);
+        assert.equal(54, message.fields[2].tag);
+        assert.equal("1", message.fields[2].value);
+        assert.equal("D", message.msgType);
+    });
+
+    test('parsePrettyPrintedMessage normalizes mixed line endings', () => {
+        // Mix of \r\n (Windows), \r (old Mac), and \n (Unix)
+        let prettyText = "NewOrderSingle\r\n{\r    BeginString (8) FIX.4.4\n       MsgType (35) D - NewOrderSingle\r\n          Side (54) 1 - Buy\r}";
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse with mixed line endings");
+            return;
+        }
+        assert.equal(3, message.fields.length);
+        assert.equal(8, message.fields[0].tag);
+        assert.equal("FIX.4.4", message.fields[0].value);
+        assert.equal(35, message.fields[1].tag);
+        assert.equal("D", message.fields[1].value);
+        assert.equal(54, message.fields[2].tag);
+        assert.equal("1", message.fields[2].value);
+        assert.equal("D", message.msgType);
+    });
+
+    test('parsePrettyPrintedMessage with Windows line endings round-trip', () => {
+        // Verify Windows line endings work with full message parsing
+        let prettyText = "Logon\r\n{\r\n    BeginString (8) FIX.4.4\r\n    BodyLength (9) 72\r\n       MsgType (35) A\r\n  SenderCompID (49) ACCEPTOR\r\n  TargetCompID (56) INITIATOR\r\n     MsgSeqNum (34) 1\r\n   SendingTime (52) 20190816-10:34:27.742\r\n  EncryptMethod (98) 0\r\n HeartBtInt (108) 30\r\n      CheckSum (10) 012\r\n}";
+        let message = parsePrettyPrintedMessage(prettyText);
+        if (!message) {
+            assert.fail("message failed to parse with Windows line endings");
+            return;
+        }
+        assert.equal(10, message.fields.length);
+        assert.equal(8, message.fields[0].tag);
+        assert.equal("FIX.4.4", message.fields[0].value);
+        assert.equal(35, message.fields[2].tag);
+        assert.equal("A", message.fields[2].value);
+        assert.equal("A", message.msgType);
+    });
 });

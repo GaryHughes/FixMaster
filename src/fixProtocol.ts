@@ -392,7 +392,8 @@ export function parsePrettyPrintedMessage(text: string): Message | null {
     // or: FieldName (tag) value - description (for enumerated values)
     const fieldPattern = /^\s*\w+\s+\((\d+)\)\s+(.+?)(?:\s+-\s+.+)?$/;
 
-    const lines = text.split('\n');
+    // Normalize line endings to handle both Unix (\n) and Windows (\r\n)
+    const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
     const fields: Field[] = [];
     var msgType: string | null = null;
     var inMessage = false;
