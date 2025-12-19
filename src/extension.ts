@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Orchestra } from './fixOrchestra';
 import { DataDictionary } from './quickFixDataDictionary';
-import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message } from './fixProtocol';
+import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, fixFormatPrintMessage, parsePrettyPrintedMessage, Message } from './fixProtocol';
 import { AdministrativeMessageBehaviour, CommandScope, EditorReuse, NameLookup } from './options';
 import { definitionHtmlForField } from './html';
 import { OrderBook } from './orderBook';
@@ -25,23 +25,23 @@ export function activate(context: ExtensionContext) {
 		}
 
 		return workspace.workspaceFolders[0].uri.path;
-	}
+	};
 
 	const resolvePathVariables = (path: string, context: string) : string | undefined => {
 	
-		if (path.search(/\${workspaceFolder}/g) == -1) {
+		if (path.search(/\${workspaceFolder}/g) === -1) {
 			return path;
 		}
 
 		let workspaceFolder = getWorkspaceFolder();
 
-		if (workspaceFolder == undefined) {
+		if (workspaceFolder === undefined) {
 			window.showErrorMessage("Unable to determine ${workspaceFolder} when resolving the " + context + " path.");
 			return undefined;
 		}
 
-		return path.replace(/\${workspaceFolder}/g, workspaceFolder)
-	}
+		return path.replace(/\${workspaceFolder}/g, workspaceFolder);
+	};
 
 	const loadOrchestra = () => {
 		
@@ -55,7 +55,7 @@ export function activate(context: ExtensionContext) {
 		
 		orchestraPath = resolvePathVariables(orchestraPath, "orchestra");
 		
-		if (orchestraPath == undefined) {
+		if (orchestraPath === undefined) {
 			return;
 		}
 		
@@ -65,7 +65,7 @@ export function activate(context: ExtensionContext) {
 		
 		if (!fs.existsSync(orchestraPath)) {
 			window.showErrorMessage("The orchestra path '" + orchestraPath + "' cannot be found.");
-			return
+			return;
 		}
 
 		window.withProgress({
@@ -99,7 +99,7 @@ export function activate(context: ExtensionContext) {
 		
 		path = resolvePathVariables(path, "QuickFix data dictionary");
 		
-		if (path == undefined) {
+		if (path === undefined) {
 			return;
 		}
 
@@ -202,19 +202,19 @@ export function activate(context: ExtensionContext) {
 
 	let getDocument = async (editorReuse:EditorReuse) : Promise<TextDocument> => {
 
-		if (editorReuse != EditorReuse.New) {
-			const document = workspace.textDocuments.find(document => { return document.languageId === 'FIX' })
+		if (editorReuse !== EditorReuse.New) {
+			const document = workspace.textDocuments.find(document => { return document.languageId === 'FIX'; });
 			if (document) {
 				if (editorReuse === EditorReuse.Replace) {
 					let edit = new WorkspaceEdit();
 					var firstLine = document.lineAt(0);
 					var lastLine = document.lineAt(document.lineCount - 1);
 					var textRange = new Range(firstLine.range.start, lastLine.range.end);
-					edit.delete(document.uri, textRange)
+					edit.delete(document.uri, textRange);
 					await workspace.applyEdit(edit);
 				}
-				await window.showTextDocument(document)
-				return document
+				await window.showTextDocument(document);
+				return document;
 			}
 		}
 
@@ -248,17 +248,17 @@ export function activate(context: ExtensionContext) {
 		const configuration = workspace.getConfiguration();
 		const editorReuse = EditorReuse[configuration.get("fixmaster.editorReuse") as keyof typeof EditorReuse];
 
-		let document = await getDocument(editorReuse)
+		let document = await getDocument(editorReuse);
 		
 		let edit = new WorkspaceEdit();
 
 		var index = 0;
 
 		if (editorReuse === EditorReuse.Append) {
-			index = document.lineCount - 1			
+			index = document.lineCount - 1;			
 		}
 		
-		if (scope == CommandScope.Document) {
+		if (scope === CommandScope.Document) {
 			edit.insert(document.uri, new Position(index, 0), sourceDocument.getText());
 		}
 		else {
@@ -421,7 +421,80 @@ export function activate(context: ExtensionContext) {
 	commands.registerCommand('extension.format-csv-selection', async () => {
 		await format(csvPrintMessage, CommandScope.Selection);
 	});
-					
+
+	commands.registerCommand('extension.format-raw-fix', async () => {
+		await formatRawFix(CommandScope.Document);
+	});
+
+	commands.registerCommand('extension.format-raw-fix-selection', async () => {
+		await formatRawFix(CommandScope.Selection);
+	});
+
+	let formatRawFix = async (scope: CommandScope) => {
+		if (!orchestra) {
+			window.showErrorMessage('The orchestra has not been loaded - check the orchestraPath setting.');
+			return;
+		}
+
+		const {activeTextEditor} = window;
+
+		if (!activeTextEditor) {
+			window.showErrorMessage('No document is open or the file is too large.');
+			return;
+		}
+
+		const sourceDocument = activeTextEditor.document;
+		let text: string;
+
+		if (scope === CommandScope.Document) {
+			text = sourceDocument.getText();
+		} else {
+			const selection = activeTextEditor.selection;
+			if (!selection) {
+				window.showErrorMessage('No text selected.');
+				return;
+			}
+			const range = new Range(selection.start, selection.end);
+			text = sourceDocument.getText(range);
+		}
+
+		// Parse pretty-printed messages and convert to raw FIX
+		const lines = text.split('\n');
+		let output = '';
+		let currentMessageLines: string[] = [];
+		let inMessage = false;
+
+		for (const line of lines) {
+			if (line.trim() === '{') {
+				inMessage = true;
+				currentMessageLines = [line];
+			} else if (line.trim() === '}') {
+				currentMessageLines.push(line);
+				inMessage = false;
+
+				// Parse this message block
+				const messageText = currentMessageLines.join('\n');
+				const message = parsePrettyPrintedMessage(messageText);
+
+				if (message) {
+					const rawFix = fixFormatPrintMessage('', message, orchestra, dataDictionary, 0);
+					output += rawFix;
+				}
+
+				currentMessageLines = [];
+			} else if (inMessage) {
+				currentMessageLines.push(line);
+			} else if (!inMessage && line.trim().length > 0) {
+				// Preserve non-message lines (like headers, timestamps, etc.)
+				output += line + '\n';
+			}
+		}
+
+		// Create a new document with the raw FIX output
+		const document = await workspace.openTextDocument({ content: output, language: 'plaintext' });
+		await window.showTextDocument(document, ViewColumn.Beside);
+	};
+
 	commands.registerCommand('extension.show-field', async () => {
 
 		if (!orchestra) {

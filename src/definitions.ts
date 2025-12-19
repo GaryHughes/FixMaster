@@ -67,7 +67,7 @@ export class Field {
 
     public toString = () : string => {
         return `Field(${this.name}=${this.tag})`;
-    }
+    };
 }
 
 // 

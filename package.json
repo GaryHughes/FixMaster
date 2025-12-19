@@ -102,6 +102,14 @@
 				"title": "FIX Master - CSV Format Selection"
 			},
 			{
+				"command": "extension.format-raw-fix",
+				"title": "FIX Master - Convert to Raw FIX"
+			},
+			{
+				"command": "extension.format-raw-fix-selection",
+				"title": "FIX Master - Convert Selection to Raw FIX"
+			},
+			{
 				"command": "extension.show-field",
 				"title": "FIX Master - Show the definition of a field"
 			}
@@ -130,6 +138,13 @@
 					"command": "extension.format-csv-selection"
 				},
 				{
+					"command": "extension.format-raw-fix"
+				},
+				{
+					"when": "editorHasSelection",
+					"command": "extension.format-raw-fix-selection"
+				},
+				{
 					"command": "extension.show-field"
 				}
 			],
@@ -147,6 +162,11 @@
 				{
 					"when": "editorHasSelection",
 					"command": "extension.format-csv-selection",
+					"group": "1_modification"
+				},
+				{
+					"when": "editorHasSelection",
+					"command": "extension.format-raw-fix-selection",
 					"group": "1_modification"
 				}
 			]
@@ -247,16 +267,22 @@
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile",
 		"test": "node ./out/test/runTest.js",
-		"lint": "eslint -c .eslintrc.js --ext .ts ./"
+		"lint": "eslint .",
+		"format": "prettier --write \"src/**/*.ts\"",
+		"format:check": "prettier --check \"src/**/*.ts\""
 	},
 	"devDependencies": {
 		"@types/mocha": "^10.0.1",
 		"@types/node": "^20.12.7",
 		"@types/vscode": "^1.88.0",
+		"@typescript-eslint/eslint-plugin": "^8.48.1",
+		"@typescript-eslint/parser": "^8.48.1",
 		"@vscode/test-electron": "^2.3.4",
 		"eslint": "^9.1.0",
+		"eslint-config-prettier": "^10.1.8",
 		"glob": "^11.1.0",
 		"mocha": "^10.8.2",
+		"prettier": "^3.7.4",
 		"ts-loader": "^9.4.4",
 		"typescript": "^5.1.6",
 		"webpack": "^5.94.0",
