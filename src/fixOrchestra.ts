@@ -166,5 +166,23 @@ export class Orchestra
         return "";
     }
 
+    isFieldEnumerated(tag: number, orchestratation: xml.Orchestration | undefined)
+    {
+        if (orchestratation) {
+            const codeset = orchestratation.codeSetsById[tag];
+            if (codeset) {
+                return true;
+            }
+        }
+
+        if (this.nameLookup === NameLookup.Promiscuous) {
+            const codeset = this.latestOrchestration.codeSetsById[tag];
+            if (codeset) {
+                return true;
+            }        
+        }
+
+        return false;
+    }
 
 }

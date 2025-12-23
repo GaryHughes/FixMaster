@@ -4,6 +4,12 @@ All notable changes to the **FIX Master** extension will be documented in this f
 
 This format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [unreleased] 
+
+### Added
+- Command `FIX Master - Convert to Raw FIX` which will convert any pretty printed FIX messages in the current file to raw FIX. 
+- Command `FIX Master - Convert Selection to Raw FIX` which will convert any pretty printed FIX messages in the current selection to raw FIX.
+
 ## [2.1.0] 2024-09-07
 
 ### Added

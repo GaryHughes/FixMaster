@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Orchestra } from './fixOrchestra';
 import { DataDictionary } from './quickFixDataDictionary';
-import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, fixFormatPrintMessage, parsePrettyPrintedMessage, Message } from './fixProtocol';
+import { fixMessagePrefix, parseMessage, prettyPrintMessage, msgTypeHeartbeat, msgTypeTestRequest, csvPrintMessage, Message, parsePrettyPrintedField } from './fixProtocol';
 import { AdministrativeMessageBehaviour, CommandScope, EditorReuse, NameLookup } from './options';
 import { definitionHtmlForField } from './html';
 import { OrderBook } from './orderBook';
@@ -200,10 +200,10 @@ export function activate(context: ExtensionContext) {
 		}
 	});
 
-	let getDocument = async (editorReuse:EditorReuse) : Promise<TextDocument> => {
+	let getDocument = async (editorReuse:EditorReuse, language: string) : Promise<TextDocument> => {
 
 		if (editorReuse !== EditorReuse.New) {
-			const document = workspace.textDocuments.find(document => { return document.languageId === 'FIX'; });
+			const document = workspace.textDocuments.find(document => { return document.languageId === language; });
 			if (document) {
 				if (editorReuse === EditorReuse.Replace) {
 					let edit = new WorkspaceEdit();
@@ -218,15 +218,25 @@ export function activate(context: ExtensionContext) {
 			}
 		}
 
-		return  await workspace.openTextDocument({ language: 'FIX' })
+		return  await workspace.openTextDocument({ language: "FIX" })
 			.then(document => window.showTextDocument(document))
 			.then(editor => editor.document);
 	};
 
-	let format = async (printer: (context: string, message:Message, orchestra:Orchestra, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
-				  scope: CommandScope,
-				  orderBook: OrderBook | null = null) => {
-
+	class EditContext {
+		constructor(readonly orchestra: Orchestra, 
+					readonly activeTextEditor: TextEditor,
+					readonly document: TextDocument,
+					readonly index: number) {
+			this.orchestra = orchestra;
+			this.activeTextEditor = activeTextEditor;
+			this.document = document;
+			this.index = index;
+		}
+	}
+	
+	let prepare_edit_context = async (scope: CommandScope, language: string) : Promise<EditContext | undefined> => {
+	
 		if (!orchestra) {
 			window.showErrorMessage('The orchestra has not been loaded - check the orchestraPath setting.');
 			return;
@@ -239,16 +249,10 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
-		if (orderBook) {
-			orderBook.clear();
-		}
-
-		const sourceDocument = activeTextEditor.document;
-
 		const configuration = workspace.getConfiguration();
 		const editorReuse = EditorReuse[configuration.get("fixmaster.editorReuse") as keyof typeof EditorReuse];
 
-		let document = await getDocument(editorReuse);
+		let document = await getDocument(editorReuse, language);
 		
 		let edit = new WorkspaceEdit();
 
@@ -259,7 +263,7 @@ export function activate(context: ExtensionContext) {
 		}
 		
 		if (scope === CommandScope.Document) {
-			edit.insert(document.uri, new Position(index, 0), sourceDocument.getText());
+			edit.insert(document.uri, new Position(index, 0), activeTextEditor.document.getText());
 		}
 		else {
 			const selection = activeTextEditor.selection;
@@ -271,13 +275,32 @@ export function activate(context: ExtensionContext) {
 		}
 
 		await workspace.applyEdit(edit);
+		
+		return new EditContext(orchestra, activeTextEditor, document, index);
+	}
+
+	let format = async (printer: (context: string, message:Message, orchestra:Orchestra, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
+				  scope: CommandScope,
+				  orderBook: OrderBook | null = null) => {
+
+		let editContext = await prepare_edit_context(scope, "FIX");
+
+		if (!editContext) {
+			return;
+		}
+
+		if (orderBook) {
+			orderBook.clear();
+		}
+
+		const configuration = workspace.getConfiguration();
 
 		const prefixPattern = configuration.get("fixmaster.prefixPattern") as string;
 		const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
 		const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
 		const administrativeMessageBehaviour = AdministrativeMessageBehaviour[configuration.get("fixmaster.administrativeMessageBehaviour") as keyof typeof AdministrativeMessageBehaviour];
 
-		orchestra.nameLookup = NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof NameLookup];
+		editContext.orchestra.nameLookup = NameLookup[configuration.get('fixmaster.nameLookup') as keyof typeof NameLookup];
 
 		window.withProgress({
 			location: ProgressLocation.Notification,
@@ -302,12 +325,13 @@ export function activate(context: ExtensionContext) {
 					const edit = new WorkspaceEdit();
 
 					var lastLineWasAMessage = false;
+					var maxIndex = editContext.document.lineCount;
 
-					var maxIndex = document.lineCount;
+					var index = editContext.index;
 					
 					for (; index < maxIndex; ++index) {
 
-						const line = document.lineAt(index);
+						const line = editContext.document.lineAt(index);
 						
 						const fixMessageIndex = line.text.indexOf(fixMessagePrefix); 
 
@@ -316,7 +340,7 @@ export function activate(context: ExtensionContext) {
 							continue;
 						}
 						
-						const linePrefix = line.text.substr(0, fixMessageIndex);
+						const linePrefix = line.text.substring(0, fixMessageIndex);
 						const regex = new RegExp(prefixPattern);
 						let match = regex.exec(linePrefix);
 						var messageContext: string = "";
@@ -368,7 +392,7 @@ export function activate(context: ExtensionContext) {
 									}
 								}	
 						
-								edit.replace(document.uri, line.range, pretty);
+								edit.replace(editContext.document.uri, line.range, pretty);
 							}
 							else {
 								// Leave the message in the output as is.
@@ -377,17 +401,105 @@ export function activate(context: ExtensionContext) {
 						}
 						else {
 							let nextLineIndex = index + 1;
-							if (nextLineIndex >= document.lineCount) {
+							if (nextLineIndex >= editContext.document.lineCount) {
 								// If we try and delete using the next line start index as the end range when we are deleting
 								// the last line in the document the editor dies.
-								edit.delete(document.uri, line.range.with(undefined, document.lineAt(index).range.end));
+								edit.delete(editContext.document.uri, line.range.with(undefined, editContext.document.lineAt(index).range.end));
 							}
 							else {
 								// Specifying the start of the next line as the end of the range to delete includes the newline
 								// terminator. Just using the end of the current line leaves extra new lines in the output.
-								edit.delete(document.uri, line.range.with(undefined, document.lineAt(nextLineIndex).range.start));
+								edit.delete(editContext.document.uri, line.range.with(undefined, editContext.document.lineAt(nextLineIndex).range.start));
 							}
 						}
+					}
+
+					workspace.applyEdit(edit);
+					
+					resolve(undefined);
+				}, 0);
+			});
+		});
+	};
+
+	let formatRawFix = async (scope: CommandScope) => {
+
+		let editContext = await prepare_edit_context(scope, 'plaintext');
+
+		if (!editContext) {
+			return;
+		}
+
+		// Parse pretty-printed messages and convert to raw FIX
+
+		window.withProgress({
+			location: ProgressLocation.Notification,
+			title: "Finding and formatting FIX messages...",
+			// The parsing is very fast so it doesn't appear worth supporting cancellation.
+			// Almost makes the use of this API pointless but lets see how we go. Needs some
+			// testing on slower machines.
+			cancellable: false
+		}, (progress, token) => {
+
+			return new Promise(resolve => {
+
+				setTimeout(() => {
+
+					if (!orchestra) {
+						// We should never get here but but the compiler complains orchestra might be undefined
+						// in the call to printer below.
+						resolve(undefined);
+						return;
+					}
+
+					const edit = new WorkspaceEdit();
+
+					// Walk through the document, anything that looks like a field gets parsed and put in a message/fragment.
+					// If we find something that does not look like a field we serialise the current message/fragment to FIX
+					// and continue until we find another field at which point we start another message/fragment.
+					// This is much more resilient than explicitly trying to find delimited messages.
+					var maxIndex = editContext.document.lineCount;
+					var startIndex = editContext.index;
+					var index = startIndex;
+
+					var message: Message | null = null;
+
+					for (; index < maxIndex; ++index) {
+
+						const line = editContext.document.lineAt(index);
+
+						let field = parsePrettyPrintedField(line.text, orchestra, dataDictionary);
+						if (field) {
+							if (!message) {
+								// Move the startIndex to leave any non field lines in tact since the end of the last message/fragment.
+								startIndex = index;
+								message = new Message(null, []);
+							}
+							message.fields.push(field);
+							continue;
+						}
+						
+						if (message) {
+							// We have a message/fragement in progress and found something that is not a field so end this one.
+							let serialised = message.serialise();
+							let previousLine = editContext.document.lineAt(line.range.start.line - 1);
+							let range = new Range(startIndex, 0, previousLine.range.start.line, previousLine.range.end.character);
+							edit.replace(editContext.document.uri, range, serialised);
+							message = null
+						}
+
+						startIndex = index;
+					}
+
+					if (message) {
+						// Make sure we serialise anthing left at the end of the file/selection.
+						let serialised = message.serialise();
+						const range = new Range(
+							startIndex, 0,
+							editContext.document.lineCount - 1, 
+							editContext.document.lineAt(editContext.document.lineCount - 1).text.length
+						);
+						edit.replace(editContext.document.uri, range, serialised);
 					}
 
 					workspace.applyEdit(edit);
@@ -429,71 +541,6 @@ export function activate(context: ExtensionContext) {
 	commands.registerCommand('extension.format-raw-fix-selection', async () => {
 		await formatRawFix(CommandScope.Selection);
 	});
-
-	let formatRawFix = async (scope: CommandScope) => {
-		if (!orchestra) {
-			window.showErrorMessage('The orchestra has not been loaded - check the orchestraPath setting.');
-			return;
-		}
-
-		const {activeTextEditor} = window;
-
-		if (!activeTextEditor) {
-			window.showErrorMessage('No document is open or the file is too large.');
-			return;
-		}
-
-		const sourceDocument = activeTextEditor.document;
-		let text: string;
-
-		if (scope === CommandScope.Document) {
-			text = sourceDocument.getText();
-		} else {
-			const selection = activeTextEditor.selection;
-			if (!selection) {
-				window.showErrorMessage('No text selected.');
-				return;
-			}
-			const range = new Range(selection.start, selection.end);
-			text = sourceDocument.getText(range);
-		}
-
-		// Parse pretty-printed messages and convert to raw FIX
-		const lines = text.split('\n');
-		let output = '';
-		let currentMessageLines: string[] = [];
-		let inMessage = false;
-
-		for (const line of lines) {
-			if (line.trim() === '{') {
-				inMessage = true;
-				currentMessageLines = [line];
-			} else if (line.trim() === '}') {
-				currentMessageLines.push(line);
-				inMessage = false;
-
-				// Parse this message block
-				const messageText = currentMessageLines.join('\n');
-				const message = parsePrettyPrintedMessage(messageText);
-
-				if (message) {
-					const rawFix = fixFormatPrintMessage('', message, orchestra, dataDictionary, 0);
-					output += rawFix;
-				}
-
-				currentMessageLines = [];
-			} else if (inMessage) {
-				currentMessageLines.push(line);
-			} else if (!inMessage && line.trim().length > 0) {
-				// Preserve non-message lines (like headers, timestamps, etc.)
-				output += line + '\n';
-			}
-		}
-
-		// Create a new document with the raw FIX output
-		const document = await workspace.openTextDocument({ content: output, language: 'plaintext' });
-		await window.showTextDocument(document, ViewColumn.Beside);
-	};
 
 	commands.registerCommand('extension.show-field', async () => {
 
