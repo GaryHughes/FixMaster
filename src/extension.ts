@@ -203,7 +203,7 @@ export function activate(context: ExtensionContext) {
 	let getDocument = async (editorReuse:EditorReuse, language: string) : Promise<TextDocument> => {
 
 		if (editorReuse !== EditorReuse.New) {
-			const document = workspace.textDocuments.find(document => { return document.languageId === language; });
+			const document = workspace.textDocuments.find(document => { return document.languageId === "FIX"; });
 			if (document) {
 				if (editorReuse === EditorReuse.Replace) {
 					let edit = new WorkspaceEdit();
