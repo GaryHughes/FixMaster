@@ -1,6 +1,10 @@
 # FIX Master
 
-FIX Master is designed to parse FIX messages from log files and pretty print them in a structured format displaying the names for fields, messages, and enumerated values.
+FIX Master is designed to parse FIX messages from log files and pretty print them in a structured format displaying the names for fields, messages, and enumerated values. 
+
+FIX Master can optionally track orders in the parsed logs and will include a table of configurable fields reflecting the current state of all orders as each message is processed.
+
+FIX Master can convert pretty printed messages back to raw FIX to allow easier editing when testing.
 
 ![fixmaster](images/fixMaster.gif)
 
