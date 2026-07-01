@@ -78,20 +78,16 @@ export class Orchestration
 {
     constructor(filename: string) {
         let buffer = fs.readFileSync(filename);
-        var orc = this;
-        var parseString = require('xml2js').parseString;
-        var stripNS = require('xml2js').processors.stripPrefix;
-        function nameToLowerCase(name: string){
-            return name?.toLowerCase();
-        }
-        parseString(buffer, { tagNameProcessors: [stripNS, nameToLowerCase], explicitChildren: true, preserveChildrenOrder: true }, function (err:any, result:any) {
-            orc.version = result.repository.$.version;
-            orc.load_data_types(result.repository);
-            orc.load_code_sets(result.repository);
-            orc.load_fields(result.repository);
-            orc.load_components(result.repository);
-            orc.load_groups(result.repository);
-            orc.load_messages(result.repository);
+        const stripNS = xml2js.processors.stripPrefix;
+        const nameToLowerCase = (name: string) => name?.toLowerCase();
+        xml2js.parseString(buffer, { tagNameProcessors: [stripNS, nameToLowerCase], explicitChildren: true, preserveChildrenOrder: true }, (err: any, result: any) => {
+            this.version = result.repository.$.version;
+            this.load_data_types(result.repository);
+            this.load_code_sets(result.repository);
+            this.load_fields(result.repository);
+            this.load_components(result.repository);
+            this.load_groups(result.repository);
+            this.load_messages(result.repository);
         });
     }
 
