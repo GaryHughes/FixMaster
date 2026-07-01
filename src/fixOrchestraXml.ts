@@ -82,12 +82,12 @@ export class Orchestration
         const nameToLowerCase = (name: string) => name?.toLowerCase();
         xml2js.parseString(buffer, { tagNameProcessors: [stripNS, nameToLowerCase], explicitChildren: true, preserveChildrenOrder: true }, (err: any, result: any) => {
             this.version = result.repository.$.version;
-            this.load_data_types(result.repository);
-            this.load_code_sets(result.repository);
-            this.load_fields(result.repository);
-            this.load_components(result.repository);
-            this.load_groups(result.repository);
-            this.load_messages(result.repository);
+            this.loadDataTypes(result.repository);
+            this.loadCodeSets(result.repository);
+            this.loadFields(result.repository);
+            this.loadComponents(result.repository);
+            this.loadGroups(result.repository);
+            this.loadMessages(result.repository);
         });
     }
 
@@ -104,7 +104,7 @@ export class Orchestration
     public groups: Record<number, Group> = {};
     public messages: Record<string, fix.Message> = {};
 
-    extract_synopsis(element: any)
+    extractSynopsis(element: any)
     {
         //  <element>
         //    <fixr:annotation>
@@ -153,7 +153,7 @@ export class Orchestration
         return result ?? ' ';
     }
 
-    load_data_types(repository: any)
+    loadDataTypes(repository: any)
     {
         /*
         <fixr:datatypes>
@@ -178,14 +178,14 @@ export class Orchestration
                 element.$.name,
                 element.$.baseType,
                 element.$.added,
-                this.extract_synopsis(element)
+                this.extractSynopsis(element)
             ); 
             this.dataTypes.push(data_type);
             // self.data_types[dataType.name] = dataType
         });
     }
 
-    load_code_sets(repository: any)
+    loadCodeSets(repository: any)
     {
         /*
         <fixr:codeSets>
@@ -206,7 +206,7 @@ export class Orchestration
                     codeElement.$.name,
                     codeElement.$.value,
                     codeElement.$.added,
-                    this.extract_synopsis(codeElement),
+                    this.extractSynopsis(codeElement),
                     codeElement.$.addedEP,
                     codeElement.$.updated,
                     codeElement.$.updatedEP,
@@ -218,7 +218,7 @@ export class Orchestration
                 element.$.id,
                 element.$.name,
                 element.$.type,
-                this.extract_synopsis(element),
+                this.extractSynopsis(element),
                 codes
             );
             this.codeSets.push(codeset);
@@ -226,7 +226,7 @@ export class Orchestration
         });
     }
 
-    load_fields(repository: any)
+    loadFields(repository: any)
     {
         /*
         <fixr:fields>
@@ -245,7 +245,7 @@ export class Orchestration
                 element.$.name,
                 element.$.type,
                 '', // TODO - remove this when we've ripped out th repository
-                this.extract_synopsis(element),
+                this.extractSynopsis(element),
                 element.$.added,
             );
             this.fieldsByName[field.name.toUpperCase()] = field;
@@ -299,7 +299,7 @@ export class Orchestration
         return references;
     }
 
-    references_to_fields(references: Reference[], depth: number)
+    referencesToFields(references: Reference[], depth: number)
     {
         let result: fix.MessageField[] = [];
         for (const reference of references) {
@@ -309,17 +309,17 @@ export class Orchestration
             }
             else if (reference.group_id) {
                 const group = this.groups[reference.group_id];
-                result = result.concat(this.references_to_fields(group.references, depth + 1));
+                result = result.concat(this.referencesToFields(group.references, depth + 1));
             }
             else if (reference.component_id) {
                 const component = this.components[reference.component_id];
-                result = result.concat(this.references_to_fields(component.references, depth));
+                result = result.concat(this.referencesToFields(component.references, depth));
             }
         }
         return result;
     }
 
-    load_components(repository: any)
+    loadComponents(repository: any)
     {
         /*
         <fixr:component name="DiscretionInstructions" id="1001" category="Common" added="FIX.4.4" abbrName="DiscInstr">
@@ -343,7 +343,7 @@ export class Orchestration
         });
     }
 
-    load_groups(repository: any)
+    loadGroups(repository: any)
     {
         /*
         <fixr:groups>
@@ -378,7 +378,7 @@ export class Orchestration
         });
     }
 
-    load_messages(repository: any)
+    loadMessages(repository: any)
     {
         /*
         <fixr:messages>
@@ -394,7 +394,7 @@ export class Orchestration
         */
         repository.messages[0].message.forEach((element:any) => {
             let references = this.extract_references(element.structure[0]);
-            let fields = this.references_to_fields(references, 0);
+            let fields = this.referencesToFields(references, 0);
             let message = new fix.Message(
                 element.$.id,
                 element.$.msgType,
@@ -402,7 +402,7 @@ export class Orchestration
                 element.$.category,
                 '', // TODO get rid of this when we drop the repository
                 '', // TODO get rid of this when we drop the repository
-                '', //this.extract_synopsis(element),
+                '', //this.extractSynopsis(element),
                 element.$.added,
                 fields
             );
