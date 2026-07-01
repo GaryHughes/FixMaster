@@ -54,52 +54,34 @@ export enum Direction {
 
 export class FieldDescription {
     
-    constructor(readonly tag: number, 
-                readonly value: string, 
-                readonly name: string, 
-                readonly valueDescription: string, 
-                readonly required: boolean, 
+    constructor(readonly tag: number,
+                readonly value: string,
+                readonly name: string,
+                readonly valueDescription: string,
+                readonly required: boolean,
                 readonly indent: number,
-                readonly type: string) {
-        this.tag = tag;
-        this.value = value;
-        this.name = name;
-        this.valueDescription = valueDescription;
-        this.required = required;
-        this.indent = indent;
-        this.type = type;
-    }
+                readonly type: string) {}
 
 }
 
 export class MessageDescription {
     
-    constructor(readonly msgType: string, 
-                readonly messageName: string, 
-                readonly fields : FieldDescription[]) {
-        this.msgType = msgType;
-        this.messageName = messageName;
-        this.fields = fields;
-    }
+    constructor(readonly msgType: string,
+                readonly messageName: string,
+                readonly fields: FieldDescription[]) {}
 
 }
 
 export class Field {
 
-    constructor(readonly tag: number, 
-                readonly value: string) {
-        this.tag = tag;
-        this.value = value;
-    }
+    constructor(readonly tag: number,
+                readonly value: string) {}
     
 }
 
 export class Message {
 
-    constructor(readonly msgType: string |  null, readonly fields : Field[]) {
-        this.msgType = msgType;
-        this.fields = fields;
-    }
+    constructor(readonly msgType: string | null, readonly fields: Field[]) {}
 
     describe(orchestra: FIX.Orchestra, quickFix: DataDictionary | null) {
         // TODO - This is all a bit messier than I'd like - review.

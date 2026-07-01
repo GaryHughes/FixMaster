@@ -224,15 +224,10 @@ export function activate(context: ExtensionContext) {
 	};
 
 	class EditContext {
-		constructor(readonly orchestra: Orchestra, 
+		constructor(readonly orchestra: Orchestra,
 					readonly activeTextEditor: TextEditor,
 					readonly document: TextDocument,
-					readonly index: number) {
-			this.orchestra = orchestra;
-			this.activeTextEditor = activeTextEditor;
-			this.document = document;
-			this.index = index;
-		}
+					readonly index: number) {}
 	}
 	
 	let prepare_edit_context = async (scope: CommandScope, language: string) : Promise<EditContext | undefined> => {
