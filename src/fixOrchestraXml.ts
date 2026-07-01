@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as xml2js from 'xml2js';
-import { setFlagsFromString } from 'v8';
 import * as fix from './definitions';
 
 // "@typescript-eslint/class-name-casing": "warn",
