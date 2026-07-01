@@ -43,6 +43,48 @@ import { Enum, Field, MessageField, Message } from './definitions';
 
 */
 
+// Typed shapes for the xml2js-parsed QuickFIX XML data dictionary.
+// xml2js is configured with explicitChildren:true and preserveChildrenOrder:true.
+
+interface QfAttrs {
+    [key: string]: string;
+}
+
+interface QfValue {
+    $: QfAttrs & { enum: string; description: string };
+}
+
+interface QfField {
+    $: QfAttrs & { number: string; name: string; type: string };
+    value?: QfValue[];
+}
+
+// A child element inside a message, component, or group (field/component/group refs).
+interface QfChild {
+    $: QfAttrs & { name?: string; required?: string };
+    '#name': string;
+    $$?: QfChild[];
+}
+
+interface QfComponent {
+    $: QfAttrs & { name: string };
+    $$?: QfChild[];
+}
+
+interface QfMessage {
+    $: QfAttrs & { msgtype: string; name: string; msgcat: string };
+    $$?: QfChild[];
+}
+
+interface QfJson {
+    fix: {
+        $: QfAttrs & { type: string; major: string; minor: string; servicepack: string };
+        fields: [{ field: QfField[] }];
+        components: [{ component?: QfComponent[] }];
+        messages: [{ message: QfMessage[] }];
+    };
+}
+
 export class DataDictionary {
 
     constructor(readonly type: string,
@@ -53,14 +95,8 @@ export class DataDictionary {
                 readonly fieldsByName: Record<string, Field>,
                 enums: Enum[],
                 messages: Message[]) {
-        this.type = type;
-        this.major = major;
-        this.minor = minor;
-        this.servicePack = servicePack;
         this.beginString = `${this.type}.${this.major}.${this.minor}SP${this.servicePack}`;
-        this.fields = fields;
-        this.fieldsByName = fieldsByName;
-        
+
         enums.forEach(entry => {
             if (this.enums[entry.tag]) {
                 this.enums[entry.tag].push(entry);
@@ -76,7 +112,7 @@ export class DataDictionary {
     readonly beginString: string;
     readonly enums: Record<number, Enum[]> = {};
     readonly messages: Record<string, Message> = {};
-   
+
     definitionOfField(tag: number, _beginString: string | undefined, _message: Message | undefined) {
         if (tag > 0 && tag < this.fields.length) {
             const field = this.fields[tag];
@@ -86,7 +122,7 @@ export class DataDictionary {
     }
 
     definitionOfMessage(msgType: string) {
-        
+
         const message = this.messages[msgType];
         if (message) {
             return message;
@@ -97,7 +133,7 @@ export class DataDictionary {
     }
 
     descriptionOfValue(tag: number, value: string) {
-        
+
         const enums = this.enums[tag];
 
         if (enums) {
@@ -113,7 +149,7 @@ export class DataDictionary {
     static async parse(filename: string) {
 
         const json = await xml2json(filename);
-    
+
         const type = json.fix.$.type;
         const major = Number(json.fix.$.major);
         const minor = Number(json.fix.$.minor);
@@ -122,15 +158,15 @@ export class DataDictionary {
         const fieldsByName: Record<string, Field> = {};
         const enums: Enum[] = [];
         const messages: Message[] = [];
-       
+
         // Field tags are 1 based and there are gaps in the sequence, we want to be able to
         // do constant time lookup using the tag value so insert dummies where required.
         let index: number = -1;
 
-        json.fix.fields[0].field.forEach((element: any) => {
+        json.fix.fields[0].field.forEach((element: QfField) => {
             const tag = Number(element.$.number);
             if (element.value) {
-                element.value.forEach((value: any) => {
+                element.value.forEach((value: QfValue) => {
                     enums.push(new Enum(
                         tag,
                         value.$.enum,
@@ -146,7 +182,7 @@ export class DataDictionary {
             if (field.tag < index) {
                 // field elements are not always sorted and we may have generated nulls for a gap
                 // so go back and fill in.
-                fields[field.tag] = field;    
+                fields[field.tag] = field;
             }
             else {
                 while (index < field.tag - 1) {
@@ -162,39 +198,39 @@ export class DataDictionary {
             fieldsByName[field.name] = field;
         });
 
-        const componentsByName: Record<string, any> = {};
+        const componentsByName: Record<string, QfComponent> = {};
 
         const component = json.fix.components[0].component;
         if (component) {
-            json.fix.components[0].component.forEach((element:any) => {
+            component.forEach((element: QfComponent) => {
                 componentsByName[element.$.name] = element;
             });
         }
-    
-        json.fix.messages[0].message.forEach((element:any) => {
-        
-            const fields: MessageField[] = [];
-           
-            const processChildren = (children: any[], indent: number, fieldsByName: Record<string, Field>) => {
+
+        json.fix.messages[0].message.forEach((element: QfMessage) => {
+
+            const messageFields: MessageField[] = [];
+
+            const processChildren = (children: QfChild[] | undefined | null, indent: number, fieldsByName: Record<string, Field>) => {
                 if (children === undefined || children === null) {
                     return;
-                } 
-                children.forEach((child: any) => {
+                }
+                children.forEach((child: QfChild) => {
                     switch (child["#name"]) {
                         case "field": {
                             const name = child.$.name;
                             const required = child.$.required === 'Y';
-                            const field = fieldsByName[name];
+                            const field = name ? fieldsByName[name] : undefined;
                             if (field) {
-                                fields.push(new MessageField(field, required, "", indent));
-                            }                            
+                                messageFields.push(new MessageField(field, required, "", indent));
+                            }
                             break;
                         }
                         case "component": {
                             const name = child.$.name;
-                            const component = componentsByName[name];
-                            if (component) {
-                                processChildren(component.$$, indent, fieldsByName);
+                            const comp = name ? componentsByName[name] : undefined;
+                            if (comp) {
+                                processChildren(comp.$$, indent, fieldsByName);
                             }
                             break;
                         }
@@ -217,10 +253,10 @@ export class DataDictionary {
                 "",
                 "",
                 "",
-                fields);
-        
+                messageFields);
+
                 messages.push(message);
-        
+
         });
 
         return new DataDictionary(
@@ -233,19 +269,19 @@ export class DataDictionary {
             enums,
             messages
         );
-    
+
     }
 
 }
 
-async function xml2json(filename: string) {
-    return new Promise<any>((resolve, reject) => {
+async function xml2json(filename: string): Promise<QfJson> {
+    return new Promise<QfJson>((resolve, reject) => {
         const xml = fs.readFileSync(filename);
         const parser = new xml2js.Parser({
-            explicitChildren: true, 
-            preserveChildrenOrder: true 
+            explicitChildren: true,
+            preserveChildrenOrder: true
         });
-        parser.parseString(xml, function (err: any, json: any) {
+        parser.parseString(xml, function (err: unknown, json: QfJson) {
             if (err) {
                 reject(err);
             }
