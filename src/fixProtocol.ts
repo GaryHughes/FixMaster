@@ -2,7 +2,6 @@ import * as FIX from './fixOrchestra';
 import * as xml from './fixOrchestraXml';
 import { DataDictionary } from './quickFixDataDictionary';
 import { stringify } from 'csv-stringify/sync';
-import base64 = require('base-64');
 
 export const fixMessagePrefix = "8=FIX";
 export const fieldDelimiter = '\x01';
@@ -232,7 +231,7 @@ export function parseMessage(text: string, orchestra: FIX.Orchestra | null = nul
                 // Incorrect length or some of the message is missing
                 return null;
             }
-            value = base64.encode(text.substr(index, length));
+            value = Buffer.from(text.substring(index, index + length), 'binary').toString('base64');
             index += length;
             if (text[index] !== separator) {
                 return null;

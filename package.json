@@ -286,10 +286,8 @@
 		"typescript": "^5.1.6"
 	},
 	"dependencies": {
-		"@types/base-64": "^1.0.2",
 		"@types/clone": "^2.1.4",
 		"@types/xml2js": "^0.4.5",
-		"base-64": "^1.0.0",
 		"clone": "^2.1.2",
 		"csv-stringify": "^6.4.6",
 		"xml2js": "^0.6.2"
