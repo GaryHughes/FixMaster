@@ -76,7 +76,7 @@ export class Order {
     }
   
     public replace(executionReport:FIX.Message) {
-        var replacement = clone<Order>(this);
+        const replacement = clone<Order>(this);
         replacement.update(executionReport);
         replacement.commit();
         this.rollback();

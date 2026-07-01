@@ -12,10 +12,10 @@ import { MessageField } from './definitions';
 
 export function activate(context: ExtensionContext) {
 
-	var orchestra: Orchestra | null = null;
-	var dataDictionary: DataDictionary | null = null;
-	var orderBook = new OrderBook();
-	var orderBookFields: MessageField[] = [];
+	let orchestra: Orchestra | null = null;
+	let dataDictionary: DataDictionary | null = null;
+	let orderBook = new OrderBook();
+	let orderBookFields: MessageField[] = [];
 
 	const getWorkspaceFolder = () : string | undefined => {
 		
@@ -47,7 +47,7 @@ export function activate(context: ExtensionContext) {
 		
 		const configuration = workspace.getConfiguration();
 		
-		var orchestraPath = configuration.get('fixmaster.orchestraPath') as string | undefined;
+		let orchestraPath = configuration.get('fixmaster.orchestraPath') as string | undefined;
 		
 		if (!orchestraPath) {
 			orchestraPath = "./orchestrations";
@@ -91,7 +91,7 @@ export function activate(context: ExtensionContext) {
 		
 		dataDictionary = null;
 		const configuration = workspace.getConfiguration();
-		var path = configuration.get('fixmaster.quickFixDataDictionaryPath') as string | undefined;
+		let path = configuration.get('fixmaster.quickFixDataDictionaryPath') as string | undefined;
 		
 		if (!path) {
 			return;
@@ -131,7 +131,7 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 		const configuration = workspace.getConfiguration();
-		var orderBookFieldsString = configuration.get('fixmaster.orderBookFields') as string;
+		const orderBookFieldsString = configuration.get('fixmaster.orderBookFields') as string;
 		if (!orderBookFieldsString) {
 			return;
 		}
@@ -207,9 +207,9 @@ export function activate(context: ExtensionContext) {
 			if (document) {
 				if (editorReuse === EditorReuse.Replace) {
 					let edit = new WorkspaceEdit();
-					var firstLine = document.lineAt(0);
-					var lastLine = document.lineAt(document.lineCount - 1);
-					var textRange = new Range(firstLine.range.start, lastLine.range.end);
+					const firstLine = document.lineAt(0);
+					const lastLine = document.lineAt(document.lineCount - 1);
+					const textRange = new Range(firstLine.range.start, lastLine.range.end);
 					edit.delete(document.uri, textRange);
 					await workspace.applyEdit(edit);
 				}
@@ -256,7 +256,7 @@ export function activate(context: ExtensionContext) {
 		
 		let edit = new WorkspaceEdit();
 
-		var index = 0;
+		let index = 0;
 
 		if (editorReuse === EditorReuse.Append) {
 			index = document.lineCount - 1;			
@@ -324,10 +324,10 @@ export function activate(context: ExtensionContext) {
 
 					const edit = new WorkspaceEdit();
 
-					var lastLineWasAMessage = false;
-					var maxIndex = editContext.document.lineCount;
+					let lastLineWasAMessage = false;
+					const maxIndex = editContext.document.lineCount;
 
-					var index = editContext.index;
+					let index = editContext.index;
 					
 					for (; index < maxIndex; ++index) {
 
@@ -343,9 +343,9 @@ export function activate(context: ExtensionContext) {
 						const linePrefix = line.text.substring(0, fixMessageIndex);
 						const regex = new RegExp(prefixPattern);
 						let match = regex.exec(linePrefix);
-						var messageContext: string = "";
+						let messageContext: string = "";
 						if (match) {
-							messageContext = match[0];	
+							messageContext = match[0];
 						}
 
 						const message = parseMessage(line.text.substr(fixMessageIndex), orchestra, fieldSeparator);	
@@ -355,8 +355,8 @@ export function activate(context: ExtensionContext) {
 							continue;
 						}
 					
-						var prettyPrint = true;
-						var include = true;
+						let prettyPrint = true;
+						let include = true;
 
 						if (message.isAdministrative()) {
 							if (administrativeMessageBehaviour === AdministrativeMessageBehaviour.DeleteAll) {
@@ -379,7 +379,7 @@ export function activate(context: ExtensionContext) {
 
 						if (include) {
 							if (prettyPrint) {
-								var pretty = printer(messageContext, message, orchestra, dataDictionary, nestedFieldIndent);
+								let pretty = printer(messageContext, message, orchestra, dataDictionary, nestedFieldIndent);
 								if (!lastLineWasAMessage) {
 									pretty = "\n" + pretty;
 									lastLineWasAMessage = true;
@@ -458,11 +458,11 @@ export function activate(context: ExtensionContext) {
 					// If we find something that does not look like a field we serialise the current message/fragment to FIX
 					// and continue until we find another field at which point we start another message/fragment.
 					// This is much more resilient than explicitly trying to find delimited messages.
-					var maxIndex = editContext.document.lineCount;
-					var startIndex = editContext.index;
-					var index = startIndex;
+					const maxIndex = editContext.document.lineCount;
+					let startIndex = editContext.index;
+					let index = startIndex;
 
-					var message: Message | null = null;
+					let message: Message | null = null;
 
 					for (; index < maxIndex; ++index) {
 
@@ -575,12 +575,12 @@ export function activate(context: ExtensionContext) {
 			}
 		);
 
-		var scriptPaths: Uri[] = [];
+		const scriptPaths: Uri[] = [];
 		for (const source of ['jquery.slim.min.js', 'bootstrap.bundle.min.js']) {
 			scriptPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'js', source))));
 		}
 
-		var stylesheetPaths: Uri[] = [];
+		const stylesheetPaths: Uri[] = [];
 		for (const source of ['repository.css', 'bootstrap.min.css']) {
 			stylesheetPaths.push(panel.webview.asWebviewUri(Uri.file(path.join(context.extensionPath, 'css', source))));
 		} 

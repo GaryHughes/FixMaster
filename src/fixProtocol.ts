@@ -105,7 +105,7 @@ export class Message {
         // TODO - This is all a bit messier than I'd like - review.
         const beginString = this.fields.find(field => field.tag === beginStringTag);
      
-        var version: xml.Orchestration | undefined;
+        let version: xml.Orchestration | undefined;
 
         if (beginString) {
             version = orchestra.orchestrations.find(v => v.version === beginString.value);        
@@ -117,12 +117,12 @@ export class Message {
             const msgType = msgTypeField.value;
             const messageDefinition = orchestra.definitionOfMessage(msgType, version);
             const fieldDescriptions = this.fields.map(field => {
-                var definition = orchestra.definitionOfField(field.tag, version, messageDefinition);
-                // TODO - change this to return tag === NaN 
+                let definition = orchestra.definitionOfField(field.tag, version, messageDefinition);
+                // TODO - change this to return tag === NaN
                 if (definition?.field.description.length === 0 && quickFix) {
                     definition = quickFix.definitionOfField(field.tag, undefined, undefined);
                 }
-                var valueDescription = orchestra.descriptionOfValue(field.tag, field.value, version);
+                let valueDescription = orchestra.descriptionOfValue(field.tag, field.value, version);
                 if (valueDescription.length === 0 && quickFix) {
                     valueDescription = quickFix.descriptionOfValue(field.tag, field.value);
                 }
@@ -143,7 +143,7 @@ export class Message {
         // and lookup the fields in isolation, this means we don't have required or indent properties but still better
         // than nothing.
         const fieldDescriptions = this.fields.map(field => {
-            var definition = orchestra.definitionOfField(field.tag, version, undefined);
+            let definition = orchestra.definitionOfField(field.tag, version, undefined);
             // TODO - change this to return tag === NaN
             if (definition?.field.description.length === 0 && quickFix) {
                 definition = quickFix.definitionOfField(field.tag, undefined, undefined);
@@ -191,14 +191,14 @@ export function parseMessage(text: string, orchestra: FIX.Orchestra | null = nul
         separator = fieldDelimiter;
     }
 
-    var msgType = null;
-    var fields: Field[] = [];
+    let msgType = null;
+    const fields: Field[] = [];
     let length = text.length;
 
-    for (var index = 0; index < length;) {
+    for (let index = 0; index < length;) {
 
-        var tag: string = "";
-        var value: string = "";
+        let tag: string = "";
+        let value: string = "";
 
         for (; index < length; ++index) {
             let token = text[index];
@@ -269,15 +269,15 @@ export function parseMessage(text: string, orchestra: FIX.Orchestra | null = nul
         return null;
     }
 
-    var message = new Message(msgType, fields);
+    const message = new Message(msgType, fields);
 
     return message;
 }
 
 export function prettyPrintMessage(context: string, message: Message, orchestra: FIX.Orchestra, quickFix: DataDictionary | null, nestedFieldIndent: number) {
     
-    var buffer: string = "";
-    var widestFieldName: number = 0;
+    let buffer: string = "";
+    let widestFieldName: number = 0;
  
     const description = message.describe(orchestra, quickFix);
     
@@ -317,7 +317,7 @@ export function prettyPrintMessage(context: string, message: Message, orchestra:
 
 export function csvPrintMessage(context: string, message: Message, orchestra: FIX.Orchestra, quickFix: DataDictionary | null, _: number) {
 
-    var buffer: string = "";
+    let buffer: string = "";
     const description = message.describe(orchestra, quickFix);
 
     if (context && context.length > 0) {

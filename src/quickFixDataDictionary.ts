@@ -125,7 +125,7 @@ export class DataDictionary {
        
         // Field tags are 1 based and there are gaps in the sequence, we want to be able to
         // do constant time lookup using the tag value so insert dummies where required.
-        var index: number = -1;
+        let index: number = -1;
 
         json.fix.fields[0].field.forEach((element: any) => {
             const tag = Number(element.$.number);
@@ -162,7 +162,7 @@ export class DataDictionary {
             fieldsByName[field.name] = field;
         });
 
-        var componentsByName: Record<string, any> = {};
+        const componentsByName: Record<string, any> = {};
 
         let component = json.fix.components[0].component;
         if (component) {
@@ -173,7 +173,7 @@ export class DataDictionary {
     
         json.fix.messages[0].message.forEach((element:any) => {
         
-            var fields: MessageField[] = [];
+            const fields: MessageField[] = [];
            
             let processChildren = (children: any[], indent: number, fieldsByName: Record<string, Field>) => {
                 if (children === undefined || children === null) {

@@ -23,20 +23,20 @@ export class OrderReport
         this._report.clear();
 
         for (let order of this.orderBook.orders.values()) {
-            var values = new Array(this._fields.length).fill(null);
-            var index = 0;
+            const values = new Array(this._fields.length).fill(null);
+            let index = 0;
             this._fields.forEach(definition => {
                 let field = order.fields[definition.field.tag];
                 if (field) {
                     let pending = order.pendingFields[definition.field.tag];
-                    var name = this.orchestra.symbolicNameOfValue(field.tag, field.value, undefined);
-                    var value = name || field.value;
+                    const name = this.orchestra.symbolicNameOfValue(field.tag, field.value, undefined);
+                    let value = name || field.value;
                     if (pending && pending.value !== field.value &&
                         // identity fields change with ExecutionReports and OrderCancelReplace etc but we don't need or want to
                         // see those changes.
-                        !Order.isIdentityField(field.tag)) 
+                        !Order.isIdentityField(field.tag))
                     {
-                        var pendingName = this.orchestra.symbolicNameOfValue(pending.tag, pending.value, undefined);
+                        const pendingName = this.orchestra.symbolicNameOfValue(pending.tag, pending.value, undefined);
                         value += ` (${pendingName || pending.value})`;
                     }
                     values[index] = value;

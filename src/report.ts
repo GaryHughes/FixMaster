@@ -44,15 +44,15 @@ export class Report {
 
     public toString = () : string => {
         let horizontalBar = "\u2015";
-        var buffer = '';
+        let buffer = '';
         // Calculate the column widths
-        var columnWidths: number[] = [this.columns.length];
-        var columnHeaderRows: number = 0;
-        for (var index = 0; index < this.columns.length; ++index) {
-            var column = this.columns[index];
+        const columnWidths: number[] = [this.columns.length];
+        let columnHeaderRows: number = 0;
+        for (let index = 0; index < this.columns.length; ++index) {
+            const column = this.columns[index];
             // column headers can be multiline
             columnHeaderRows = Math.max(columnHeaderRows, column.name.length);
-            var size = 0;
+            let size = 0;
             // get the widest column name
             column.name.forEach(name => {
                 size = Math.max(size, name.length); 
@@ -73,7 +73,7 @@ export class Report {
         for (let headerIndex = 0; headerIndex < columnHeaderRows; ++headerIndex) {
             for (let index = 0; index < this.columns.length; ++index) {
                 const column = this.columns[index];
-                var value = "";
+                let value = "";
                 if (column.name.length === columnHeaderRows) {
                     value = column.name[headerIndex];
                 }
@@ -101,7 +101,7 @@ export class Report {
         buffer += "\n";
         // Add the data rows        
         for (const row of this.rows) {
-            for (index = 0; index < this.columns.length; ++index) {
+            for (let index = 0; index < this.columns.length; ++index) {
                 const column = this.columns[index];
                 if (column.justification === ColumnJustification.Left) {
                     buffer += (row[index] || "").padEnd(columnWidths[index]);
@@ -119,9 +119,9 @@ export class Report {
         buffer += horizontalBar.padStart(totalWidth, horizontalBar);
         if (this.footer.length > 0) {
             buffer += '\n';
-            for (index = 0; index < this.columns.length; ++index) {
+            for (let index = 0; index < this.columns.length; ++index) {
                 const column = this.columns[index];
-                value = "";
+                let value = "";
                 if (index < this.footer.length) {
                     value = this.footer[index];
                 }

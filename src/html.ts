@@ -3,7 +3,7 @@ import { Orchestra } from './fixOrchestra';
 import { Uri } from 'vscode';
 
 function htmlHead(stylesheetPaths: Uri[], scriptPaths: Uri[]) {
-    var html = '';
+    let html = '';
     html += '<!DOCTYPE html>';
     html += '<html lang="en">';
     html += '<head>';
@@ -32,7 +32,7 @@ export function definitionHtmlForField(definition: MessageField, orchestra: Orch
     // want that tab to be selected so find a version it is available in.
     const preferredVersion = orchestra.orchestrations.find(orchestration => orchestration.version === preferedBeginString);
     if (preferredVersion) {
-        var preferredDefinition = preferredVersion.fields[definition.field.tag];
+        let preferredDefinition = preferredVersion.fields[definition.field.tag];
         if (isNaN(preferredDefinition.tag)) {
             for (const orchestration of orchestra.orchestrations.slice().reverse()) {
                 preferredDefinition = orchestration.fields[definition.field.tag];    
@@ -44,13 +44,13 @@ export function definitionHtmlForField(definition: MessageField, orchestra: Orch
         }
     }
 
-    var html = htmlHead(stylesheetPaths, scriptPaths);
+    let html = htmlHead(stylesheetPaths, scriptPaths);
     html += '<body>';
     html += '<div>';
     html += '<br>';
     html += '<ul class="nav nav-pills">';
     for (const orchestration of orchestra.orchestrations) {
-        var style = 'nav-link';
+        let style = 'nav-link';
       
         const versionDefinition = orchestration.fields[definition.field.tag];
         if (!versionDefinition || isNaN(versionDefinition.tag)) {
@@ -76,7 +76,7 @@ export function definitionHtmlForField(definition: MessageField, orchestra: Orch
 
     for (const orchestration of orchestra.orchestrations) {
         const codeSet = orchestration.codeSetsById[definition.field.tag];
-        style = 'tab-pane';
+        let style = 'tab-pane';
         if (orchestration.version === preferedBeginString) {
             style += ' active';
         }

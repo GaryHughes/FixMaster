@@ -45,10 +45,10 @@ export class Orchestra
 
     definitionOfField(tagOrName: number | string, orchestration: xml.Orchestration | undefined = undefined, message: fix.Message | undefined = undefined) : fix.MessageField | undefined 
     {
-        var tag = Number(tagOrName);
-        
+        let tag = Number(tagOrName);
+
         if (isNaN(tag)) {
-            var o = orchestration ?? this.latestOrchestration;
+            const o = orchestration ?? this.latestOrchestration;
             if (o) {
                 const field = o.fieldsByName[tagOrName.toString().toUpperCase()];
                 if (field) {

@@ -56,7 +56,7 @@ export class OrderBook {
             return false;
         }
 
-        var order = this._orders.get(id);
+        const order = this._orders.get(id);
         if (!order) {
             return false;
         }
@@ -65,9 +65,9 @@ export class OrderBook {
 
         if (execType) {
             if (execType.value === FIX.execTypeReplace) {
-                var replacement = order.replace(message);
+                const replacement = order.replace(message);
                 // This is an inneficient mess - fix.
-                var idFields = message.fields.filter(field => field.tag !== FIX.origClOrdIdTag && field.tag !== FIX.clOrdIdTag);
+                const idFields = message.fields.filter(field => field.tag !== FIX.origClOrdIdTag && field.tag !== FIX.clOrdIdTag);
                 idFields.push(new FIX.Field(FIX.clOrdIdTag, replacement.clOrdId));
                 const idMessage = new FIX.Message(message.msgType, idFields);
                 const replacementId = this.idForMessage(idMessage, FIX.Direction.Incoming);
@@ -88,7 +88,7 @@ export class OrderBook {
         if (!id) {
             return false;
         }
-        var order = this._orders.get(id);
+        const order = this._orders.get(id);
         if (!order) {
             return false;
         }
@@ -101,7 +101,7 @@ export class OrderBook {
         if (!id) {
             return false;
         }
-        var order = this._orders.get(id);
+        const order = this._orders.get(id);
         if (!order) {
             return false;
         }
@@ -110,11 +110,11 @@ export class OrderBook {
     }   
 
     private processOrderCancelReject(message: FIX.Message) {
-        var id = this.idForMessage(message, FIX.Direction.Incoming);
+        const id = this.idForMessage(message, FIX.Direction.Incoming);
         if (!id) {
             return false;
         }
-        var order = this._orders.get(id);
+        const order = this._orders.get(id);
         if (!order) {
             return false;
         }
@@ -139,7 +139,7 @@ export class OrderBook {
             return null;
         }
 
-        var clOrdId = message.fields.find(field => field.tag === FIX.origClOrdIdTag);
+        let clOrdId = message.fields.find(field => field.tag === FIX.origClOrdIdTag);
         if (!clOrdId) {
             clOrdId = message.fields.find(field => field.tag === FIX.clOrdIdTag);
             if (!clOrdId) {

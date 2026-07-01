@@ -112,11 +112,11 @@ export class Orchestration
         //            int field representing the number of entries in a repeating group. Value must be positive.
         //        </fixr:documentation>
         //    </fixr:annotation>
-        var documentation: any[] = [];
+        const documentation: any[] = [];
 
         let search = function recursive_search(obj: any)
         {
-            for (var key in obj) {
+            for (const key in obj) {
                 
                 const value = obj[key];
                 
@@ -138,7 +138,7 @@ export class Orchestration
 
         search(element);
         
-        var result: string | undefined = undefined;
+        let result: string | undefined = undefined;
 
         for (const item of documentation) {
             if (item[0].$.purpose === 'SYNOPSIS') {
@@ -238,7 +238,7 @@ export class Orchestration
 			    </fixr:annotation>
           </fixr:field>
         */
-        var maxTag = Number(0);
+        let maxTag = Number(0);
         repository.fields[0].field.forEach((element:any) => {
             let field = new fix.Field(
                 Number(element.$.id),
@@ -301,7 +301,7 @@ export class Orchestration
 
     references_to_fields(references: Reference[], depth: number)
     {
-        var result: fix.MessageField[] = [];
+        let result: fix.MessageField[] = [];
         for (const reference of references) {
             if (reference.field_id) {
                 const source = this.fields[reference.field_id];
