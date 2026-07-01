@@ -185,7 +185,7 @@ export function activate(context: ExtensionContext) {
 			}
 			const fieldSeparator = configuration.get("fixmaster.fieldSeparator") as string;
 			const nestedFieldIndent = configuration.get("fixmaster.nestedFieldIndent") as number;
-			const rawText = line.text.substr(fixMessageIndex);
+			const rawText = line.text.slice(fixMessageIndex);
 			const message = parseMessage(rawText, orchestra, fieldSeparator);	
 			if (!message) {
 				return;
@@ -343,7 +343,7 @@ export function activate(context: ExtensionContext) {
 							messageContext = match[0];
 						}
 
-						const message = parseMessage(line.text.substr(fixMessageIndex), orchestra, fieldSeparator);	
+						const message = parseMessage(line.text.slice(fixMessageIndex), orchestra, fieldSeparator);	
 
 						if (!message) {
 							lastLineWasAMessage = false;
