@@ -22,6 +22,14 @@ function normaliseId(value: string) {
     return value.split(".").join("");
 }
 
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 export function definitionHtmlForField(definition: MessageField, orchestra: Orchestra, stylesheetPaths: Uri[], scriptPaths: Uri[], preferedBeginString: string | undefined = undefined) {
 
     if (!preferedBeginString) {
@@ -61,7 +69,7 @@ export function definitionHtmlForField(definition: MessageField, orchestra: Orch
         }
 
         html += '<li class="nav-item">';
-        html += `   <a class="${style}" href="#${normaliseId(orchestration.version)}" data-toggle="pill">${orchestration.version}`;
+        html += `   <a class="${style}" href="#${normaliseId(orchestration.version)}" data-toggle="pill">${escapeHtml(orchestration.version)}`;
         // TODO
         // if (version.extensionPack) {
         //     html += "/EP" + version.extensionPack;
@@ -84,7 +92,7 @@ export function definitionHtmlForField(definition: MessageField, orchestra: Orch
 
         const versionDefinition = orchestration.fields[definition.field.tag];
         if (versionDefinition) {
-            html += '       <p>' + versionDefinition.description.split('\n').join('<br>') + '</p>';
+            html += '       <p>' + versionDefinition.description.split('\n').map(escapeHtml).join('<br>') + '</p>';
         }
 
         if (codeSet && codeSet.codes.length > 0) {
@@ -97,26 +105,26 @@ export function definitionHtmlForField(definition: MessageField, orchestra: Orch
             html += '           <tbody>';
             for (const code of codeSet.codes) {
                 html += '   <tr>';
-                html += '   <td class="text-center">' + code.value + '</td>';
-                html += '   <td>' + code.name + '</td>';
-                html += '   <td>' + code.synopsis + '</td>';
+                html += '   <td class="text-center">' + escapeHtml(code.value) + '</td>';
+                html += '   <td>' + escapeHtml(code.name) + '</td>';
+                html += '   <td>' + escapeHtml(code.synopsis) + '</td>';
                 if (code.addedEP && code.addedEP.length > 0) {
-                    html += '   <td>' + code.added + "/EP" + code.addedEP + '</td>';
+                    html += '   <td>' + escapeHtml(code.added) + "/EP" + escapeHtml(code.addedEP) + '</td>';
                 }
                 else {
-                    html += '   <td>' + (code.added ?? '') + '</td>';
+                    html += '   <td>' + escapeHtml(code.added ?? '') + '</td>';
                 }
                 if (code.updatedEP && code.updatedEP.length > 0) {
-                    html += '   <td>' + code.updated + "/EP" + code.updatedEP + '</td>';
+                    html += '   <td>' + escapeHtml(code.updated) + "/EP" + escapeHtml(code.updatedEP) + '</td>';
                 }
                 else {
-                    html += '   <td>' + (code.updated ?? '') + '</td>';
+                    html += '   <td>' + escapeHtml(code.updated ?? '') + '</td>';
                 }
                 if (code.deprecatedEP && code.deprecatedEP.length > 0) {
-                    html += '   <td>' + code.deprecated + "/EP" + code.deprecatedEP + '</td>';
+                    html += '   <td>' + escapeHtml(code.deprecated) + "/EP" + escapeHtml(code.deprecatedEP) + '</td>';
                 }
                 else {
-                    html += '   <td>' + (code.deprecated ?? '') + '</td>';
+                    html += '   <td>' + escapeHtml(code.deprecated ?? '') + '</td>';
                 }
                 html += '   </tr>';
             }
