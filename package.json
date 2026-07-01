@@ -30,49 +30,190 @@
 	"contributes": {
 		"languages": [
 			{
-			  "id": "FIX",
-			  "extensions": [".fix"]
+				"id": "FIX",
+				"extensions": [
+					".fix"
+				]
 			}
 		],
 		"grammars": [
 			{
-			  "language": "FIX",
-			  "scopeName": "text.fix",
-			  "path": "./syntaxes/fix.grammar.json"
+				"language": "FIX",
+				"scopeName": "text.fix",
+				"path": "./syntaxes/fix.grammar.json"
 			}
 		],
 		"configurationDefaults": {
 			"editor.tokenColorCustomizations": {
-				
 				"textMateRules": [
-					{ "scope": "fix.message.open", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.message.close", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.field.tag.open", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.field.tag", "settings": { "foreground": "#4daafc" } },
-					{ "scope": "fix.field.tag.close", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.field.enumerated.separator", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.field.enumerated.value.name", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.orderbook.open", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.orderbook.close", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.orderbook.side.buy", "settings": { "foreground": "#4daafc" } },
-					{ "scope": "fix.orderbook.side.sell", "settings": { "foreground": "#F3D447" } },
-					{ "scope": "fix.orderbook.ordstatus.new", "settings": { "foreground": "#99CF8C" } },
-					{ "scope": "fix.orderbook.ordstatus.partially-filled", "settings": { "foreground": "#99CF8C" } },
-					{ "scope": "fix.orderbook.ordstatus.pending-new", "settings": { "foreground": "#E58C77" } },
-					{ "scope": "fix.orderbook.ordstatus.pending-cancel", "settings": { "foreground": "#E58C77" } },
-					{ "scope": "fix.orderbook.ordstatus.pending-replace", "settings": { "foreground": "#E58C77" } },
-					{ "scope": "fix.orderbook.ordstatus.expired", "settings": { "foreground": "#DA4939" } },
-					{ "scope": "fix.orderbook.ordstatus.rejected", "settings": { "foreground": "#DA4939" } },
-					{ "scope": "fix.orderbook.ordstatus.stopped", "settings": { "foreground": "#DA4939" } },
-					{ "scope": "fix.orderbook.ordstatus.suspended", "settings": { "foreground": "#DA4939" } },
-					{ "scope": "fix.orderbook.ordstatus.filled", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.orderbook.ordstatus.done-for-day", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.orderbook.ordstatus.canceled", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.orderbook.ordstatus.replaced", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.orderbook.pending-replace.current.value", "settings": { "foreground": "#E58C77" } },
-					{ "scope": "fix.orderbook.pending-replace.new.open", "settings": { "foreground": "#868686" } },
-					{ "scope": "fix.orderbook.pending-replace.new.value", "settings": { "foreground": "#99CF8C" } },
-					{ "scope": "fix.orderbook.pending-replace.new.close", "settings": { "foreground": "#868686" } }
+					{
+						"scope": "fix.message.open",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.message.close",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.field.tag.open",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.field.tag",
+						"settings": {
+							"foreground": "#4daafc"
+						}
+					},
+					{
+						"scope": "fix.field.tag.close",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.field.enumerated.separator",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.field.enumerated.value.name",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.orderbook.open",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.orderbook.close",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.orderbook.side.buy",
+						"settings": {
+							"foreground": "#4daafc"
+						}
+					},
+					{
+						"scope": "fix.orderbook.side.sell",
+						"settings": {
+							"foreground": "#F3D447"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.new",
+						"settings": {
+							"foreground": "#99CF8C"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.partially-filled",
+						"settings": {
+							"foreground": "#99CF8C"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.pending-new",
+						"settings": {
+							"foreground": "#E58C77"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.pending-cancel",
+						"settings": {
+							"foreground": "#E58C77"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.pending-replace",
+						"settings": {
+							"foreground": "#E58C77"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.expired",
+						"settings": {
+							"foreground": "#DA4939"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.rejected",
+						"settings": {
+							"foreground": "#DA4939"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.stopped",
+						"settings": {
+							"foreground": "#DA4939"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.suspended",
+						"settings": {
+							"foreground": "#DA4939"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.filled",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.done-for-day",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.canceled",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.orderbook.ordstatus.replaced",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.orderbook.pending-replace.current.value",
+						"settings": {
+							"foreground": "#E58C77"
+						}
+					},
+					{
+						"scope": "fix.orderbook.pending-replace.new.open",
+						"settings": {
+							"foreground": "#868686"
+						}
+					},
+					{
+						"scope": "fix.orderbook.pending-replace.new.value",
+						"settings": {
+							"foreground": "#99CF8C"
+						}
+					},
+					{
+						"scope": "fix.orderbook.pending-replace.new.close",
+						"settings": {
+							"foreground": "#868686"
+						}
+					}
 				]
 			}
 		},
@@ -250,7 +391,7 @@
 					"enum": [
 						"New",
 						"Append",
-						"Replace"	
+						"Replace"
 					],
 					"enumDescriptions": [
 						"Copy the pretty printed output to a new file",
@@ -266,7 +407,7 @@
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile",
-		"test": "node ./out/test/runTest.js",
+		"test": "vscode-test",
 		"lint": "eslint .",
 		"format": "prettier --write \"src/**/*.ts\"",
 		"format:check": "prettier --check \"src/**/*.ts\""
@@ -277,10 +418,10 @@
 		"@types/vscode": "^1.88.0",
 		"@typescript-eslint/eslint-plugin": "^8.48.1",
 		"@typescript-eslint/parser": "^8.48.1",
+		"@vscode/test-cli": "^0.0.15",
 		"@vscode/test-electron": "^2.3.4",
 		"eslint": "^9.1.0",
 		"eslint-config-prettier": "^10.1.8",
-		"glob": "^13.0.0",
 		"mocha": "^11.7.5",
 		"prettier": "^3.7.4",
 		"typescript": "^5.1.6"
