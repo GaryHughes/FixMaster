@@ -143,19 +143,26 @@ class Group
 
 export class Orchestration
 {
-    constructor(filename: string) {
+    private constructor() {}
+
+    static async load(filename: string): Promise<Orchestration> {
         const buffer = fs.readFileSync(filename);
         const stripNS = xml2js.processors.stripPrefix;
         const nameToLowerCase = (name: string) => name?.toLowerCase();
-        xml2js.parseString(buffer, { tagNameProcessors: [stripNS, nameToLowerCase], explicitChildren: true, preserveChildrenOrder: true }, (err: unknown, result: XmlParseResult) => {
-            this.version = result.repository.$.version;
-            this.loadDataTypes(result.repository);
-            this.loadCodeSets(result.repository);
-            this.loadFields(result.repository);
-            this.loadComponents(result.repository);
-            this.loadGroups(result.repository);
-            this.loadMessages(result.repository);
-        });
+        const result = await xml2js.parseStringPromise(buffer, {
+            tagNameProcessors: [stripNS, nameToLowerCase],
+            explicitChildren: true,
+            preserveChildrenOrder: true,
+        }) as XmlParseResult;
+        const o = new Orchestration();
+        o.version = result.repository.$.version;
+        o.loadDataTypes(result.repository);
+        o.loadCodeSets(result.repository);
+        o.loadFields(result.repository);
+        o.loadComponents(result.repository);
+        o.loadGroups(result.repository);
+        o.loadMessages(result.repository);
+        return o;
     }
 
     public version: string = "";

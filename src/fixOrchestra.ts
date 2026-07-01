@@ -6,22 +6,28 @@ import { NameLookup } from './options';
 
 export class Orchestra
 {
-    constructor(root: string) {
-    
+    private constructor(
+        readonly orchestrations: xml.Orchestration[],
+        readonly latestOrchestration: xml.Orchestration,
+    ) {}
+
+    static async load(root: string): Promise<Orchestra> {
         const filenames = fs.readdirSync(root, { withFileTypes: true })
                           .filter(entry => entry.isFile() && entry.name.endsWith(".xml"))
                           .map(entry => entry.name);
 
-        this.orchestrations = filenames.map(entry => {
-            const orchestraPath = path.join(root, entry); 
-            try {
-                return new xml.Orchestration(orchestraPath);
-            } catch (err) {
-                throw new Error(`failed to load orchestra file '${orchestraPath}' - ${err}`);
-            }
-        });  
-        
-        this.orchestrations.sort((left: xml.Orchestration, right: xml.Orchestration) => {  
+        const orchestrations = await Promise.all(
+            filenames.map(async entry => {
+                const orchestraPath = path.join(root, entry);
+                try {
+                    return await xml.Orchestration.load(orchestraPath);
+                } catch (err) {
+                    throw new Error(`failed to load orchestra file '${orchestraPath}' - ${err}`);
+                }
+            })
+        );
+
+        orchestrations.sort((left: xml.Orchestration, right: xml.Orchestration) => {
             if (left.version < right.version) {
                 return -1;
             }
@@ -30,16 +36,13 @@ export class Orchestra
             }
             return 0;
         });
-        
-        if (this.orchestrations.length === 0) {
-            throw new Error(`failed to load any orchestration files from the directory '${root}'`);     
+
+        if (orchestrations.length === 0) {
+            throw new Error(`failed to load any orchestration files from the directory '${root}'`);
         }
 
-        this.latestOrchestration = this.orchestrations[this.orchestrations.length - 1];
+        return new Orchestra(orchestrations, orchestrations[orchestrations.length - 1]);
     }
-
-    orchestrations: xml.Orchestration[];
-    readonly latestOrchestration: xml.Orchestration;
 
     nameLookup: NameLookup = NameLookup.Promiscuous;
 

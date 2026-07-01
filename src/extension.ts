@@ -72,18 +72,13 @@ export function activate(context: ExtensionContext) {
 			location: ProgressLocation.Notification,
 			title: "Loading the FIX orchestra...",
 			cancellable: false
-		}, (_progress, _token) => {
-			return new Promise(resolve => {
-				setTimeout(() => {
-					try {
-						orchestra = new Orchestra(orchestraPath as string);
-						loadOrderBookTags();
-					} catch (err) {
-						window.showErrorMessage("Unable to load an orchestra from '" + orchestraPath + "' - " + err);
-					}
-					resolve(undefined);
-				}, 0);
-			});
+		}, async (_progress, _token) => {
+			try {
+				orchestra = await Orchestra.load(orchestraPath as string);
+				loadOrderBookTags();
+			} catch (err) {
+				window.showErrorMessage("Unable to load an orchestra from '" + orchestraPath + "' - " + err);
+			}
 		});
 	};
 
