@@ -5,7 +5,7 @@ import { NameLookup } from '../../options';
 
 suite('FIX Orchestra Test Suite', () => {
 
-    var orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
+    const orchestra = new Orchestra(path.join(__dirname, "../../../orchestrations"));
  
     test('Strict field name lookup', () => {
         const FIX_4_2 = orchestra.orchestrations[0];

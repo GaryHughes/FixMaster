@@ -3,13 +3,12 @@ import { OrderBook } from './orderBook';
 import { Report, ColumnJustification } from './report';
 import { MessageField } from './definitions';
 import { Order } from './order';
-import * as FIX from  './fixProtocol';
 
 export class OrderReport
 {
     public constructor(readonly orchestra: Orchestra, readonly orderBook: OrderBook, readonly fields: MessageField[]) {
         this._fields = fields;
-        for (let definition of this._fields) {
+        for (const definition of this._fields) {
             let justification = ColumnJustification.Left;
             if (definition.field.isNumeric) {
                 justification = ColumnJustification.Right;
@@ -22,13 +21,13 @@ export class OrderReport
 
         this._report.clear();
 
-        for (let order of this.orderBook.orders.values()) {
+        for (const order of this.orderBook.orders.values()) {
             const values = new Array(this._fields.length).fill(null);
             let index = 0;
             this._fields.forEach(definition => {
-                let field = order.fields[definition.field.tag];
+                const field = order.fields[definition.field.tag];
                 if (field) {
-                    let pending = order.pendingFields[definition.field.tag];
+                    const pending = order.pendingFields[definition.field.tag];
                     const name = this.orchestra.symbolicNameOfValue(field.tag, field.value, undefined);
                     let value = name || field.value;
                     if (pending && pending.value !== field.value &&

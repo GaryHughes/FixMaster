@@ -24,8 +24,11 @@ module.exports = [
       '@typescript-eslint': tsPlugin,
     },
     rules: {
-      // TypeScript specific rules
+      // TypeScript-specific rules
       '@typescript-eslint/no-unused-expressions': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-floating-promises': 'warn',
 
       // General JavaScript/TypeScript rules
       // Note: semi, quotes, indent rules are handled by Prettier
@@ -33,6 +36,8 @@ module.exports = [
       'eqeqeq': ['warn', 'always'],
       'no-redeclare': 'warn',
       'no-throw-literal': 'warn',
+      'no-var': 'error',
+      'prefer-const': 'warn',
 
       // Disable rules that conflict with Prettier
       ...prettierConfig.rules,

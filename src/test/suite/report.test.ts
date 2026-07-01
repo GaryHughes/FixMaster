@@ -5,7 +5,7 @@ suite('Report Test Suite', () => {
 
     test('Basic report test', () => {
 
-        let report = new Report();
+        const report = new Report();
 
         report.addColumn("Value");
         report.addColumn("Name");

@@ -175,7 +175,7 @@ export function parseMessage(text: string, orchestra: FIX.Orchestra | null = nul
 
     let msgType = null;
     const fields: Field[] = [];
-    let length = text.length;
+    const length = text.length;
 
     for (let index = 0; index < length;) {
 
@@ -183,7 +183,7 @@ export function parseMessage(text: string, orchestra: FIX.Orchestra | null = nul
         let value: string = "";
 
         for (; index < length; ++index) {
-            let token = text[index];
+            const token = text[index];
             if (token === fieldValueSeparator || token === separator) {
                 ++index;
                 break;
@@ -191,20 +191,20 @@ export function parseMessage(text: string, orchestra: FIX.Orchestra | null = nul
             tag += token;
         }
 
-        let intTag = parseInt(tag);
+        const intTag = parseInt(tag);
 
         if (isNaN(intTag)) {
             continue;
         }
 
-        let definition = orchestra?.definitionOfField(tag);
+        const definition = orchestra?.definitionOfField(tag);
         
         if (definition?.field.type === 'data') {
             if (fields.length === 0) {
                 // We need the previous field to read the expected length
                 return null;
             }    
-            let length = parseInt(fields[fields.length - 1].value);
+            const length = parseInt(fields[fields.length - 1].value);
             if (isNaN(length)) {
                 // Previous field is not an int so this message is malformed
                 return null;
@@ -222,7 +222,7 @@ export function parseMessage(text: string, orchestra: FIX.Orchestra | null = nul
         else {
 
             for (; index < length; ++index) {
-                let token = text[index];
+                const token = text[index];
                 if (token === separator) {
                     ++index;
                     break;
@@ -231,7 +231,7 @@ export function parseMessage(text: string, orchestra: FIX.Orchestra | null = nul
             }
         }
 
-        let field = new Field(intTag, value);
+        const field = new Field(intTag, value);
 
         fields.push(field);
 
@@ -328,7 +328,7 @@ export function csvPrintMessage(context: string, message: Message, orchestra: FI
     return buffer;
 }
 
-export function parsePrettyPrintedField(text: string, orchestra: FIX.Orchestra, quickFix: DataDictionary | null): Field | null {
+export function parsePrettyPrintedField(text: string, orchestra: FIX.Orchestra, _quickFix: DataDictionary | null): Field | null {
     //
     // BodyLength    (9) 0858
     //    MsgType   (35) X - MarketDataIncrementalRefresh
@@ -348,7 +348,7 @@ export function parsePrettyPrintedField(text: string, orchestra: FIX.Orchestra, 
 
     // If this is an enumerated field drop the description if there is one.
     if (orchestra.isFieldEnumerated(tag, undefined)) {
-        let separatorIndex = value.lastIndexOf(" - ");
+        const separatorIndex = value.lastIndexOf(" - ");
         if (separatorIndex >= 0) {
             value = value.substring(0, separatorIndex);
         }

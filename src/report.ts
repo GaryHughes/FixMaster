@@ -43,7 +43,7 @@ export class Report {
     }
 
     public toString = () : string => {
-        let horizontalBar = "\u2015";
+        const horizontalBar = "\u2015";
         let buffer = '';
         // Calculate the column widths
         const columnWidths: number[] = [this.columns.length];
@@ -78,7 +78,7 @@ export class Report {
                     value = column.name[headerIndex];
                 }
                 else {
-                    let effectiveMax = columnHeaderRows - headerIndex;
+                    const effectiveMax = columnHeaderRows - headerIndex;
                     if (column.name.length >= effectiveMax) {
                         value = column.name[headerIndex - (columnHeaderRows - column.name.length)];
                     }

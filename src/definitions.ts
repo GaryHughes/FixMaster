@@ -43,7 +43,7 @@ export class Field {
 
     public get isNumeric() : boolean {
         // TODO - make this smarter by using baseType
-        let dataType = this.type.toLowerCase();
+        const dataType = this.type.toLowerCase();
         return numericTypes.indexOf(dataType) >= 0;
     }
 

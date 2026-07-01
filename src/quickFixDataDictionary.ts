@@ -77,7 +77,7 @@ export class DataDictionary {
     readonly enums: Record<number, Enum[]> = {};
     readonly messages: Record<string, Message> = {};
    
-    definitionOfField(tag: number, beginString: string | undefined, message: Message | undefined) {
+    definitionOfField(tag: number, _beginString: string | undefined, _message: Message | undefined) {
         if (tag > 0 && tag < this.fields.length) {
             const field = this.fields[tag];
             return new MessageField(field, false, "", 0);
@@ -118,10 +118,10 @@ export class DataDictionary {
         const major = Number(json.fix.$.major);
         const minor = Number(json.fix.$.minor);
         const servicePack = Number(json.fix.$.servicepack);
-        let fields: Field[] = [];
-        let fieldsByName: Record<string, Field> = {};
-        let enums: Enum[] = [];
-        let messages: Message[] = [];
+        const fields: Field[] = [];
+        const fieldsByName: Record<string, Field> = {};
+        const enums: Enum[] = [];
+        const messages: Message[] = [];
        
         // Field tags are 1 based and there are gaps in the sequence, we want to be able to
         // do constant time lookup using the tag value so insert dummies where required.
@@ -164,7 +164,7 @@ export class DataDictionary {
 
         const componentsByName: Record<string, any> = {};
 
-        let component = json.fix.components[0].component;
+        const component = json.fix.components[0].component;
         if (component) {
             json.fix.components[0].component.forEach((element:any) => {
                 componentsByName[element.$.name] = element;
@@ -175,7 +175,7 @@ export class DataDictionary {
         
             const fields: MessageField[] = [];
            
-            let processChildren = (children: any[], indent: number, fieldsByName: Record<string, Field>) => {
+            const processChildren = (children: any[], indent: number, fieldsByName: Record<string, Field>) => {
                 if (children === undefined || children === null) {
                     return;
                 } 
@@ -240,8 +240,8 @@ export class DataDictionary {
 
 async function xml2json(filename: string) {
     return new Promise<any>((resolve, reject) => {
-        let xml = fs.readFileSync(filename);
-        let parser = new xml2js.Parser({
+        const xml = fs.readFileSync(filename);
+        const parser = new xml2js.Parser({
             explicitChildren: true, 
             preserveChildrenOrder: true 
         });

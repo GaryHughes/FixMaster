@@ -68,7 +68,7 @@ export class Order {
     }
 
     extractFieldAsString(tag: number) : string {
-        let field = this.message.fields.find(field => field.tag === tag);
+        const field = this.message.fields.find(field => field.tag === tag);
         if (!field) {
             return "";
         }

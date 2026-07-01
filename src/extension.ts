@@ -1,4 +1,4 @@
-import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, TextDocument, ViewColumn, Uri, languages, Hover, MarkdownString, Position, Range, TextEditor, TextEditorEdit } from 'vscode';
+import { window, ProgressLocation, ExtensionContext, commands, workspace, WorkspaceEdit, TextDocument, ViewColumn, Uri, languages, Hover, MarkdownString, Position, Range, TextEditor } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Orchestra } from './fixOrchestra';
@@ -14,7 +14,7 @@ export function activate(context: ExtensionContext) {
 
 	let orchestra: Orchestra | null = null;
 	let dataDictionary: DataDictionary | null = null;
-	let orderBook = new OrderBook();
+	const orderBook = new OrderBook();
 	let orderBookFields: MessageField[] = [];
 
 	const getWorkspaceFolder = () : string | undefined => {
@@ -33,7 +33,7 @@ export function activate(context: ExtensionContext) {
 			return path;
 		}
 
-		let workspaceFolder = getWorkspaceFolder();
+		const workspaceFolder = getWorkspaceFolder();
 
 		if (workspaceFolder === undefined) {
 			window.showErrorMessage("Unable to determine ${workspaceFolder} when resolving the " + context + " path.");
@@ -72,7 +72,7 @@ export function activate(context: ExtensionContext) {
 			location: ProgressLocation.Notification,
 			title: "Loading the FIX orchestra...",
 			cancellable: false
-		}, (progress, token) => {
+		}, (_progress, _token) => {
 			return new Promise(resolve => {
 				setTimeout(() => {
 					try {
@@ -112,7 +112,7 @@ export function activate(context: ExtensionContext) {
 			location: ProgressLocation.Notification,
 			title: "Loading the QuickFix data dictionary...",
 			cancellable: false
-		}, (progress, token) => {
+		}, (_progress, _token) => {
 			return new Promise(resolve => {
 				setTimeout(async () => {
 					try {
@@ -136,9 +136,9 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 		orderBookFields = [];
-		let fields = orderBookFieldsString.split(","); 
-		for (let field of fields) {
-			let definition = orchestra.definitionOfField(field);
+		const fields = orderBookFieldsString.split(","); 
+		for (const field of fields) {
+			const definition = orchestra.definitionOfField(field);
 			if (definition) {
 				// The order book ins only intended to display a high level summary of the order state so we don't support repeating fields.
 				if (!orderBookFields.find(field => field.field.tag === definition?.field.tag)) {
@@ -200,13 +200,13 @@ export function activate(context: ExtensionContext) {
 		}
 	});
 
-	let getDocument = async (editorReuse:EditorReuse, language: string) : Promise<TextDocument> => {
+	const getDocument = async (editorReuse:EditorReuse, _language: string) : Promise<TextDocument> => {
 
 		if (editorReuse !== EditorReuse.New) {
 			const document = workspace.textDocuments.find(document => { return document.languageId === "FIX"; });
 			if (document) {
 				if (editorReuse === EditorReuse.Replace) {
-					let edit = new WorkspaceEdit();
+					const edit = new WorkspaceEdit();
 					const firstLine = document.lineAt(0);
 					const lastLine = document.lineAt(document.lineCount - 1);
 					const textRange = new Range(firstLine.range.start, lastLine.range.end);
@@ -230,7 +230,7 @@ export function activate(context: ExtensionContext) {
 					readonly index: number) {}
 	}
 	
-	let prepare_edit_context = async (scope: CommandScope, language: string) : Promise<EditContext | undefined> => {
+	const prepare_edit_context = async (scope: CommandScope, language: string) : Promise<EditContext | undefined> => {
 	
 		if (!orchestra) {
 			window.showErrorMessage('The orchestra has not been loaded - check the orchestraPath setting.');
@@ -247,9 +247,9 @@ export function activate(context: ExtensionContext) {
 		const configuration = workspace.getConfiguration();
 		const editorReuse = EditorReuse[configuration.get("fixmaster.editorReuse") as keyof typeof EditorReuse];
 
-		let document = await getDocument(editorReuse, language);
+		const document = await getDocument(editorReuse, language);
 		
-		let edit = new WorkspaceEdit();
+		const edit = new WorkspaceEdit();
 
 		let index = 0;
 
@@ -274,11 +274,11 @@ export function activate(context: ExtensionContext) {
 		return new EditContext(orchestra, activeTextEditor, document, index);
 	}
 
-	let format = async (printer: (context: string, message:Message, orchestra:Orchestra, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
+	const format = async (printer: (context: string, message:Message, orchestra:Orchestra, dataDictionary: DataDictionary | null, nestedFieldIndent: number) => string, 
 				  scope: CommandScope,
 				  orderBook: OrderBook | null = null) => {
 
-		let editContext = await prepare_edit_context(scope, "FIX");
+		const editContext = await prepare_edit_context(scope, "FIX");
 
 		if (!editContext) {
 			return;
@@ -304,7 +304,7 @@ export function activate(context: ExtensionContext) {
 			// Almost makes the use of this API pointless but lets see how we go. Needs some
 			// testing on slower machines.
 			cancellable: false
-		}, (progress, token) => {
+		}, (_progress, _token) => {
 
 			return new Promise(resolve => {
 
@@ -337,7 +337,7 @@ export function activate(context: ExtensionContext) {
 						
 						const linePrefix = line.text.substring(0, fixMessageIndex);
 						const regex = new RegExp(prefixPattern);
-						let match = regex.exec(linePrefix);
+						const match = regex.exec(linePrefix);
 						let messageContext: string = "";
 						if (match) {
 							messageContext = match[0];
@@ -382,7 +382,7 @@ export function activate(context: ExtensionContext) {
 
 								if (orderBook) {
 									if (orderBook.process(message)) {
-										let orderReport = new OrderReport(orchestra, orderBook, orderBookFields);
+										const orderReport = new OrderReport(orchestra, orderBook, orderBookFields);
 										pretty += "\n" + orderReport.toString() + "\n";			
 									}
 								}	
@@ -395,7 +395,7 @@ export function activate(context: ExtensionContext) {
 							}
 						}
 						else {
-							let nextLineIndex = index + 1;
+							const nextLineIndex = index + 1;
 							if (nextLineIndex >= editContext.document.lineCount) {
 								// If we try and delete using the next line start index as the end range when we are deleting
 								// the last line in the document the editor dies.
@@ -417,9 +417,9 @@ export function activate(context: ExtensionContext) {
 		});
 	};
 
-	let formatRawFix = async (scope: CommandScope) => {
+	const formatRawFix = async (scope: CommandScope) => {
 
-		let editContext = await prepare_edit_context(scope, 'plaintext');
+		const editContext = await prepare_edit_context(scope, 'plaintext');
 
 		if (!editContext) {
 			return;
@@ -434,7 +434,7 @@ export function activate(context: ExtensionContext) {
 			// Almost makes the use of this API pointless but lets see how we go. Needs some
 			// testing on slower machines.
 			cancellable: false
-		}, (progress, token) => {
+		}, (_progress, _token) => {
 
 			return new Promise(resolve => {
 
@@ -463,7 +463,7 @@ export function activate(context: ExtensionContext) {
 
 						const line = editContext.document.lineAt(index);
 
-						let field = parsePrettyPrintedField(line.text, orchestra, dataDictionary);
+						const field = parsePrettyPrintedField(line.text, orchestra, dataDictionary);
 						if (field) {
 							if (!message) {
 								// Move the startIndex to leave any non field lines in tact since the end of the last message/fragment.
@@ -476,9 +476,9 @@ export function activate(context: ExtensionContext) {
 						
 						if (message) {
 							// We have a message/fragement in progress and found something that is not a field so end this one.
-							let serialised = message.serialise();
-							let previousLine = editContext.document.lineAt(line.range.start.line - 1);
-							let range = new Range(startIndex, 0, previousLine.range.start.line, previousLine.range.end.character);
+							const serialised = message.serialise();
+							const previousLine = editContext.document.lineAt(line.range.start.line - 1);
+							const range = new Range(startIndex, 0, previousLine.range.start.line, previousLine.range.end.character);
 							edit.replace(editContext.document.uri, range, serialised);
 							message = null
 						}
@@ -488,7 +488,7 @@ export function activate(context: ExtensionContext) {
 
 					if (message) {
 						// Make sure we serialise anthing left at the end of the file/selection.
-						let serialised = message.serialise();
+						const serialised = message.serialise();
 						const range = new Range(
 							startIndex, 0,
 							editContext.document.lineCount - 1, 

@@ -8,7 +8,7 @@ export class Orchestra
 {
     constructor(root: string) {
     
-        let filenames = fs.readdirSync(root, { withFileTypes: true })
+        const filenames = fs.readdirSync(root, { withFileTypes: true })
                           .filter(entry => entry.isFile() && entry.name.endsWith(".xml"))
                           .map(entry => entry.name);
 

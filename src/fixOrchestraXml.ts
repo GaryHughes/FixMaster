@@ -2,8 +2,6 @@ import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 import * as fix from './definitions';
 
-// "@typescript-eslint/class-name-casing": "warn",
-
 class DataType
 {
     constructor(readonly name: string, 
@@ -77,7 +75,7 @@ class Group
 export class Orchestration
 {
     constructor(filename: string) {
-        let buffer = fs.readFileSync(filename);
+        const buffer = fs.readFileSync(filename);
         const stripNS = xml2js.processors.stripPrefix;
         const nameToLowerCase = (name: string) => name?.toLowerCase();
         xml2js.parseString(buffer, { tagNameProcessors: [stripNS, nameToLowerCase], explicitChildren: true, preserveChildrenOrder: true }, (err: any, result: any) => {
@@ -114,7 +112,7 @@ export class Orchestration
         //    </fixr:annotation>
         const documentation: any[] = [];
 
-        let search = function recursive_search(obj: any)
+        const search = function recursive_search(obj: any)
         {
             for (const key in obj) {
                 
@@ -174,7 +172,7 @@ export class Orchestration
         </fixr:datatypes>
         */
         repository.datatypes[0].datatype.forEach((element:any) => {
-            let data_type = new DataType(
+            const data_type = new DataType(
                 element.$.name,
                 element.$.baseType,
                 element.$.added,
@@ -199,7 +197,7 @@ export class Orchestration
                 </fixr:code>
         */
         repository.codesets[0].codeset.forEach((element:any) => {
-            let codes: Code[] = [];
+            const codes: Code[] = [];
             element.code.forEach((codeElement:any) => {
                 codes.push(new Code(
                     codeElement.$.id,
@@ -214,7 +212,7 @@ export class Orchestration
                     codeElement.$.deprecatedEP
                 )); 
             });
-            let codeset = new CodeSet(
+            const codeset = new CodeSet(
                 element.$.id,
                 element.$.name,
                 element.$.type,
@@ -240,7 +238,7 @@ export class Orchestration
         */
         let maxTag = Number(0);
         repository.fields[0].field.forEach((element:any) => {
-            let field = new fix.Field(
+            const field = new fix.Field(
                 Number(element.$.id),
                 element.$.name,
                 element.$.type,
@@ -254,7 +252,7 @@ export class Orchestration
             }
         });
         this.fields = new Array(maxTag);
-        for (let name in this.fieldsByName) {
+        for (const name in this.fieldsByName) {
             const field = this.fieldsByName[name];
             this.fields[field.tag] = this.fieldsByName[name];
         }
@@ -262,7 +260,7 @@ export class Orchestration
 
     extract_references(element: any)
     {
-        let references: Reference[] = [];
+        const references: Reference[] = [];
 
         // TOOD - these have documentation as well
 
@@ -332,7 +330,7 @@ export class Orchestration
           </fixr:fieldRef>
         */
         repository.components[0].component.forEach((element:any) => {
-            let component = new Component(
+            const component = new Component(
                 element.$.id,
                 element.$.name,
                 element.$.category,
@@ -367,7 +365,7 @@ export class Orchestration
            </fixr:group>
         */
         repository.groups[0].group?.forEach((element:any) => {
-            let group = new Group(
+            const group = new Group(
                 Number(element.$.id),
                 element.$.name,
                 element.$.added,
@@ -393,9 +391,9 @@ export class Orchestration
                   </fixr:componentRef>
         */
         repository.messages[0].message.forEach((element:any) => {
-            let references = this.extract_references(element.structure[0]);
-            let fields = this.referencesToFields(references, 0);
-            let message = new fix.Message(
+            const references = this.extract_references(element.structure[0]);
+            const fields = this.referencesToFields(references, 0);
+            const message = new fix.Message(
                 element.$.id,
                 element.$.msgType,
                 element.$.name,
